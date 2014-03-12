@@ -11,7 +11,7 @@ command -v sox >/dev/null 2>&1 || { \
 AIFF_DIR="resources/sfx"
 AIFF_EXT=".aiff"
 RAW_DIR="filesystem/sfx"
-RAW_EXT=".pcm"
+RAW_EXT=".raw"
 
 mkdir -p ${RAW_DIR}
 
