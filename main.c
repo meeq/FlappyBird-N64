@@ -5,6 +5,7 @@
 #include <libdragon.h>
 
 #include "system.h"
+#include "audio.h"
 
 sprite_t *read_dfs_sprite(char *file)
 {
@@ -13,19 +14,6 @@ sprite_t *read_dfs_sprite(char *file)
     dfs_read( sprite, 1, dfs_size( fp ), fp );
     dfs_close( fp );
     return sprite;
-}
-
-raw_pcm_t read_dfs_raw_pcm(char *file)
-{
-    int fp = dfs_open( file );
-    int size = dfs_size( fp );
-    s16 *data = malloc( size );
-    dfs_read( data, 1, size, fp );
-    dfs_close( fp );
-    raw_pcm_t sound;
-    sound.numSamples = size / sizeof(u16);
-    sound.sampleData = data;
-    return sound;
 }
 
 int main(void)
@@ -44,20 +32,21 @@ int main(void)
     dfs_init( DFS_DEFAULT_LOCATION );
 
     /* Initialize audio */
-    audio_init( FREQUENCY_44KHZ, 1 );
-    int audioBuffSize = audio_get_buffer_length() * STEREO_PCM_SAMPLE_SIZE;
-    s16* audioBuff = malloc( audioBuffSize );
+    u16 sample_rate = FREQUENCY_44KHZ;
+    audio_init( sample_rate, 1 );
+    int audio_buff_length = audio_get_buffer_length() * STEREO_PCM_SAMPLE_SIZE;
+    s16* audio_buff = malloc( audio_buff_length );
     audio_write_silence();
 
-    raw_pcm_t sound = read_dfs_raw_pcm("/sfx/test.raw");
-    int samplesBuffered = 0;
+    pcm_sound_t *test_sound = read_dfs_pcm_sound("/sfx/test.raw", sample_rate, 1);
+    int buffered = 0;
 
     /* Set up main loop */
 
-    u32 bgColor = graphics_make_color( 0xDD, 0xEE, 0xFF, 0xFF );
-    u32 fgColor = graphics_make_color( 0x00, 0x00, 0x00, 0x00 );
+    u32 bg_color = graphics_make_color( 0xDD, 0xEE, 0xFF, 0xFF );
+    u32 fg_color = graphics_make_color( 0x00, 0x00, 0x00, 0x00 );
 
-    char *testString = "Trivial font/color/audio test";
+    char *test_string = "Trivial font/color/audio test";
 
     /* Run the main loop */
     while(1)
@@ -68,29 +57,34 @@ int main(void)
         while( !(disp = display_lock()) );
 
         /*Fill the screen */
-        graphics_fill_screen( disp, bgColor );
+        graphics_fill_screen( disp, bg_color );
 
         /* Set the text output color */
-        graphics_set_color( fgColor, bgColor );
+        graphics_set_color( fg_color, bg_color );
 
-        graphics_draw_text( disp, 20, 20, testString );
+        graphics_draw_text( disp, 20, 20, test_string );
 
         /* Force backbuffer flip */
         display_show(disp);
 
         if (audio_can_write())
         {
-             sprintf(testString, "Samples %i/%i", samplesBuffered, sound.numSamples);
-            if (samplesBuffered < sound.numSamples)
+            sprintf(test_string, "Samples %i/%i", buffered, test_sound->samples);
+            if (buffered < test_sound->samples)
             {
                 s16 sample = 0;
-                int writeSamples = samplesBuffered + (audioBuffSize / STEREO_PCM_SAMPLE_SIZE);
-                for (int i = 0; samplesBuffered < writeSamples; samplesBuffered += 1, i += 2)
+                int limit = buffered + (audio_buff_length / STEREO_PCM_SAMPLE_SIZE);
+                for (int i = 0; buffered < limit; buffered += 1, i += 2)
                 {
-                    sample = (samplesBuffered < sound.numSamples) ? sound.sampleData[samplesBuffered] : 0;
-                    audioBuff[i] = audioBuff[i + 1] = sample;
+                    if (buffered < test_sound->samples)
+                    {
+                        sample = test_sound->data[buffered];
+                    } else {
+                        sample = 0;
+                    }
+                    audio_buff[i] = audio_buff[i + 1] = sample;
                 }
-                audio_write(audioBuff);
+                audio_write( audio_buff );
             } else {
                 audio_write_silence();
             }

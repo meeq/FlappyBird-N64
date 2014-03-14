@@ -1,3 +1,6 @@
+#ifndef __FLAPPY_SYSTEM_H
+#define __FLAPPY_SYSTEM_H
+
 typedef volatile unsigned short vu16;
 typedef volatile unsigned int vu32;
 typedef volatile uint64_t vu64;
@@ -12,13 +15,4 @@ typedef signed short s16;
 #define BUFFERING_DOUBLE 2
 #define BUFFERING_TRIPLE 3
 
-/* Audio definitions */
-
-#define FREQUENCY_44KHZ 44100
-#define STEREO_PCM_SAMPLE_SIZE (2 * sizeof(s16))
-
-struct raw_pcm {
-  int numSamples;
-  s16 *sampleData;
-};
-typedef struct raw_pcm raw_pcm_t;
+#endif

@@ -1,8 +1,8 @@
 PROG_NAME = flappy
 PROG_TITLE = "Flappy Test"
-ROM_SIZE = 2M
+ROM_SIZE = 4M
 
-OBJS = main.o
+OBJS = main.o audio.o
 
 # Paths
 DFSDIR = ./filesystem/
