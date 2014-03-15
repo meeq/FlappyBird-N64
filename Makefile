@@ -34,11 +34,19 @@ $(PROG_NAME).v64: $(PROG_NAME).elf $(PROG_NAME).dfs
 $(PROG_NAME).elf : $(OBJS)
 	$(LD) -o $(PROG_NAME).elf $(OBJS) $(LINK_FLAGS)
 
-$(PROG_NAME).dfs:
+$(PROG_NAME).dfs: filesystem
 	find $(DFSDIR) -name ".DS_Store" -depth -exec rm {} \;
 	$(MKDFSPATH) $(PROG_NAME).dfs $(DFSDIR)
+
+filesystem:
+	mkdir -p $(DFSDIR)
+	sh ./convert_gfx.sh
+	sh ./convert_sfx.sh
 
 all: $(PROG_NAME).v64
 
 clean:
+	rm -Rf $(DFSDIR)
 	rm -f *.v64 *.elf *.o *.bin *.dfs
+
+.PHONY: all clean filesystem

@@ -1,0 +1,10 @@
+backdrop	2	1
+bird	3	3
+font-large	10	1
+font-medium	10	1
+font-small	10	1
+ground	1 	1
+logo 1 	4
+pipe-caps	2	2
+pipe-tubes	2	1
+scoreboard	1 	1
