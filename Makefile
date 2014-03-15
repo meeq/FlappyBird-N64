@@ -1,6 +1,6 @@
 PROG_NAME = flappy
 PROG_TITLE = "Flappy Test"
-ROM_SIZE = 4M
+ROM_SIZE = 2M
 
 OBJS = src/main.o src/audio.o
 

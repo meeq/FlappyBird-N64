@@ -1,4 +1,5 @@
-backdrop	2	1
+backdrop-day	1	1
+backdrop-night  1 1
 bird	3	3
 font-large	10	1
 font-medium	10	1

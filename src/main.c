@@ -35,10 +35,6 @@ int main(void)
     audio_t *audio = audio_setup( FREQUENCY_44KHZ, 1 );
     audio_write_silence();
 
-    pcm_sound_t *test_sound;
-    test_sound = read_dfs_pcm_sound("/sfx/test.raw", audio->sample_rate, 1);
-    audio_sfx_play( audio, test_sound );
-
     /* Set up main loop */
 
     u32 bg_color = graphics_make_color( 0xDD, 0xEE, 0xFF, 0xFF );
