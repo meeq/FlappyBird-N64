@@ -3,4 +3,6 @@
 *.elf
 *.o
 
+filesystem/*
+
 *.v64
