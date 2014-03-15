@@ -1,11 +1,6 @@
-#include <stdio.h>
-#include <malloc.h>
-#include <string.h>
-#include <stdint.h>
-#include <libdragon.h>
-
 #include "system.h"
 #include "audio.h"
+
 
 sprite_t *read_dfs_sprite(char *file)
 {
@@ -15,6 +10,7 @@ sprite_t *read_dfs_sprite(char *file)
     dfs_close( fp );
     return sprite;
 }
+
 
 int main(void)
 {

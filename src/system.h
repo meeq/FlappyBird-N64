@@ -1,6 +1,12 @@
 #ifndef __FLAPPY_SYSTEM_H
 #define __FLAPPY_SYSTEM_H
 
+#include <stdio.h>
+#include <malloc.h>
+#include <string.h>
+#include <stdint.h>
+#include <libdragon.h>
+
 typedef volatile unsigned short vu16;
 typedef volatile unsigned int vu32;
 typedef volatile uint64_t vu64;

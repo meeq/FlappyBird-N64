@@ -1,9 +1,3 @@
-#include <stdio.h>
-#include <malloc.h>
-#include <string.h>
-#include <stdint.h>
-#include <libdragon.h>
-
 #include "audio.h"
 
 audio_t *audio_setup(u16 sample_rate, u8 buffers)
