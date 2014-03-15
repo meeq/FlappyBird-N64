@@ -44,12 +44,9 @@ int main(void)
     u32 bg_color = graphics_make_color( 0xDD, 0xEE, 0xFF, 0xFF );
     u32 fg_color = graphics_make_color( 0x00, 0x00, 0x00, 0x00 );
 
-    char *test_string = "Trivial font/color/audio test";
-
     /* Run the main loop */
     while(1)
     {
-        sprintf(test_string, "Samples %i/%i", audio->sfx_cursor, (audio->sfx != NULL) ? audio->sfx->samples : 0);
         audio_tick( audio );
 
         static display_context_t disp = 0;
@@ -62,8 +59,6 @@ int main(void)
 
         /* Set the text output color */
         graphics_set_color( fg_color, bg_color );
-
-        graphics_draw_text( disp, 20, 20, test_string );
 
         /* Force backbuffer flip */
         display_show(disp);

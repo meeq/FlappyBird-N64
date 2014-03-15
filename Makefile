@@ -2,7 +2,7 @@ PROG_NAME = flappy
 PROG_TITLE = "Flappy Test"
 ROM_SIZE = 4M
 
-OBJS = main.o audio.o
+OBJS = src/main.o src/audio.o
 
 # Paths
 DFSDIR = ./filesystem/
@@ -47,6 +47,6 @@ all: $(PROG_NAME).v64
 
 clean:
 	rm -Rf $(DFSDIR)
-	rm -f *.v64 *.elf *.o *.bin *.dfs
+	rm -f *.v64 *.elf src/*.o *.bin *.dfs
 
 .PHONY: all clean filesystem
