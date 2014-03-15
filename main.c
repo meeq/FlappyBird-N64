@@ -32,14 +32,12 @@ int main(void)
     dfs_init( DFS_DEFAULT_LOCATION );
 
     /* Initialize audio */
-    u16 sample_rate = FREQUENCY_44KHZ;
-    audio_init( sample_rate, 1 );
-    int audio_buff_length = audio_get_buffer_length() * STEREO_PCM_SAMPLE_SIZE;
-    s16* audio_buff = malloc( audio_buff_length );
+    audio_t *audio = audio_setup( FREQUENCY_44KHZ, 1 );
     audio_write_silence();
 
-    pcm_sound_t *test_sound = read_dfs_pcm_sound("/sfx/test.raw", sample_rate, 1);
-    int buffered = 0;
+    pcm_sound_t *test_sound;
+    test_sound = read_dfs_pcm_sound("/sfx/test.raw", audio->sample_rate, 1);
+    audio_sfx_play( audio, test_sound );
 
     /* Set up main loop */
 
@@ -51,6 +49,9 @@ int main(void)
     /* Run the main loop */
     while(1)
     {
+        sprintf(test_string, "Samples %i/%i", audio->sfx_cursor, (audio->sfx != NULL) ? audio->sfx->samples : 0);
+        audio_tick( audio );
+
         static display_context_t disp = 0;
 
         /* Grab a render buffer */
@@ -67,27 +68,6 @@ int main(void)
         /* Force backbuffer flip */
         display_show(disp);
 
-        if (audio_can_write())
-        {
-            sprintf(test_string, "Samples %i/%i", buffered, test_sound->samples);
-            if (buffered < test_sound->samples)
-            {
-                s16 sample = 0;
-                int limit = buffered + (audio_buff_length / STEREO_PCM_SAMPLE_SIZE);
-                for (int i = 0; buffered < limit; buffered += 1, i += 2)
-                {
-                    if (buffered < test_sound->samples)
-                    {
-                        sample = test_sound->data[buffered];
-                    } else {
-                        sample = 0;
-                    }
-                    audio_buff[i] = audio_buff[i + 1] = sample;
-                }
-                audio_write( audio_buff );
-            } else {
-                audio_write_silence();
-            }
-        }
+
     }
 }
