@@ -5,6 +5,9 @@
 
 /* Graphics definitions */
 
+#define BUFFERING_DOUBLE 2
+#define BUFFERING_TRIPLE 3
+
 #define RDP_DETACHED 0
 #define RDP_ATTACHED 1
 

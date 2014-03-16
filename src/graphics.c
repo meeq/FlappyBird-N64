@@ -29,21 +29,21 @@ graphics_t *graphics_setup(resolution_t res, bitdepth_t depth,
             height = 480;
             break;
     }
-    graphics_t *result = malloc( sizeof( graphics_t ) );
+    graphics_t *graphics = malloc( sizeof( graphics_t ) );
     /* Setup state */
-    result->res = res;
-    result->width = width;
-    result->height = height;
-    result->color_depth = depth;
-    result->num_buffers = num_buffers;
-    result->gamma = gamma;
-    result->antialias = aa;
+    graphics->res = res;
+    graphics->width = width;
+    graphics->height = height;
+    graphics->color_depth = depth;
+    graphics->num_buffers = num_buffers;
+    graphics->gamma = gamma;
+    graphics->antialias = aa;
     /* Drawing state */
-    result->disp = 0;
+    graphics->disp = 0;
     /* RDP state */
-    result->rdp_attached = RDP_DETACHED;
-    result->rdp_fill_mode = RDP_FILL_NONE;
-    return result;
+    graphics->rdp_attached = RDP_DETACHED;
+    graphics->rdp_fill_mode = RDP_FILL_NONE;
+    return graphics;
 }
 
 void free_graphics(graphics_t *graphics)

@@ -16,9 +16,4 @@ typedef unsigned int u32;
 typedef uint64_t u64;
 typedef signed short s16;
 
-/* Video definitions */
-
-#define BUFFERING_DOUBLE 2
-#define BUFFERING_TRIPLE 3
-
 #endif

@@ -5,13 +5,13 @@ audio_t *audio_setup(u16 sample_rate, u8 buffers)
     audio_init( sample_rate, buffers );
     int buffer_length = audio_get_buffer_length();
     s16 *buffer = malloc( buffer_length * STEREO_PCM_SAMPLE_SIZE );
-    audio_t *result = malloc( sizeof( audio_t ) );
-    result->sample_rate = sample_rate;
-    result->frames = buffer_length * 2;
-    result->buffer = buffer;
-    result->sfx_cursor = 0;
-    result->sfx = NULL;
-    return result;
+    audio_t *audio = malloc( sizeof( audio_t ) );
+    audio->sample_rate = sample_rate;
+    audio->frames = buffer_length * 2;
+    audio->buffer = buffer;
+    audio->sfx_cursor = 0;
+    audio->sfx = NULL;
+    return audio;
 }
 
 void free_audio(audio_t *audio)
@@ -80,17 +80,17 @@ pcm_sound_t *read_dfs_pcm_sound(char *file, u16 sample_rate, u8 channels)
     dfs_read( data, 1, size, fp );
     dfs_close( fp );
     u32 frames = size / MONO_PCM_SAMPLE_SIZE;
-    pcm_sound_t *result = malloc( sizeof( pcm_sound_t ) );
-    result->sample_rate = sample_rate;
-    result->channels = channels;
-    result->frames = frames;
-    result->samples = frames / channels;
-    result->data = data;
-    return result;
+    pcm_sound_t *sound = malloc( sizeof( pcm_sound_t ) );
+    sound->sample_rate = sample_rate;
+    sound->channels = channels;
+    sound->frames = frames;
+    sound->samples = frames / channels;
+    sound->data = data;
+    return sound;
 }
 
-void free_pcm_sound(pcm_sound_t *sfx)
+void free_pcm_sound(pcm_sound_t *sound)
 {
-    free( sfx->data );
-    free( sfx );
+    free( sound->data );
+    free( sound );
 }
