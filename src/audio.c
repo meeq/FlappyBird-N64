@@ -5,7 +5,7 @@ audio_t *audio_setup(u16 sample_rate, u8 buffers)
     audio_init( sample_rate, buffers );
     int buffer_length = audio_get_buffer_length();
     s16 *buffer = malloc( buffer_length * STEREO_PCM_SAMPLE_SIZE );
-    audio_t *result = malloc( sizeof(audio_t) );
+    audio_t *result = malloc( sizeof( audio_t ) );
     result->sample_rate = sample_rate;
     result->frames = buffer_length * 2;
     result->buffer = buffer;
@@ -80,7 +80,7 @@ pcm_sound_t *read_dfs_pcm_sound(char *file, u16 sample_rate, u8 channels)
     dfs_read( data, 1, size, fp );
     dfs_close( fp );
     u32 frames = size / MONO_PCM_SAMPLE_SIZE;
-    pcm_sound_t *result = malloc( sizeof(pcm_sound_t) );
+    pcm_sound_t *result = malloc( sizeof( pcm_sound_t ) );
     result->sample_rate = sample_rate;
     result->channels = channels;
     result->frames = frames;

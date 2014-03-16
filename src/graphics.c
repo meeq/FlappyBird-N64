@@ -29,7 +29,7 @@ graphics_t *graphics_setup(resolution_t res, bitdepth_t depth,
             height = 480;
             break;
     }
-    graphics_t *result = malloc( sizeof(graphics_t) );
+    graphics_t *result = malloc( sizeof( graphics_t ) );
     /* Setup state */
     result->res = res;
     result->width = width;
