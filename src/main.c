@@ -37,9 +37,8 @@ int main(void)
     s16 sky_fill_y = 0;
     s16 sky_fill_h = 141;
 
-    sprite_t *cloud_sprite = read_dfs_sprite("/gfx/bg-clouds-day.sprite");
+    sprite_t *cloud_sprite = read_dfs_sprite("/gfx/bg-cloud-day.sprite");
     s16 cloud_repeat_y = 133;
-    s16 cloud_repeat_h = 11;
 
     u32 cloud_fill_color = graphics_make_color( 0xE9, 0xFC, 0xD9, 0xFF );
     s16 cloud_fill_y = 141;
@@ -47,11 +46,9 @@ int main(void)
 
     sprite_t *city_sprite = read_dfs_sprite("/gfx/bg-city-day.sprite");
     s16 city_repeat_y = 146;
-    s16 city_repeat_h = 18;
 
     sprite_t *hill_sprite = read_dfs_sprite("/gfx/bg-hill-day.sprite");
     s16 hill_repeat_y = 160;
-    s16 hill_repeat_h = 9;
 
     u32 hill_fill_color = graphics_make_color( 0x5E, 0xE2, 0x70, 0xFF );
     s16 hill_fill_y = 169;
@@ -59,7 +56,6 @@ int main(void)
 
     sprite_t *ground_sprite = read_dfs_sprite("/gfx/ground.sprite");
     s16 ground_repeat_y = 190;
-    s16 ground_repeat_h = 11;
 
     u32 ground_fill_color = graphics_make_color( 0xDF, 0xD8, 0x93, 0xFF );
     s16 ground_fill_y = 200;
@@ -102,6 +98,45 @@ int main(void)
         /* Draw the ground fill */
         rdp_set_primitive_color( ground_fill_color );
         rdp_draw_filled_rectangle( 0, ground_fill_y, 320, ground_fill_y + ground_fill_h );
+
+        /* Enable sprite display instead of solid color fill */
+        rdp_enable_texture_copy();
+
+        /* Ensure the RDP is ready to receive sprites */
+        rdp_sync( SYNC_PIPE );
+
+        /* Draw the cloud repeat sprite */
+        rdp_load_texture( 0, 0, MIRROR_DISABLED, cloud_sprite );
+        rdp_draw_textured_rectangle( 0,
+            0, cloud_repeat_y,
+            320, cloud_repeat_y + cloud_sprite->height);
+
+        /* Ensure the RDP is ready to receive sprites */
+        rdp_sync( SYNC_PIPE );
+
+        /* Draw the city repeat sprite */
+        rdp_load_texture( 0, 0, MIRROR_DISABLED, city_sprite );
+        rdp_draw_textured_rectangle( 0,
+            0, city_repeat_y,
+            320, city_repeat_y + city_sprite->height);
+
+        /* Ensure the RDP is ready to receive sprites */
+        rdp_sync( SYNC_PIPE );
+
+        /* Draw the hill repeat sprite */
+        rdp_load_texture( 0, 0, MIRROR_DISABLED, hill_sprite );
+        rdp_draw_textured_rectangle( 0,
+            0, hill_repeat_y,
+            320, hill_repeat_y + hill_sprite->height);
+
+        /* Ensure the RDP is ready to receive sprites */
+        rdp_sync( SYNC_PIPE );
+
+        /* Draw the ground repeat sprite */
+        rdp_load_texture( 0, 0, MIRROR_DISABLED, ground_sprite );
+        rdp_draw_textured_rectangle( 0,
+            0, ground_repeat_y,
+            320, ground_repeat_y + ground_sprite->height);
 
         /* Inform the RDP drawing is finished; flush pending operations */
         rdp_detach_display();

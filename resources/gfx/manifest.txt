@@ -1,9 +1,9 @@
 bg-city-day	1	1
 bg-city-night  1 1
-bg-clouds-day 1 1
-bg-clouds-night  1 1
-bg-hills-day 1 1
-bg-hills-night  1 1
+bg-cloud-day 1 1
+bg-cloud-night  1 1
+bg-hill-day 1 1
+bg-hill-night  1 1
 bird	3	3
 font-large	10	1
 font-medium	10	1
