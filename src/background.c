@@ -79,7 +79,7 @@ void draw_bg_fill_sprite(graphics_t *graphics, bg_fill_sprite_t fill)
 
     }
     mirror_t mirror = MIRROR_DISABLED;
-    sprite_t sprite = fill.sprite;
+    sprite_t *sprite = fill.sprite;
     int slices = sprite->hslices, max_w = graphics->width;
     if (slices > 1)
     {
