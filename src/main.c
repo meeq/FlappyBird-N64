@@ -14,6 +14,7 @@ int main(void)
     controller_init();
 
     /* Initialize display */
+    /* TODO Support 640x480 for 2-player splitscreen */
     graphics_t *graphics = graphics_setup(
         RESOLUTION_320x240, DEPTH_16_BPP,
         BUFFERING_DOUBLE, GAMMA_NONE, ANTIALIAS_RESAMPLE
@@ -23,7 +24,7 @@ int main(void)
     audio_t *audio = audio_setup( FREQUENCY_44KHZ, 1 );
     audio_write_silence();
 
-    background_t bg = background_setup( NIGHT_TIME );
+    background_t bg = background_setup( DAY_TIME );
 
     /* Run the main loop */
     while(1)
@@ -66,5 +67,15 @@ int main(void)
         /* Force backbuffer flip and reset the display handle */
         display_show( disp );
         graphics->disp = disp = 0;
+
+        /* Do we need to switch backgrounds? */
+        controller_scan();
+        struct controller_data keys = get_keys_down();
+
+        if( keys.c[0].A )
+        {
+            background_free( bg );
+            bg = background_setup( !bg.time_mode );
+        }
     }
 }

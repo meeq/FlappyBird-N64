@@ -25,7 +25,7 @@ typedef struct
 typedef struct
 {
     // Setup state
-    u8 day_night_mode;
+    u8 time_mode;
     // Color fills
     bg_fill_color_t sky_fill;
     bg_fill_color_t cloud_fill;
@@ -40,7 +40,7 @@ typedef struct
 
 /* Background helpers */
 
-background_t background_setup(u8 day_night_mode);
+background_t background_setup(u8 time_mode);
 
 void background_free(background_t bg);
 
