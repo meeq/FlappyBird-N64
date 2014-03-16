@@ -23,7 +23,7 @@ background_t background_setup(u8 day_night_mode)
     }
     /* Set up the background fills from top-to-bottom */
     /* These are all hard-coded for 320x240 resolution... */
-    background_t result = {
+    background_t background = {
         .day_night_mode = day_night_mode,
         .sky_fill = { .color = sky_color, .y = 0, .h = 141 },
         .cloud_top = { .sprite = cloud_sprite, .y = 119 },
@@ -40,7 +40,7 @@ background_t background_setup(u8 day_night_mode)
             .y = 200, .h = 40
         }
     };
-    return result;
+    return background;
 }
 
 void background_free(background_t bg)
