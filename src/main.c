@@ -2,6 +2,7 @@
 #include "audio.h"
 #include "graphics.h"
 
+#include "background.h"
 
 int main(void)
 {
@@ -22,40 +23,7 @@ int main(void)
     audio_t *audio = audio_setup( FREQUENCY_44KHZ, 1 );
     audio_write_silence();
 
-    /* Set up the background fills from top-to-bottom */
-    /* These are all hard-coded for 320x240 resolution... */
-    x_fill_color_t sky = {
-        .color = graphics_make_color( 0x4E, 0xC0, 0xCA, 0xFF ),
-        .y = 0, .h = 141
-    };
-    x_fill_sprite_t cloud_top = {
-        .sprite = read_dfs_sprite("/gfx/bg-cloud-day.sprite"),
-        .y = 119
-    };
-    x_fill_color_t cloud_fill = {
-        .color = graphics_make_color( 0xE9, 0xFC, 0xD9, 0xFF ),
-        .y = 141, .h = 22
-    };
-    x_fill_sprite_t city = {
-        .sprite = read_dfs_sprite("/gfx/bg-city-day.sprite"),
-        .y = 148
-    };
-    x_fill_sprite_t hill_top = {
-        .sprite = read_dfs_sprite("/gfx/bg-hill-day.sprite"),
-        .y = 158
-    };
-    x_fill_color_t hill_fill = {
-        .color = graphics_make_color( 0x5E, 0xE2, 0x70, 0xFF ),
-        .y = 169, .h = 21
-    };
-    x_fill_sprite_t ground_top = {
-        .sprite = read_dfs_sprite("/gfx/ground.sprite"),
-        .y = 190
-    };
-    x_fill_color_t ground_fill = {
-        .color = graphics_make_color( 0xDF, 0xD8, 0x93, 0xFF ),
-        .y = 200, .h = 40
-    };
+    background_t bg = background_setup( NIGHT_TIME );
 
     /* Run the main loop */
     while(1)
@@ -79,16 +47,16 @@ int main(void)
         graphics->rdp_attached = RDP_ATTACHED;
 
         /* Color fills */
-        draw_x_fill_color(graphics, sky);
-        draw_x_fill_color(graphics, cloud_fill);
-        draw_x_fill_color(graphics, hill_fill);
-        draw_x_fill_color(graphics, ground_fill);
+        draw_x_fill_color( graphics, bg.sky_fill );
+        draw_x_fill_color( graphics, bg.cloud_fill );
+        draw_x_fill_color( graphics, bg.hill_fill );
+        draw_x_fill_color( graphics, bg.ground_fill );
 
         /* Texture fills */
-        draw_x_fill_sprite(graphics, cloud_top);
-        draw_x_fill_sprite(graphics, city);
-        draw_x_fill_sprite(graphics, hill_top);
-        draw_x_fill_sprite(graphics, ground_top);
+        draw_x_fill_sprite( graphics, bg.cloud_top );
+        draw_x_fill_sprite( graphics, bg.city );
+        draw_x_fill_sprite( graphics, bg.hill_top );
+        draw_x_fill_sprite( graphics, bg.ground_top );
 
         /* Inform the RDP drawing is finished; flush pending operations */
         rdp_detach_display();
