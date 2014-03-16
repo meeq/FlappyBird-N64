@@ -11,22 +11,22 @@
 
 typedef struct
 {
-  u16 sample_rate;
-  u8 channels;
-  u32 frames;
-  u32 samples;
-  s16 *data;
+    u16 sample_rate;
+    u8 channels;
+    u32 frames;
+    u32 samples;
+    s16 *data;
 } pcm_sound_t;
 
 typedef struct
 {
-  // Setup state
-  u16 sample_rate;
-  u32 frames;
-  s16 *buffer;
-  // Playback state
-  u32 sfx_cursor;
-  pcm_sound_t *sfx;
+    // Setup state
+    u16 sample_rate;
+    u32 frames;
+    s16 *buffer;
+    // Playback state
+    u32 sfx_cursor;
+    pcm_sound_t *sfx;
 } audio_t;
 
 /* Audio helpers */
