@@ -32,19 +32,6 @@ typedef struct
     u8 rdp_fill_mode;
 } graphics_t;
 
-typedef struct
-{
-    u32 color;
-    s16 y;
-    s16 h;
-} x_fill_color_t;
-
-typedef struct
-{
-    sprite_t *sprite;
-    s16 y;
-} x_fill_sprite_t;
-
 /* Graphics helpers */
 
 graphics_t *graphics_setup(resolution_t res, bitdepth_t bit,
@@ -54,8 +41,5 @@ graphics_t *graphics_setup(resolution_t res, bitdepth_t bit,
 void free_graphics(graphics_t *graphics);
 
 sprite_t *read_dfs_sprite(char *file);
-
-void draw_x_fill_color(graphics_t *graphics, x_fill_color_t fill);
-void draw_x_fill_sprite(graphics_t *graphics, x_fill_sprite_t fill);
 
 #endif

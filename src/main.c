@@ -47,16 +47,16 @@ int main(void)
         graphics->rdp_attached = RDP_ATTACHED;
 
         /* Color fills */
-        draw_x_fill_color( graphics, bg.sky_fill );
-        draw_x_fill_color( graphics, bg.cloud_fill );
-        draw_x_fill_color( graphics, bg.hill_fill );
-        draw_x_fill_color( graphics, bg.ground_fill );
+        draw_bg_fill_color( graphics, bg.sky_fill );
+        draw_bg_fill_color( graphics, bg.cloud_fill );
+        draw_bg_fill_color( graphics, bg.hill_fill );
+        draw_bg_fill_color( graphics, bg.ground_fill );
 
         /* Texture fills */
-        draw_x_fill_sprite( graphics, bg.cloud_top );
-        draw_x_fill_sprite( graphics, bg.city );
-        draw_x_fill_sprite( graphics, bg.hill_top );
-        draw_x_fill_sprite( graphics, bg.ground_top );
+        draw_bg_fill_sprite( graphics, bg.cloud_top );
+        draw_bg_fill_sprite( graphics, bg.city );
+        draw_bg_fill_sprite( graphics, bg.hill_top );
+        draw_bg_fill_sprite( graphics, bg.ground_top );
 
         /* Inform the RDP drawing is finished; flush pending operations */
         rdp_detach_display();
