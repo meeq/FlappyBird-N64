@@ -2,6 +2,7 @@
 *.dfs
 *.elf
 *.o
+*.d
 
 filesystem/*
 
