@@ -3,6 +3,7 @@
 #include "graphics.h"
 
 #include "background.h"
+#include "bird.h"
 
 int main(void)
 {
@@ -25,6 +26,7 @@ int main(void)
     audio_write_silence();
 
     background_t bg = background_setup( DAY_TIME );
+    bird_t bird = bird_setup( BIRD_COLOR_YELLOW );
 
     /* Run the main loop */
     while(1)
@@ -58,6 +60,9 @@ int main(void)
         draw_bg_fill_sprite( graphics, bg.city );
         draw_bg_fill_sprite( graphics, bg.hill_top );
         draw_bg_fill_sprite( graphics, bg.ground_top );
+
+        /* Draw the bird */
+        draw_bird( graphics, bird );
 
         /* Inform the RDP drawing is finished; flush pending operations */
         rdp_detach_display();
