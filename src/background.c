@@ -33,7 +33,7 @@ background_t background_setup(u8 time_mode)
         .hill_fill = { .color = hill_color, .y = 169, .h = 21 },
         .ground_top = {
             .sprite = read_dfs_sprite( "/gfx/ground.sprite" ),
-            .y = 190
+            .y = GROUND_TOP_Y
         },
         .ground_fill = {
             .color = graphics_make_color( 0xDF, 0xD8, 0x93, 0xFF ),

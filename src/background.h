@@ -6,6 +6,8 @@
 
 /* Background definitions */
 
+#define GROUND_TOP_Y 190
+
 #define DAY_TIME 0
 #define NIGHT_TIME 1
 
