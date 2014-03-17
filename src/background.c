@@ -63,8 +63,7 @@ void draw_bg_fill_color(graphics_t *graphics, bg_fill_color_t fill)
         graphics->rdp_fill_mode = RDP_FILL_COLOR;
     }
     rdp_set_primitive_color( fill.color );
-    rdp_draw_filled_rectangle( 0,
-        fill.y, graphics->width, fill.y + fill.h );
+    rdp_draw_filled_rectangle( 0, fill.y, graphics->width, fill.y + fill.h );
 }
 
 void draw_bg_fill_sprite(graphics_t *graphics, bg_fill_sprite_t fill)
@@ -87,7 +86,7 @@ void draw_bg_fill_sprite(graphics_t *graphics, bg_fill_sprite_t fill)
         for (int repeat_x = 0,
                  repeat_w = sprite->width / slices,
                  slice;
-             repeat_x < max_w; )
+             repeat_x < max_w;)
         {
             for (slice = 0;
                  slice < slices && repeat_x < max_w;
@@ -102,7 +101,7 @@ void draw_bg_fill_sprite(graphics_t *graphics, bg_fill_sprite_t fill)
         /* Small tiles can be drawn in a single rectangle */
         rdp_sync( SYNC_PIPE );
         rdp_load_texture( 0, 0, mirror, sprite );
-        rdp_draw_textured_rectangle( 0,
-            0, fill.y, max_w, fill.y + sprite->height - 1);
+        u16 tx = 0, bx = max_w, ty = fill.y, by = fill.y + sprite->height - 1;
+        rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
     }
 }
