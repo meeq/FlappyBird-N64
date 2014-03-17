@@ -17,10 +17,10 @@ bird_t bird_setup(u8 color_type)
         /* Calculate the half-hypotenuse of the slice diagonal */
         float slice_w = (bird_sprite->width / bird_sprite->hslices) - 1.0;
         float slice_h = (bird_sprite->height / bird_sprite->vslices) - 1.0;
-        float hyp_squared = pow( slice_w, 2.0 ) + pow( slice_h, 2.0 );
+        float hyp_squared = powf( slice_w, 2.0 ) + powf( slice_h, 2.0 );
         bird_half_w = slice_w / 2.0;
         bird_half_h = slice_h / 2.0;
-        bird_half_hyp = sqrt( hyp_squared ) / 2.0;
+        bird_half_hyp = sqrtf( hyp_squared ) / 2.0;
     }
     bird_t bird = {
         .anim_frame = 0,
