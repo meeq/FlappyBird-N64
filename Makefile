@@ -78,11 +78,11 @@ $(PROG_NAME).dfs: $(SPRITE_FILES) $(PCM_FILES)
 
 all: $(PROG_NAME).v64
 
-emulate:
+emulate: $(PROG_NAME).v64
 	sh ./run_emulator.sh $(shell pwd)/$(PROG_NAME).v64
 
 clean:
 	rm -Rf $(DFSDIR)
 	rm -f *.v64 *.elf src/*.o *.bin *.dfs
 
-.PHONY: all clean emulate
+.PHONY: all clean
