@@ -12,6 +12,7 @@ bird_t bird_setup(u8 color_type)
 {
     if (bird_sprite == NULL)
     {
+        /* Load the sprite and pre-calculate some size details */
         bird_sprite = read_dfs_sprite( "/gfx/bird.sprite" );
         /* Calculate the half-hypotenuse of the slice diagonal */
         float slice_w = (bird_sprite->width / bird_sprite->hslices) - 1.0;
@@ -30,6 +31,24 @@ bird_t bird_setup(u8 color_type)
     return bird;
 }
 
+void bird_tick(bird_t *bird, gamepad_state_t gamepad)
+{
+    /* Update animation state */
+    u64 ticks = get_ticks_ms(), anim_tick = bird->anim_tick;
+    u8 anim_frame = bird->anim_frame;
+    while (ticks - anim_tick > BIRD_ANIM_RATE)
+    {
+        anim_frame++;
+        if (anim_frame == BIRD_ANIM_FRAMES)
+        {
+            anim_frame = 0;
+        }
+        anim_tick = ticks;
+    }
+    bird->anim_tick = anim_tick;
+    bird->anim_frame = anim_frame;
+}
+
 void draw_bird(graphics_t *graphics, bird_t bird)
 {
     if (graphics->rdp_attached != RDP_ATTACHED) return;
@@ -41,12 +60,15 @@ void draw_bird(graphics_t *graphics, bird_t bird)
         graphics->rdp_fill_mode = RDP_FILL_TEXTURE;
 
     }
+    /* Load the current animation sprite slice as a texture */
     rdp_sync( SYNC_PIPE );
     u8 stride = (bird.color_type * BIRD_NUM_COLORS) + bird.anim_frame;
     rdp_load_texture_stride( 0, 0, MIRROR_DISABLED, bird_sprite, stride );
+    /* Calculate bird rectangle position */
     u16 cx = graphics->width / 2.0, cy = graphics->height / 2.0,
         tx = cx - bird_half_w, bx = cx + bird_half_w,
         ty = cy - bird_half_h, by = cy + bird_half_h;
+    /* TODO Calculate Y position */
     /* TODO Calculate rotation */
     rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
 }

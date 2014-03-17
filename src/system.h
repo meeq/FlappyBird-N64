@@ -16,4 +16,6 @@ typedef unsigned int u32;
 typedef uint64_t u64;
 typedef signed short s16;
 
+typedef struct SI_condat gamepad_state_t;
+
 #endif

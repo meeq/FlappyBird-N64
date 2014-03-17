@@ -6,6 +6,7 @@
 
 /* Bird definitions */
 
+#define BIRD_ANIM_RATE 100
 #define BIRD_ANIM_FRAMES 3
 #define BIRD_NUM_COLORS 3
 #define BIRD_COLOR_YELLOW 0
@@ -14,6 +15,7 @@
 
 typedef struct
 {
+    u64 anim_tick;
     u8 anim_frame;
     u8 color_type;
     /* Center point */
@@ -27,5 +29,7 @@ typedef struct
 bird_t bird_setup(u8 color_type);
 
 void draw_bird(graphics_t *graphics, bird_t bird);
+
+void bird_tick(bird_t *bird, gamepad_state_t gamepad);
 
 #endif

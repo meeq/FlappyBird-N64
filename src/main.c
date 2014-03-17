@@ -31,6 +31,18 @@ int main(void)
     /* Run the main loop */
     while(1)
     {
+        /* Do we need to switch backgrounds? */
+        controller_scan();
+        struct controller_data keys = get_keys_down();
+
+        if( keys.c[0].A )
+        {
+            background_free( bg );
+            bg = background_setup( !bg.time_mode );
+        }
+
+        bird_tick( &bird, keys.c[0] );
+
         audio_tick( audio );
 
         static display_context_t disp = 0;
@@ -72,15 +84,5 @@ int main(void)
         /* Force backbuffer flip and reset the display handle */
         display_show( disp );
         graphics->disp = disp = 0;
-
-        /* Do we need to switch backgrounds? */
-        controller_scan();
-        struct controller_data keys = get_keys_down();
-
-        if( keys.c[0].A )
-        {
-            background_free( bg );
-            bg = background_setup( !bg.time_mode );
-        }
     }
 }
