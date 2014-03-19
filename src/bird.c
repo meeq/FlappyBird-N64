@@ -24,49 +24,39 @@ bird_t bird_setup(u8 color_type)
         bird_half_hyp = sqrtf( hyp_squared ) / 2.0;
     }
     bird_t bird = {
-        .anim_frame = 0,
+        .state = BIRD_STATE_READY,
         .color_type = color_type,
-        .wobble_y = 0.0,
+        .anim_ms = 0,
+        .anim_frame = 0,
         .y = 0.0,
-        .rot = 0.0
+        .rot = 0.0,
+        .flap_dy = 0.0,
+        .flap_ms = 0,
+        .sine_ms = 0,
+        .sine_x = 0.0,
+        .sine_y = 0.0
     };
     return bird;
 }
 
-void bird_tick(bird_t *bird, gamepad_state_t gamepad)
-{
-    /* Update animation state */
-    u64 ticks = get_ticks_ms(),
-        anim_tick = bird->anim_tick;
-    u8 anim_frame = bird->anim_frame;
-    while (ticks - anim_tick > BIRD_ANIM_RATE)
-    {
-        anim_frame++;
-        if (anim_frame == BIRD_ANIM_FRAMES)
-        {
-            anim_frame = 0;
-        }
-        anim_tick = ticks;
-    }
-    bird->anim_tick = anim_tick;
-    bird->anim_frame = anim_frame;
-    /* Update the wobble offset */
-    if (ticks - bird->wobble_tick > BIRD_WOBBLE_RATE)
-    {
-        bird->wobble_tick = ticks;
-        bird->wobble_x += BIRD_WOBBLE_INCREMENT;
-        bird->wobble_y = sinf( bird->wobble_x ) * BIRD_WOBBLE_DAMPEN;
-        while (bird->wobble_x >= BIRD_WOBBLE_CYCLE)
-        {
-            bird->wobble_x -= BIRD_WOBBLE_CYCLE;
-        }
-    }
-}
-
 void draw_bird(graphics_t *graphics, bird_t bird)
 {
-    if (graphics->rdp_attached != RDP_ATTACHED) return;
-    /* It's probably best not to thrash between textures and colors */
+    /* Calculate player space center position */
+    u16 cx = graphics->width / 2.0,
+        cy = GROUND_TOP_Y / 2.0;
+    /* Calculate bird Y position */
+    float bird_y = bird.y;
+    if (bird.state == BIRD_STATE_READY)
+    {
+        bird_y += bird.sine_y;
+    }
+    if (bird_y > BIRD_MAX_Y) bird_y = BIRD_MAX_Y;
+    if (bird_y < BIRD_MIN_Y) bird_y = BIRD_MIN_Y;
+    cy += bird_y * cy;
+    /* TODO Calculate rotation from center point */
+    u16 tx = cx - bird_half_w, bx = cx + bird_half_w,
+        ty = cy - bird_half_h, by = cy + bird_half_h;
+    /* Setup the RDP for textured fills if it isn't already */
     if (graphics->rdp_fill_mode != RDP_FILL_TEXTURE)
     {
         /* Enable textures instead of solid color fill */
@@ -78,17 +68,70 @@ void draw_bird(graphics_t *graphics, bird_t bird)
     rdp_sync( SYNC_PIPE );
     u8 stride = (bird.color_type * BIRD_NUM_COLORS) + bird.anim_frame;
     rdp_load_texture_stride( 0, 0, MIRROR_DISABLED, bird_sprite, stride );
-    /* Calculate player space center position */
-    u16 cx = graphics->width / 2.0,
-        cy = GROUND_TOP_Y / 2.0;
-    /* Calculate bird Y position */
-    float bird_y = bird.y + bird.wobble_y;
-    if (bird_y > BIRD_MAX_Y) bird_y = BIRD_MAX_Y;
-    if (bird_y < BIRD_MIN_Y) bird_y = BIRD_MIN_Y;
-    cy += bird_y * cy;
-    /* TODO Calculate rotation */
-    u16 tx = cx - bird_half_w, bx = cx + bird_half_w,
-        ty = cy - bird_half_h, by = cy + bird_half_h;
     /* Draw the rotated rectangle */
     rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
+}
+
+static void bird_tick_animation(bird_t *bird)
+{
+    u64 ticks_ms = get_ticks_ms(),
+        anim_ms = bird->anim_ms;
+    u8 anim_frame = bird->anim_frame;
+    if (bird->state != BIRD_STATE_DEAD)
+    {
+        if (ticks_ms - anim_ms > BIRD_ANIM_RATE)
+        {
+            /* Update animation state */
+            if (++anim_frame >= BIRD_ANIM_FRAMES)
+            {
+                anim_frame = 0;
+            }
+            anim_ms = ticks_ms;
+        }
+    } else {
+        /* Dead birds don't animate */
+        anim_ms = ticks_ms;
+        anim_frame = BIRD_ANIM_FRAMES - 1;
+    }
+    bird->anim_ms = anim_ms;
+    bird->anim_frame = anim_frame;
+}
+
+static void bird_tick_ready(bird_t *bird)
+{
+    u64 ticks_ms = get_ticks_ms();
+    if (ticks_ms - bird->sine_ms > BIRD_WOBBLE_RATE)
+    {
+        /* Increment the "floating" effect sine wave */
+        bird->sine_ms = ticks_ms;
+        bird->sine_x += BIRD_WOBBLE_INCREMENT;
+        bird->sine_y = sinf( bird->sine_x ) * BIRD_WOBBLE_DAMPEN;
+        while (bird->sine_x >= BIRD_WOBBLE_CYCLE)
+        {
+            bird->sine_x -= BIRD_WOBBLE_CYCLE;
+        }
+    }
+}
+
+void bird_tick(bird_t *bird, gamepad_state_t gamepad)
+{
+    /* Cycle through bird colors with right trigger */
+    if ( gamepad.R )
+    {
+        if (++bird->color_type >= BIRD_NUM_COLORS)
+        {
+            bird->color_type = 0;
+        }
+    }
+    bird_tick_animation( bird );
+    switch (bird->state)
+    {
+        case BIRD_STATE_READY:
+            bird_tick_ready( bird );
+            break;
+        case BIRD_STATE_PLAY:
+            // bird_tick_velocity( bird );
+            // bird_tick_rotation( bird );
+            break;
+    }
 }

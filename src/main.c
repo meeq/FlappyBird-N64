@@ -35,7 +35,7 @@ int main(void)
         controller_scan();
         struct controller_data keys = get_keys_down();
 
-        if( keys.c[0].A )
+        if( keys.c[0].L )
         {
             background_free( bg );
             bg = background_setup( !bg.time_mode );
