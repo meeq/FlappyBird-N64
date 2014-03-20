@@ -47,7 +47,7 @@ typedef struct
     /* Rotation */
     float rot;
     /* Flapping */
-    float flap_dy;
+    float dy;
     u64 flap_ms;
     u64 gravity_ms;
     /* Ready "floating" wave */
