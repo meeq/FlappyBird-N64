@@ -32,8 +32,7 @@ bird_t bird_setup(u8 color_type)
         .y = 0.0,
         .rot = 0.0,
         .dy = 0.0,
-        .flap_ms = 0,
-        .gravity_ms = 0,
+        .dy_ms = 0,
         .sine_ms = 0,
         .sine_x = 0.0,
         .sine_y = 0.0
@@ -81,7 +80,7 @@ static void bird_tick_animation(bird_t *bird)
     u8 anim_frame = bird->anim_frame;
     if (bird->state != BIRD_STATE_DEAD)
     {
-        if (ticks_ms - anim_ms > BIRD_ANIM_RATE)
+        if (ticks_ms - anim_ms >= BIRD_ANIM_RATE)
         {
             /* Update animation state */
             if (++anim_frame >= BIRD_ANIM_FRAMES)
@@ -106,7 +105,7 @@ static void bird_tick_ready(bird_t *bird)
     bird->rot = 0.0;
     /* Periodically update the "floating" effect */
     u64 ticks_ms = get_ticks_ms();
-    if (ticks_ms - bird->sine_ms > BIRD_SINE_RATE)
+    if (ticks_ms - bird->sine_ms >= BIRD_SINE_RATE)
     {
         /* Increment the "floating" effect sine wave */
         bird->sine_ms = ticks_ms;
@@ -124,35 +123,33 @@ static void bird_tick_velocity(bird_t *bird, gamepad_state_t gamepad)
     /* Flap when the player presses A */
     if ( gamepad.A )
     {
-        bird->dy -= BIRD_FLAP_VELOCITY;
+        bird->dy = -BIRD_FLAP_VELOCITY;
+        bird->anim_frame = BIRD_ANIM_FRAMES - 1;
         audio_play_sfx( g_audio, SFX_WING );
     }
     u64 ticks_ms = get_ticks_ms();
-    if (ticks_ms - bird->gravity_ms > BIRD_GRAVITY_RATE)
+    if ( ticks_ms - bird->dy_ms >= BIRD_VELOCITY_RATE )
     {
-        float bird_y = bird->y;
-        float bird_dy = bird->dy;
-        bird_y += BIRD_GRAVITY_VELOCITY + bird_dy;
-        /* Did the bird hit the ground? */
-        if (bird_y > BIRD_MAX_Y)
+        float y = bird->y;
+        float dy = bird->dy;
+        dy += BIRD_GRAVITY_ACCEL;
+        y += dy;
+        /* Did the bird hit the ceiling? */
+        if (y < BIRD_MIN_Y)
         {
-            bird_y = BIRD_MAX_Y;
+            y = BIRD_MIN_Y;
+        }
+        /* Did the bird hit the ground? */
+        if (y > BIRD_MAX_Y)
+        {
+            y = BIRD_MAX_Y;
+            dy = 0.0;
             bird->state = BIRD_STATE_DEAD;
             audio_play_sfx( g_audio, SFX_HIT );
         }
-        /* Did the bird hit the ceiling? */
-        if (bird_y < BIRD_MIN_Y)
-        {
-            bird_y = BIRD_MIN_Y;
-        }
-        if (bird_dy < 0.0)
-        {
-            bird_dy += BIRD_GRAVITY_VELOCITY;
-            if (bird_dy > 0.0) bird_dy = 0.0;
-        }
-        bird->y = bird_y;
-        bird->dy = bird_dy;
-        bird->gravity_ms = ticks_ms;
+        bird->y = y;
+        bird->dy = dy;
+        bird->dy_ms = ticks_ms;
     }
 }
 

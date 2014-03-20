@@ -26,9 +26,9 @@
 #define BIRD_MIN_ROT -30.0
 #define BIRD_MAX_ROT 90.0
 /* Flap */
-#define BIRD_FLAP_VELOCITY 0.08
-#define BIRD_GRAVITY_RATE 10
-#define BIRD_GRAVITY_VELOCITY 0.01
+#define BIRD_VELOCITY_RATE 16
+#define BIRD_FLAP_VELOCITY 0.06
+#define BIRD_GRAVITY_ACCEL 0.005
 /* Sine "floating" effect */
 #define BIRD_SINE_RATE 25
 #define BIRD_SINE_INCREMENT 0.1
@@ -48,8 +48,7 @@ typedef struct
     float rot;
     /* Flapping */
     float dy;
-    u64 flap_ms;
-    u64 gravity_ms;
+    u64 dy_ms;
     /* Ready "floating" wave */
     u64 sine_ms;
     float sine_x;
