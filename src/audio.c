@@ -1,30 +1,50 @@
 #include "audio.h"
 
+audio_t *g_audio = NULL;
+
 audio_t *audio_setup(u16 sample_rate, u8 buffers)
 {
+    /* Start up the audio subsystem */
     audio_init( sample_rate, buffers );
     int buffer_length = audio_get_buffer_length();
     s16 *buffer = malloc( buffer_length * STEREO_PCM_SAMPLE_SIZE );
-    audio_t *audio = malloc( sizeof( audio_t ) );
+    audio_t *audio = g_audio = malloc( sizeof( audio_t ) );
     audio->sample_rate = sample_rate;
     audio->frames = buffer_length * 2;
     audio->buffer = buffer;
     audio->sfx_cursor = 0;
     audio->sfx = NULL;
+    /* Load the sound effects cache */
+    char *sfx_files[SFX_NUM_SOUNDS] = {
+        "/sfx/die.raw",
+        "/sfx/hit.raw",
+        "/sfx/point.raw",
+        "/sfx/swoosh.raw",
+        "/sfx/wing.raw"
+    };
+    pcm_sound_t *sfx;
+    for (int i = 0; i < SFX_NUM_SOUNDS; i++)
+    {
+        sfx = read_dfs_pcm_sound( sfx_files[i], sample_rate, 1);
+        audio->sfx_cache[i] = sfx;
+    }
     return audio;
 }
 
 void free_audio(audio_t *audio)
 {
+    /* Clear the sound effects cache */
+    for (int i = 0; i < SFX_NUM_SOUNDS; i++)
+    {
+        free(audio->sfx_cache[i]->data);
+        free(audio->sfx_cache[i]);
+        audio->sfx_cache[i] = NULL;
+    }
+    /* Shut down the audio subsystem */
+    g_audio = NULL;
     free( audio->buffer );
     free( audio );
     audio_close();
-}
-
-void audio_sfx_play(audio_t *audio, pcm_sound_t *sfx)
-{
-    audio->sfx_cursor = 0;
-    audio->sfx = sfx;
 }
 
 void audio_tick(audio_t *audio)
@@ -72,6 +92,19 @@ void audio_tick(audio_t *audio)
     }
 }
 
+void audio_play_sfx(audio_t *audio, u8 sfx_index)
+{
+    if (audio != NULL && sfx_index < SFX_NUM_SOUNDS)
+    {
+        pcm_sound_t *sfx = audio->sfx_cache[sfx_index];
+        if (sfx != NULL)
+        {
+            audio->sfx_cursor = 0;
+            audio->sfx = sfx;
+        }
+    }
+}
+
 pcm_sound_t *read_dfs_pcm_sound(char *file, u16 sample_rate, u8 channels)
 {
     int fp = dfs_open( file );
@@ -87,10 +120,4 @@ pcm_sound_t *read_dfs_pcm_sound(char *file, u16 sample_rate, u8 channels)
     sound->samples = frames / channels;
     sound->data = data;
     return sound;
-}
-
-void free_pcm_sound(pcm_sound_t *sound)
-{
-    free( sound->data );
-    free( sound );
 }

@@ -1,5 +1,6 @@
 #include <math.h>
 
+#include "audio.h"
 #include "background.h"
 #include "bird.h"
 
@@ -124,6 +125,7 @@ static void bird_tick_velocity(bird_t *bird, gamepad_state_t gamepad)
     if ( gamepad.A )
     {
         bird->dy -= BIRD_FLAP_VELOCITY;
+        audio_play_sfx( g_audio, SFX_WING );
     }
     u64 ticks_ms = get_ticks_ms();
     if (ticks_ms - bird->gravity_ms > BIRD_GRAVITY_RATE)
@@ -136,6 +138,7 @@ static void bird_tick_velocity(bird_t *bird, gamepad_state_t gamepad)
         {
             bird_y = BIRD_MAX_Y;
             bird->state = BIRD_STATE_DEAD;
+            audio_play_sfx( g_audio, SFX_HIT );
         }
         /* Did the bird hit the ceiling? */
         if (bird_y < BIRD_MIN_Y)
