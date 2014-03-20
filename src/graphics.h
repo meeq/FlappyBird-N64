@@ -37,8 +37,16 @@ typedef struct
 graphics_t *graphics_setup(resolution_t res, bitdepth_t bit,
                            u32 num_buffers, gamma_t gamma,
                            antialias_t aa);
-
 void free_graphics(graphics_t *graphics);
+
+void graphics_display_lock(graphics_t *graphics);
+void graphics_display_flip(graphics_t *graphics);
+
+void graphics_attach_rdp(graphics_t *graphics);
+void graphics_detach_rdp(graphics_t *graphics);
+
+void graphics_rdp_color_fill(graphics_t *graphics);
+void graphics_rdp_texture_fill(graphics_t *graphics);
 
 sprite_t *read_dfs_sprite(char *file);
 

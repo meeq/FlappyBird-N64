@@ -57,15 +57,8 @@ void draw_bird(graphics_t *graphics, bird_t bird)
     /* TODO Calculate rotation from center point */
     u16 tx = cx - bird_half_w, bx = cx + bird_half_w,
         ty = cy - bird_half_h, by = cy + bird_half_h;
-    /* Setup the RDP for textured fills if it isn't already */
-    if (graphics->rdp_fill_mode != RDP_FILL_TEXTURE)
-    {
-        /* Enable textures instead of solid color fill */
-        rdp_enable_texture_copy();
-        graphics->rdp_fill_mode = RDP_FILL_TEXTURE;
-
-    }
     /* Load the current animation sprite slice as a texture */
+    graphics_rdp_texture_fill( graphics );
     rdp_sync( SYNC_PIPE );
     u8 stride = (bird.color_type * BIRD_NUM_COLORS) + bird.anim_frame;
     rdp_load_texture_stride( 0, 0, MIRROR_DISABLED, bird_sprite, stride );

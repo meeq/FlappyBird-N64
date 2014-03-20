@@ -53,6 +53,84 @@ void free_graphics(graphics_t *graphics)
     display_close();
 }
 
+
+void graphics_display_lock(graphics_t *graphics)
+{
+    /* Grab a render buffer */
+    static display_context_t disp = 0;
+    while( !(disp = display_lock()) );
+    graphics->disp = disp;
+    /* Reset RDP state */
+    graphics->rdp_attached = RDP_DETACHED;
+    graphics->rdp_fill_mode = RDP_FILL_NONE;
+}
+
+void graphics_display_flip(graphics_t *graphics)
+{
+    if( graphics->disp )
+    {
+        /* Detach the RDP and sync before flipping the display buffer */
+        if (graphics->rdp_attached == RDP_ATTACHED)
+        {
+            graphics_detach_rdp(graphics);
+        }
+        /* Force backbuffer flip and reset the display handle */
+        display_show( graphics->disp );
+        graphics->disp = 0;
+    }
+}
+
+void graphics_attach_rdp(graphics_t *graphics)
+{
+    if (graphics->rdp_attached == RDP_DETACHED && graphics->disp)
+    {
+        /* Ensure the RDP is ready for new commands */
+        rdp_sync( SYNC_PIPE );
+
+        /* Remove any clipping windows */
+        rdp_set_default_clipping();
+
+        /* Attach RDP to display */
+        rdp_attach_display( graphics->disp );
+        graphics->rdp_attached = RDP_ATTACHED;
+    }
+}
+
+void graphics_detach_rdp(graphics_t *graphics)
+{
+    if (graphics->rdp_attached == RDP_ATTACHED)
+    {
+        /* Inform the RDP drawing is finished; flush pending operations */
+        rdp_detach_display();
+        graphics->rdp_attached = RDP_DETACHED;
+        graphics->rdp_fill_mode = RDP_FILL_NONE;
+    }
+}
+
+void graphics_rdp_color_fill(graphics_t *graphics)
+{
+    graphics_attach_rdp(graphics);
+    /* Setup the RDP for color fills if it isn't already */
+    if (graphics->rdp_fill_mode != RDP_FILL_COLOR)
+    {
+        /* Enable solid colors instead of texture fills */
+        rdp_enable_primitive_fill();
+        graphics->rdp_fill_mode = RDP_FILL_COLOR;
+    }
+}
+
+void graphics_rdp_texture_fill(graphics_t *graphics)
+{
+    graphics_attach_rdp(graphics);
+    /* Setup the RDP for textured fills if it isn't already */
+    if (graphics->rdp_fill_mode != RDP_FILL_TEXTURE)
+    {
+        /* Enable textures instead of solid color fill */
+        rdp_enable_texture_copy();
+        graphics->rdp_fill_mode = RDP_FILL_TEXTURE;
+    }
+}
+
 sprite_t *read_dfs_sprite(char *file)
 {
     int fp = dfs_open( file );

@@ -56,20 +56,7 @@ int main(void)
         /* Buffer sound effects */
         audio_tick( audio );
 
-        /* Grab a render buffer */
-        static display_context_t disp = 0;
-        while( !(disp = display_lock()) );
-        graphics->disp = disp;
-
-        /* Ensure the RDP is ready for new commands */
-        rdp_sync( SYNC_PIPE );
-
-        /* Remove any clipping windows */
-        rdp_set_default_clipping();
-
-        /* Attach RDP to display */
-        rdp_attach_display( disp );
-        graphics->rdp_attached = RDP_ATTACHED;
+        graphics_display_lock( graphics );
 
         /* Color fills */
         draw_bg_fill_color( graphics, bg.sky_fill );
@@ -109,13 +96,6 @@ int main(void)
                 break;
         }
 
-        /* Inform the RDP drawing is finished; flush pending operations */
-        rdp_detach_display();
-        graphics->rdp_attached = RDP_DETACHED;
-        graphics->rdp_fill_mode = RDP_FILL_NONE;
-
-        /* Force backbuffer flip and reset the display handle */
-        display_show( disp );
-        graphics->disp = disp = 0;
+        graphics_display_flip( graphics );
     }
 }

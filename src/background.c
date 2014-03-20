@@ -54,29 +54,14 @@ void background_free(background_t bg)
 
 void draw_bg_fill_color(graphics_t *graphics, bg_fill_color_t fill)
 {
-    if (graphics->rdp_attached != RDP_ATTACHED) return;
-    /* It's probably best not to thrash between colors and textures */
-    if (graphics->rdp_fill_mode != RDP_FILL_COLOR)
-    {
-        /* Enable solid color fill instead of textures */
-        rdp_enable_primitive_fill();
-        graphics->rdp_fill_mode = RDP_FILL_COLOR;
-    }
+    graphics_rdp_color_fill( graphics );
     rdp_set_primitive_color( fill.color );
     rdp_draw_filled_rectangle( 0, fill.y, graphics->width, fill.y + fill.h );
 }
 
 void draw_bg_fill_sprite(graphics_t *graphics, bg_fill_sprite_t fill)
 {
-    if (graphics->rdp_attached != RDP_ATTACHED) return;
-    /* It's probably best not to thrash between textures and colors */
-    if (graphics->rdp_fill_mode != RDP_FILL_TEXTURE)
-    {
-        /* Enable textures instead of solid color fill */
-        rdp_enable_texture_copy();
-        graphics->rdp_fill_mode = RDP_FILL_TEXTURE;
-
-    }
+    graphics_rdp_texture_fill( graphics );
     mirror_t mirror = MIRROR_DISABLED;
     sprite_t *sprite = fill.sprite;
     int slices = sprite->hslices, max_w = graphics->width;
