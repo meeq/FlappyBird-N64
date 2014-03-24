@@ -8,7 +8,6 @@
 static sprite_t *bird_sprite = NULL;
 static float bird_half_w = 0.0;
 static float bird_half_h = 0.0;
-static float bird_half_hyp = 0.0;
 
 bird_t bird_setup(u8 color_type)
 {
@@ -19,10 +18,8 @@ bird_t bird_setup(u8 color_type)
         /* Calculate the half-hypotenuse of the slice diagonal */
         float slice_w = (bird_sprite->width / bird_sprite->hslices) - 1.0;
         float slice_h = (bird_sprite->height / bird_sprite->vslices) - 1.0;
-        float hyp_squared = powf( slice_w, 2.0 ) + powf( slice_h, 2.0 );
-        bird_half_w = slice_w / 2.0;
-        bird_half_h = slice_h / 2.0;
-        bird_half_hyp = sqrtf( hyp_squared ) / 2.0;
+        bird_half_w = (slice_w / 2.0) * GRAPHICS_SCALE;
+        bird_half_h = (slice_h / 2.0) * GRAPHICS_SCALE;
     }
     bird_t bird = {
         .state = BIRD_STATE_READY,
@@ -43,8 +40,8 @@ bird_t bird_setup(u8 color_type)
 void draw_bird(graphics_t *graphics, bird_t bird)
 {
     /* Calculate player space center position */
-    u16 cx = graphics->width / 2.0,
-        cy = GROUND_TOP_Y / 2.0;
+    float cx = graphics->width / 2.0;
+    float cy = GROUND_TOP_Y / 2.0;
     /* Calculate bird Y position */
     float bird_y = bird.y;
     if (bird.state == BIRD_STATE_READY)
@@ -55,15 +52,16 @@ void draw_bird(graphics_t *graphics, bird_t bird)
     if (bird_y < BIRD_MIN_Y) bird_y = BIRD_MIN_Y;
     cy += bird_y * cy;
     /* TODO Calculate rotation from center point */
-    u16 tx = cx - bird_half_w, bx = cx + bird_half_w,
-        ty = cy - bird_half_h, by = cy + bird_half_h;
+    u16 tx = cx - bird_half_w, bx = cx + bird_half_w + 1,
+        ty = cy - bird_half_h, by = cy + bird_half_h + 1;
     /* Load the current animation sprite slice as a texture */
     graphics_rdp_texture_fill( graphics );
     rdp_sync( SYNC_PIPE );
     u8 stride = (bird.color_type * BIRD_NUM_COLORS) + bird.anim_frame;
     rdp_load_texture_stride( 0, 0, MIRROR_DISABLED, bird_sprite, stride );
     /* Draw the rotated rectangle */
-    rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
+    rdp_draw_textured_rectangle_scaled( 0,
+        tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
 }
 
 static void bird_tick_animation(bird_t *bird)

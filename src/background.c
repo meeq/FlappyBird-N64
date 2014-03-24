@@ -25,19 +25,31 @@ background_t background_setup(u8 time_mode)
     /* These are all hard-coded for 320x240 resolution... */
     background_t background = {
         .time_mode = time_mode,
-        .sky_fill = { .color = sky_color, .y = 0, .h = 141 },
-        .cloud_top = { .sprite = cloud_sprite, .y = 119 },
-        .cloud_fill = { .color = cloud_color, .y = 141, .h = 22 },
-        .city = { .sprite = city_sprite, .y = 148 },
-        .hill_top = { .sprite = hill_sprite, .y = 158 },
-        .hill_fill = { .color = hill_color, .y = 169, .h = 21 },
+        .sky_fill = {
+            .color = sky_color, .y = SKY_FILL_Y, .h = SKY_FILL_H
+        },
+        .cloud_top = {
+            .sprite = cloud_sprite, .y = CLOUD_TOP_Y
+        },
+        .cloud_fill = {
+            .color = cloud_color, .y = CLOUD_FILL_Y, .h = CLOUD_FILL_H
+        },
+        .city = {
+            .sprite = city_sprite, .y = CITY_TOP_Y
+        },
+        .hill_top = {
+            .sprite = hill_sprite, .y = HILL_TOP_Y
+        },
+        .hill_fill = {
+            .color = hill_color, .y = HILL_FILL_Y, .h = HILL_FILL_H
+        },
         .ground_top = {
             .sprite = read_dfs_sprite( "/gfx/ground.sprite" ),
             .y = GROUND_TOP_Y
         },
         .ground_fill = {
             .color = graphics_make_color( 0xDF, 0xD8, 0x93, 0xFF ),
-            .y = 200, .h = 40
+            .y = GROUND_FILL_Y, .h = GROUND_FILL_H
         }
     };
     return background;
@@ -64,9 +76,11 @@ void draw_bg_fill_sprite(graphics_t *graphics, bg_fill_sprite_t fill)
     graphics_rdp_texture_fill( graphics );
     mirror_t mirror = MIRROR_DISABLED;
     sprite_t *sprite = fill.sprite;
+    u16 ty = fill.y, by = (fill.y + sprite->height * GRAPHICS_SCALE) - 1;
     int slices = sprite->hslices, max_w = graphics->width;
     if (slices > 1)
     {
+        u16 tx, bx;
         /* Manually tile horizontally-sliced repeating fills */
         for (int repeat_x = 0,
                  repeat_w = sprite->width / slices,
@@ -77,16 +91,20 @@ void draw_bg_fill_sprite(graphics_t *graphics, bg_fill_sprite_t fill)
                  slice < slices && repeat_x < max_w;
                  slice++, repeat_x += repeat_w)
             {
+                tx = repeat_x * GRAPHICS_SCALE;
+                bx = ((repeat_x + repeat_w) * GRAPHICS_SCALE) - 1;
                 rdp_sync( SYNC_PIPE );
                 rdp_load_texture_stride( 0, 0, mirror, sprite, slice );
-                rdp_draw_sprite( 0, repeat_x, fill.y );
+                rdp_draw_textured_rectangle_scaled( 0,
+                    tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
             }
         }
     } else {
         /* Small tiles can be drawn in a single rectangle */
         rdp_sync( SYNC_PIPE );
         rdp_load_texture( 0, 0, mirror, sprite );
-        u16 tx = 0, bx = max_w, ty = fill.y, by = fill.y + sprite->height - 1;
-        rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
+        u16 tx = 0, bx = max_w;
+        rdp_draw_textured_rectangle_scaled( 0,
+            tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
     }
 }

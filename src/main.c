@@ -17,7 +17,7 @@ int main(void)
     /* Initialize display */
     /* TODO Support 640x480 for 2-player splitscreen */
     graphics_t *graphics = graphics_setup(
-        RESOLUTION_320x240, DEPTH_16_BPP,
+        RESOLUTION_640x480, DEPTH_16_BPP,
         BUFFERING_DOUBLE, GAMMA_NONE, ANTIALIAS_RESAMPLE
     );
 
