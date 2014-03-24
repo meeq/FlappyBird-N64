@@ -8,15 +8,15 @@ background_t background_setup(u8 time_mode)
     if (time_mode == DAY_TIME)
     {
         sky_color = graphics_make_color( 0x4E, 0xC0, 0xCA, 0xFF );
-        cloud_color = graphics_make_color( 0xE9, 0xFC, 0xD9, 0xFF );
-        hill_color = graphics_make_color( 0x5E, 0xE2, 0x70, 0xFF );
+        cloud_color = graphics_make_color( 0xE4, 0xFD, 0xD0, 0xFF );
+        hill_color = graphics_make_color( 0x52, 0xE0, 0x5D, 0xFF );
         cloud_sprite = read_dfs_sprite( "/gfx/bg-cloud-day.sprite" );
         city_sprite = read_dfs_sprite( "/gfx/bg-city-day.sprite" );
         hill_sprite = read_dfs_sprite( "/gfx/bg-hill-day.sprite" );
     } else {
         sky_color = graphics_make_color( 0x00, 0x87, 0x93, 0xFF );
-        cloud_color = graphics_make_color( 0x00, 0xB3, 0xC2, 0xFF );
-        hill_color = graphics_make_color( 0x00, 0xA3, 0x00, 0xFF );
+        cloud_color = graphics_make_color( 0x15, 0xA5, 0xB5, 0xFF );
+        hill_color = graphics_make_color( 0x14, 0x96, 0x02, 0xFF );
         cloud_sprite = read_dfs_sprite( "/gfx/bg-cloud-night.sprite" );
         city_sprite = read_dfs_sprite( "/gfx/bg-city-night.sprite" );
         hill_sprite = read_dfs_sprite( "/gfx/bg-hill-night.sprite" );
