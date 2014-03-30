@@ -1,6 +1,8 @@
 PROG_NAME = FlappyBird
 PROG_TITLE = "FlappyBird64"
-ROM_SIZE = 2M
+# OUT_SIZE = 52672B HEADER + 1M ROM
+OUT_SIZE = 1052672B
+DFS_OFFSET = 256K
 
 # Paths
 DFSDIR = filesystem/
@@ -60,12 +62,12 @@ $(PROG_NAME).v64: $(PROG_NAME).elf $(PROG_NAME).dfs
 	$(OBJCOPY) $(PROG_NAME).elf $(PROG_NAME).bin -O binary
 	rm -f $(PROG_NAME).v64
 	$(N64TOOL) \
-		-b -l $(ROM_SIZE) \
+		-b -l $(OUT_SIZE) \
 		-t $(PROG_TITLE) \
 		-h $(HEADERPATH)/$(HEADERNAME) \
 		-o $(PROG_NAME).v64  \
 		$(PROG_NAME).bin \
-		-s 1M $(PROG_NAME).dfs
+		-s $(DFS_OFFSET) $(PROG_NAME).dfs
 	$(CHKSUM64PATH) $(PROG_NAME).v64
 
 # Linked binary

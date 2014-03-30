@@ -11,7 +11,7 @@ int main(void)
     init_interrupts();
 
     /* Initialize peripherals */
-    dfs_init( DFS_DEFAULT_LOCATION );
+    dfs_init( DFS_ROM_LOCATION );
     controller_init();
 
     /* Initialize display */

@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <libdragon.h>
 
+#define DFS_ROM_LOCATION 0xB0041000 /* 256K */
+
 typedef volatile unsigned short vu16;
 typedef volatile unsigned int vu32;
 typedef volatile uint64_t vu64;
