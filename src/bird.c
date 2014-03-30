@@ -52,8 +52,8 @@ void draw_bird(graphics_t *graphics, bird_t bird)
     if (bird_y < BIRD_MIN_Y) bird_y = BIRD_MIN_Y;
     cy += bird_y * cy;
     /* TODO Calculate rotation from center point */
-    u16 tx = cx - bird_half_w, bx = cx + bird_half_w + 1,
-        ty = cy - bird_half_h, by = cy + bird_half_h + 1;
+    u16 tx = cx - bird_half_w, bx = cx + bird_half_w,
+        ty = cy - bird_half_h, by = cy + bird_half_h;
     /* Load the current animation sprite slice as a texture */
     graphics_rdp_texture_fill( graphics );
     rdp_sync( SYNC_PIPE );

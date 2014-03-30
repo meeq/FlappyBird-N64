@@ -5,7 +5,7 @@
 
 /* Graphics definitions */
 
-#define GRAPHICS_SCALE 2
+#define GRAPHICS_SCALE 1
 
 #define BUFFERING_DOUBLE 2
 #define BUFFERING_TRIPLE 3
