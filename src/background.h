@@ -6,6 +6,8 @@
 
 /* Background definitions */
 
+#define BG_SCROLL_RATE 16
+
 #define SKY_FILL_Y 0
 #define SKY_FILL_H 141 * GRAPHICS_SCALE
 #define CLOUD_TOP_Y 130 * GRAPHICS_SCALE
@@ -33,12 +35,16 @@ typedef struct
 {
     sprite_t *sprite;
     s16 y;
+    double scroll_x;
+    u16 scroll_w;
+    double scroll_dx;
 } bg_fill_sprite_t;
 
 typedef struct
 {
     // Setup state
     u8 time_mode;
+    u64 scroll_ms;
     // Color fills
     bg_fill_color_t sky_fill;
     bg_fill_color_t cloud_fill;
@@ -56,6 +62,8 @@ typedef struct
 background_t background_setup(u8 time_mode);
 
 void background_free(background_t bg);
+
+void background_tick(background_t *bg);
 
 void draw_bg_fill_color(graphics_t *graphics, bg_fill_color_t fill);
 void draw_bg_fill_sprite(graphics_t *graphics, bg_fill_sprite_t fill);

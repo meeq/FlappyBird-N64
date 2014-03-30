@@ -50,11 +50,11 @@ int main(void)
         switch (bird.state)
         {
             case BIRD_STATE_READY:
-                // background_tick( &bg );
+                background_tick( &bg );
                 // pipes_reset( &pipes );
                 break;
             case BIRD_STATE_PLAY:
-                // background_tick( &bg );
+                background_tick( &bg );
                 // pipes_tick( &pipes );
                 // collision_tick( &bird, &pipes );
                 break;
