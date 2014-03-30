@@ -40,7 +40,7 @@ bird_t bird_setup(u8 color_type)
 void draw_bird(graphics_t *graphics, bird_t bird)
 {
     /* Calculate player space center position */
-    float cx = graphics->width / 2.0;
+    float cx = graphics->width / 2.5;
     float cy = GROUND_TOP_Y / 2.0;
     /* Calculate bird Y position */
     float bird_y = bird.y;
