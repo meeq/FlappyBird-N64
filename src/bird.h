@@ -17,23 +17,23 @@
 #define BIRD_COLOR_RED 1
 #define BIRD_COLOR_BLUE 2
 /* Animation */
-#define BIRD_ANIM_RATE 150
+#define BIRD_ANIM_RATE 120
 #define BIRD_ANIM_FRAMES 3
 /* Center point */
 #define BIRD_MIN_Y -0.90
 #define BIRD_MAX_Y 0.95
 /* Rotation */
-#define BIRD_MIN_ROT -30.0
+#define BIRD_MIN_ROT -15.0
 #define BIRD_MAX_ROT 90.0
 /* Flap */
 #define BIRD_VELOCITY_RATE 16
 #define BIRD_FLAP_VELOCITY 0.06
 #define BIRD_GRAVITY_ACCEL 0.005
 /* Sine "floating" effect */
-#define BIRD_SINE_RATE 25
+#define BIRD_SINE_RATE 20
 #define BIRD_SINE_INCREMENT 0.1
 #define BIRD_SINE_CYCLE (M_PI * 2.0)
-#define BIRD_SINE_DAMPEN 0.03
+#define BIRD_SINE_DAMPEN 0.02
 
 typedef struct
 {
