@@ -1,5 +1,5 @@
-PROG_NAME = flappy
-PROG_TITLE = "Flappy Test"
+PROG_NAME = FlappyBird
+PROG_TITLE = "FlappyBird64"
 ROM_SIZE = 2M
 
 # Paths
