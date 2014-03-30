@@ -7,16 +7,16 @@ background_t background_setup(u8 time_mode)
     sprite_t *cloud_sprite, *city_sprite, *hill_sprite, *ground_sprite;
     if (time_mode == DAY_TIME)
     {
-        sky_color = graphics_make_color( 0x4E, 0xC0, 0xCA, 0xFF );
-        cloud_color = graphics_make_color( 0xE4, 0xFD, 0xD0, 0xFF );
-        hill_color = graphics_make_color( 0x52, 0xE0, 0x5D, 0xFF );
+        sky_color = SKY_COLOR_DAY;
+        cloud_color = CLOUD_COLOR_DAY;
+        hill_color = HILL_COLOR_DAY;
         cloud_sprite = read_dfs_sprite( "/gfx/bg-cloud-day.sprite" );
         city_sprite = read_dfs_sprite( "/gfx/bg-city-day.sprite" );
         hill_sprite = read_dfs_sprite( "/gfx/bg-hill-day.sprite" );
     } else {
-        sky_color = graphics_make_color( 0x00, 0x87, 0x93, 0xFF );
-        cloud_color = graphics_make_color( 0x15, 0xA5, 0xB5, 0xFF );
-        hill_color = graphics_make_color( 0x14, 0x96, 0x02, 0xFF );
+        sky_color = SKY_COLOR_NIGHT;
+        cloud_color = CLOUD_COLOR_NIGHT;
+        hill_color = HILL_COLOR_NIGHT;
         cloud_sprite = read_dfs_sprite( "/gfx/bg-cloud-night.sprite" );
         city_sprite = read_dfs_sprite( "/gfx/bg-city-night.sprite" );
         hill_sprite = read_dfs_sprite( "/gfx/bg-hill-night.sprite" );
@@ -31,7 +31,7 @@ background_t background_setup(u8 time_mode)
         },
         .cloud_top = {
             .sprite = cloud_sprite, .y = CLOUD_TOP_Y,
-            .scroll_x = 0, .scroll_dx = -0.01,
+            .scroll_x = 0, .scroll_dx = SKY_SCROLL_DX,
             .scroll_w = (cloud_sprite->width / cloud_sprite->hslices)
         },
         .cloud_fill = {
@@ -39,12 +39,12 @@ background_t background_setup(u8 time_mode)
         },
         .city = {
             .sprite = city_sprite, .y = CITY_TOP_Y,
-            .scroll_x = 0, .scroll_dx = -0.08,
+            .scroll_x = 0, .scroll_dx = CITY_SCROLL_DX,
             .scroll_w = (city_sprite->width / city_sprite->hslices)
         },
         .hill_top = {
             .sprite = hill_sprite, .y = HILL_TOP_Y,
-            .scroll_x = 0, .scroll_dx = -0.4,
+            .scroll_x = 0, .scroll_dx = HILL_SCROLL_DX,
             .scroll_w = (hill_sprite->width / hill_sprite->hslices)
         },
         .hill_fill = {
@@ -52,12 +52,11 @@ background_t background_setup(u8 time_mode)
         },
         .ground_top = {
             .sprite = ground_sprite, .y = GROUND_TOP_Y,
-            .scroll_x = 0, .scroll_dx = -1,
+            .scroll_x = 0, .scroll_dx = GROUND_SCROLL_DX,
             .scroll_w = (ground_sprite->width / ground_sprite->hslices)
         },
         .ground_fill = {
-            .color = graphics_make_color( 0xDF, 0xD8, 0x93, 0xFF ),
-            .y = GROUND_FILL_Y, .h = GROUND_FILL_H
+            .color = GROUND_COLOR, .y = GROUND_FILL_Y, .h = GROUND_FILL_H
         }
     };
     return background;
@@ -107,14 +106,13 @@ void draw_bg_fill_sprite(graphics_t *graphics, bg_fill_sprite_t fill)
     graphics_rdp_texture_fill( graphics );
     mirror_t mirror = MIRROR_DISABLED;
     sprite_t *sprite = fill.sprite;
-    s16 x = fill.scroll_x;
+    s16 scroll_x = fill.scroll_x, tx, bx;
     u16 ty = fill.y, by = (fill.y + sprite->height * GRAPHICS_SCALE) - 1;
     int slices = sprite->hslices, max_w = graphics->width;
     if (slices > 1)
     {
-        s16 tx, bx;
         /* Manually tile horizontally-sliced repeating fills */
-        for (int repeat_x = x,
+        for (int repeat_x = scroll_x,
                  repeat_w = sprite->width / slices,
                  slice;
              repeat_x < max_w;)
@@ -132,10 +130,11 @@ void draw_bg_fill_sprite(graphics_t *graphics, bg_fill_sprite_t fill)
             }
         }
     } else {
-        /* Small tiles can be drawn in a single rectangle */
+        /* Small sprites can be drawn using fewer rectangles and tiling */
         rdp_sync( SYNC_PIPE );
         rdp_load_texture( 0, 0, mirror, sprite );
-        s16 tx = x, bx;
+        /* If cut off on the left side, draw clipped version separately */
+        tx = scroll_x;
         if (tx < 0)
         {
             bx = tx + fill.scroll_w;
@@ -143,6 +142,7 @@ void draw_bg_fill_sprite(graphics_t *graphics, bg_fill_sprite_t fill)
                 tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
             tx += fill.scroll_w;
         }
+        /* Draw full-tiles for the rest */
         bx = max_w;
         rdp_draw_textured_rectangle_scaled( 0,
             tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );

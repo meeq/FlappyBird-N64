@@ -8,21 +8,34 @@
 
 #define BG_SCROLL_RATE 16
 
-#define SKY_FILL_Y 0
-#define SKY_FILL_H 141 * GRAPHICS_SCALE
-#define CLOUD_TOP_Y 130 * GRAPHICS_SCALE
-#define CLOUD_FILL_Y 141 * GRAPHICS_SCALE
-#define CLOUD_FILL_H 32 * GRAPHICS_SCALE
-#define CITY_TOP_Y 155 * GRAPHICS_SCALE
-#define HILL_TOP_Y 170 * GRAPHICS_SCALE
-#define HILL_FILL_Y 179 * GRAPHICS_SCALE
-#define HILL_FILL_H 11 * GRAPHICS_SCALE
-#define GROUND_TOP_Y 190 * GRAPHICS_SCALE
-#define GROUND_FILL_Y 200 * GRAPHICS_SCALE
-#define GROUND_FILL_H 40 * GRAPHICS_SCALE
+#define SKY_COLOR_DAY       graphics_make_color( 0x4E, 0xC0, 0xCA, 0xFF )
+#define SKY_COLOR_NIGHT     graphics_make_color( 0x00, 0x87, 0x93, 0xFF )
+#define CLOUD_COLOR_DAY     graphics_make_color( 0xE4, 0xFD, 0xD0, 0xFF )
+#define CLOUD_COLOR_NIGHT   graphics_make_color( 0x15, 0xA5, 0xB5, 0xFF )
+#define HILL_COLOR_DAY      graphics_make_color( 0x52, 0xE0, 0x5D, 0xFF )
+#define HILL_COLOR_NIGHT    graphics_make_color( 0x14, 0x96, 0x02, 0xFF )
+#define GROUND_COLOR        graphics_make_color( 0xDF, 0xD8, 0x93, 0xFF )
 
-#define DAY_TIME 0
-#define NIGHT_TIME 1
+#define SKY_FILL_Y      0
+#define SKY_FILL_H      141 * GRAPHICS_SCALE
+#define CLOUD_TOP_Y     130 * GRAPHICS_SCALE
+#define CLOUD_FILL_Y    141 * GRAPHICS_SCALE
+#define CLOUD_FILL_H    32 * GRAPHICS_SCALE
+#define CITY_TOP_Y      155 * GRAPHICS_SCALE
+#define HILL_TOP_Y      170 * GRAPHICS_SCALE
+#define HILL_FILL_Y     179 * GRAPHICS_SCALE
+#define HILL_FILL_H     11 * GRAPHICS_SCALE
+#define GROUND_TOP_Y    190 * GRAPHICS_SCALE
+#define GROUND_FILL_Y   200 * GRAPHICS_SCALE
+#define GROUND_FILL_H   40 * GRAPHICS_SCALE
+
+#define SKY_SCROLL_DX       -0.008
+#define CITY_SCROLL_DX      -0.04
+#define HILL_SCROLL_DX      -0.2
+#define GROUND_SCROLL_DX    -1.0
+
+#define DAY_TIME    0
+#define NIGHT_TIME  1
 
 typedef struct
 {
