@@ -2,6 +2,7 @@
 #include "audio.h"
 #include "graphics.h"
 
+#include "title.h"
 #include "background.h"
 #include "bird.h"
 
@@ -26,6 +27,7 @@ int main(void)
     audio_write_silence();
 
     /* Initialize game state */
+    sprite_t *logo = read_dfs_sprite( "/gfx/logo.sprite" );
     background_t bg = background_setup( DAY_TIME );
     bird_t bird = bird_setup( BIRD_COLOR_YELLOW );
     // pipes_t pipes = pipes_setup();
@@ -90,6 +92,7 @@ int main(void)
             switch (bird.state)
             {
                 case BIRD_STATE_TITLE:
+                    draw_logo( graphics, logo );
                 case BIRD_STATE_READY:
                     // draw_get_ready( graphics, get_ready );
                     // draw_score( graphics, score );
