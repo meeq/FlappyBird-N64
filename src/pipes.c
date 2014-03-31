@@ -46,71 +46,54 @@ void pipes_tick(pipes_t *pipes)
     }
 }
 
-/*
-    SIGH: The tubes and caps were supposed to be drawn in the same loop
-    by leveraging texture slots, but that does not appear to be working.
-    Instead we load the tube texture. draw all the tubes, load the cap
-    texture, and draw all the caps, which duplicates some computations.
-*/
-
-inline static void pipe_draw_tubes(graphics_t *graphics, pipe_t pipe)
-{
-    if (pipe.x < 0.0 || pipe.x > 1.0) return;
-    int cx = graphics->width * pipe.x;
-    int tx = cx - (PIPE_WIDTH >> 1);
-    int bx = cx + (PIPE_WIDTH >> 1) - 1;
-    int cy = (GROUND_TOP_Y >> 1);
-    int gap_y = cy + pipe.y * cy;
-    int ty, by;
-    /* Top tube */
-    ty = 0;
-    by = gap_y - (PIPE_GAP_Y >> 1);
-    rdp_draw_textured_rectangle_scaled( 0,
-        tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
-    /* Bottom tube */
-    ty = gap_y + (PIPE_GAP_Y >> 1);
-    by = GROUND_TOP_Y - 1;
-    rdp_draw_textured_rectangle_scaled( 0,
-        tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
-}
-
-inline static void pipe_draw_caps(graphics_t *graphics, pipe_t pipe)
-{
-    if (pipe.x < 0.0 || pipe.x > 1.0) return;
-    int cx = graphics->width * pipe.x;
-    int tx = cx - (PIPE_WIDTH >> 1);
-    int bx = cx + (PIPE_WIDTH >> 1) - 1;
-    int cy = (GROUND_TOP_Y >> 1);
-    int gap_y = cy + pipe.y * cy;
-    int ty, by;
-    /* Top cap */
-    ty = gap_y - (PIPE_GAP_Y >> 1);
-    by = ty + PIPE_CAP_HEIGHT - 1;
-    rdp_draw_textured_rectangle_scaled( 0,
-        tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
-    /* Bottom cap */
-    ty = gap_y + (PIPE_GAP_Y >> 1) - PIPE_CAP_HEIGHT;
-    by = ty + PIPE_CAP_HEIGHT - 1;
-    rdp_draw_textured_rectangle_scaled( 0,
-        tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
-}
-
 void pipes_draw(graphics_t *graphics, pipes_t pipes)
 {
+    sprite_t *tube = pipes.tube_sprite;
+    sprite_t *cap = pipes.cap_sprite;
+    u8 color = pipes.color, cap_hslices = cap->hslices;
+    pipe_t pipe;
+    int cx, cy, tx, ty, bx, by, gap_y;
+
     graphics_rdp_texture_fill( graphics );
     mirror_t mirror = MIRROR_DISABLED;
     rdp_sync( SYNC_PIPE );
-
-    rdp_load_texture_stride( 0, 0, mirror, pipes.tube_sprite, 0 );
     for (int i = 0; i < PIPES_MAX_NUM; i++)
     {
-        pipe_draw_tubes( graphics, pipes.n[i] );
-    }
-
-    rdp_load_texture_stride( 0, 0, mirror, pipes.cap_sprite, 0 );
-    for (int i = 0; i < PIPES_MAX_NUM; i++)
-    {
-        pipe_draw_caps( graphics, pipes.n[i] );
+        pipe = pipes.n[i];
+        /* Calculate X position */
+        cx = graphics->width * pipe.x;
+        tx = cx - (PIPE_WIDTH >> 1);
+        bx = cx + (PIPE_WIDTH >> 1) - 1;
+        if (bx < 0 || tx >= graphics->width) continue;
+        /* Calculate Y position */
+        cy = (GROUND_TOP_Y >> 1);
+        gap_y = cy + pipe.y * cy;
+        /* Load tube texture */
+        rdp_load_texture_stride( 0, 0, mirror, tube, color );
+        /* Top tube */
+        ty = 0;
+        by = gap_y - (PIPE_GAP_Y >> 1);
+        rdp_draw_textured_rectangle_scaled( 0,
+            tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
+        /* Bottom tube */
+        ty = gap_y + (PIPE_GAP_Y >> 1);
+        by = GROUND_TOP_Y - 1;
+        rdp_draw_textured_rectangle_scaled( 0,
+            tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
+        /* Load top cap texture */
+        rdp_load_texture_stride( 0, 0, mirror, cap, color + cap_hslices );
+        /* Top cap */
+        ty = gap_y - (PIPE_GAP_Y >> 1);
+        by = ty + PIPE_CAP_HEIGHT - 1;
+        rdp_draw_textured_rectangle_scaled( 0,
+            tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
+        /* Load bottom cap texture */
+        rdp_load_texture_stride( 0, 0, mirror, cap, color );
+        /* Bottom cap */
+        ty = gap_y + (PIPE_GAP_Y >> 1) - PIPE_CAP_HEIGHT;
+        by = ty + PIPE_CAP_HEIGHT - 1;
+        rdp_draw_textured_rectangle_scaled( 0,
+            tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
     }
 
 }

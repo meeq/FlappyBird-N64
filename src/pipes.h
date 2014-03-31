@@ -14,7 +14,7 @@
 
 #define PIPE_WIDTH          26
 #define PIPE_CAP_HEIGHT     13
-#define PIPE_GAP_Y          75
+#define PIPE_GAP_Y          80
 
 typedef struct
 {
