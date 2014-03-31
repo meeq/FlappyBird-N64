@@ -65,7 +65,7 @@ typedef struct
 
 bird_t bird_setup(u8 color_type);
 
-void draw_bird(graphics_t *graphics, bird_t bird);
+void bird_draw(graphics_t *graphics, bird_t bird);
 
 void bird_tick(bird_t *bird, gamepad_state_t gamepad);
 

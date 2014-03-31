@@ -78,7 +78,7 @@ void background_free(background_t bg);
 
 void background_tick(background_t *bg);
 
-void draw_bg_fill_color(graphics_t *graphics, bg_fill_color_t fill);
-void draw_bg_fill_sprite(graphics_t *graphics, bg_fill_sprite_t fill);
+void background_draw_color(graphics_t *graphics, bg_fill_color_t fill);
+void background_draw_sprite(graphics_t *graphics, bg_fill_sprite_t fill);
 
 #endif

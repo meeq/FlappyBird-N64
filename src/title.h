@@ -11,8 +11,8 @@
 #define HEADING_GET_READY 0
 #define HEADING_GAME_OVER 1
 
-void draw_logo(graphics_t *graphics, sprite_t *logo);
-void draw_heading(graphics_t *graphics, sprite_t *headings, u8 stride);
-void draw_how_to(graphics_t *graphics, sprite_t *sprite);
+void logo_draw(graphics_t *graphics, sprite_t *logo);
+void heading_draw(graphics_t *graphics, sprite_t *headings, u8 stride);
+void howto_draw(graphics_t *graphics, sprite_t *sprite);
 
 #endif

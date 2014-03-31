@@ -73,43 +73,43 @@ int main(void)
         graphics_display_lock( graphics );
         {
             /* Color fills */
-            draw_bg_fill_color( graphics, bg.sky_fill );
-            draw_bg_fill_color( graphics, bg.cloud_fill );
-            draw_bg_fill_color( graphics, bg.hill_fill );
-            draw_bg_fill_color( graphics, bg.ground_fill );
+            background_draw_color( graphics, bg.sky_fill );
+            background_draw_color( graphics, bg.cloud_fill );
+            background_draw_color( graphics, bg.hill_fill );
+            background_draw_color( graphics, bg.ground_fill );
 
             /* Texture fills */
-            draw_bg_fill_sprite( graphics, bg.cloud_top );
-            draw_bg_fill_sprite( graphics, bg.city );
-            draw_bg_fill_sprite( graphics, bg.hill_top );
-            draw_bg_fill_sprite( graphics, bg.ground_top );
+            background_draw_sprite( graphics, bg.cloud_top );
+            background_draw_sprite( graphics, bg.city );
+            background_draw_sprite( graphics, bg.hill_top );
+            background_draw_sprite( graphics, bg.ground_top );
 
             /* Draw the pipes */
-            // draw_pipes( graphics, pipes );
+            // pipes_draw( graphics, pipes );
 
             /* Draw the bird */
-            draw_bird( graphics, bird );
+            bird_draw( graphics, bird );
 
             /* Draw the UI */
             // u16 score = bird.score;
             switch (bird.state)
             {
                 case BIRD_STATE_TITLE:
-                    draw_logo( graphics, logo );
+                    logo_draw( graphics, logo );
                     break;
                 case BIRD_STATE_READY:
-                    draw_heading( graphics, headings, HEADING_GET_READY );
-                    // draw_score( graphics, font_large, score );
-                    draw_how_to( graphics, how_to );
+                    heading_draw( graphics, headings, HEADING_GET_READY );
+                    // score_draw( graphics, font_large, score );
+                    howto_draw( graphics, how_to );
                     break;
                 case BIRD_STATE_PLAY:
-                    // draw_score( graphics, font_large, score );
+                    // score_draw( graphics, font_large, score );
                     break;
                 case BIRD_STATE_DEAD:
-                    draw_heading( graphics, headings, HEADING_GAME_OVER );
-                    // draw_scoreboard( graphics, scoreboard );
-                    // draw_medal( graphics, medals, score );
-                    // draw_scoreboard_scores( graphics, font_med, score );
+                    heading_draw( graphics, headings, HEADING_GAME_OVER );
+                    // scoreboard_draw( graphics, scoreboard );
+                    // medal_draw( graphics, medals, score );
+                    // scoreboard_scores_draw( graphics, font_med, score );
                     break;
             }
         }

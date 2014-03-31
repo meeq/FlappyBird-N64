@@ -94,14 +94,14 @@ void background_tick(background_t *bg)
     }
 }
 
-void draw_bg_fill_color(graphics_t *graphics, bg_fill_color_t fill)
+void background_draw_color(graphics_t *graphics, bg_fill_color_t fill)
 {
     graphics_rdp_color_fill( graphics );
     rdp_set_primitive_color( fill.color );
     rdp_draw_filled_rectangle( 0, fill.y, graphics->width, fill.y + fill.h );
 }
 
-void draw_bg_fill_sprite(graphics_t *graphics, bg_fill_sprite_t fill)
+void background_draw_sprite(graphics_t *graphics, bg_fill_sprite_t fill)
 {
     graphics_rdp_texture_fill( graphics );
     mirror_t mirror = MIRROR_DISABLED;

@@ -39,7 +39,7 @@ bird_t bird_setup(u8 color_type)
     return bird;
 }
 
-void draw_bird(graphics_t *graphics, bird_t bird)
+void bird_draw(graphics_t *graphics, bird_t bird)
 {
     /* Calculate player space center position */
     float cx = graphics->width * bird.x;

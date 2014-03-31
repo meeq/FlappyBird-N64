@@ -1,6 +1,6 @@
 #include "title.h"
 
-void draw_logo(graphics_t *graphics, sprite_t *logo)
+void logo_draw(graphics_t *graphics, sprite_t *logo)
 {
     graphics_detach_rdp( graphics );
     int disp = graphics->disp;
@@ -33,7 +33,7 @@ void draw_logo(graphics_t *graphics, sprite_t *logo)
     graphics_draw_text( disp, credit2_x, credit2_y, credit2_str );
 }
 
-void draw_heading(graphics_t *graphics, sprite_t *headings, u8 stride)
+void heading_draw(graphics_t *graphics, sprite_t *headings, u8 stride)
 {
     graphics_detach_rdp( graphics );
     int disp = graphics->disp;
@@ -46,7 +46,7 @@ void draw_heading(graphics_t *graphics, sprite_t *headings, u8 stride)
     graphics_draw_sprite_trans_stride( disp, x, y, headings, stride );
 }
 
-void draw_how_to(graphics_t *graphics, sprite_t *sprite)
+void howto_draw(graphics_t *graphics, sprite_t *sprite)
 {
     graphics_detach_rdp( graphics );
     int disp = graphics->disp;
