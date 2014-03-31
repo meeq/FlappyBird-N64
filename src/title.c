@@ -16,6 +16,7 @@ void draw_logo(graphics_t *graphics, sprite_t *logo)
     int credit1_w = 110;
     int credit1_x = center_x - (credit1_w / 2.0);
     int credit1_y = graphics->height - 92;
+
     char *credit2_str = "N64 Port by C. Bonhage";
     int credit2_w = 175;
     int credit2_x = center_x - (credit2_w / 2.0);
