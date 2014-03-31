@@ -84,7 +84,7 @@ inline void background_tick_scroll(bg_fill_sprite_t *fill)
 void background_tick(background_t *bg)
 {
     u64 ticks_ms = get_ticks_ms();
-    if (ticks_ms - bg->scroll_ms >= BG_SCROLL_RATE)
+    if (ticks_ms - bg->scroll_ms >= BACKGROUND_SCROLL_RATE)
     {
         bg->scroll_ms = ticks_ms;
         background_tick_scroll( &bg->cloud_top );

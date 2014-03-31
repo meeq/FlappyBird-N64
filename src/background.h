@@ -6,7 +6,7 @@
 
 /* Background definitions */
 
-#define BG_SCROLL_RATE 16
+#define BACKGROUND_SCROLL_RATE 16
 
 #define SKY_COLOR_DAY       graphics_make_color( 0x4E, 0xC0, 0xCA, 0xFF )
 #define SKY_COLOR_NIGHT     graphics_make_color( 0x00, 0x87, 0x93, 0xFF )
