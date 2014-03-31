@@ -5,6 +5,7 @@
 #include "title.h"
 #include "background.h"
 #include "bird.h"
+#include "pipes.h"
 
 int main(void)
 {
@@ -34,7 +35,7 @@ int main(void)
     /* Initialize game state */
     background_t bg = background_setup( DAY_TIME );
     bird_t bird = bird_setup( BIRD_COLOR_YELLOW );
-    // pipes_t pipes = pipes_setup();
+    pipes_t pipes = pipes_setup();
 
     /* Run the main loop */
     while(1)
@@ -57,11 +58,11 @@ int main(void)
             case BIRD_STATE_TITLE:
             case BIRD_STATE_READY:
                 background_tick( &bg );
-                // pipes_reset( &pipes );
+                pipes_reset( &pipes );
                 break;
             case BIRD_STATE_PLAY:
                 background_tick( &bg );
-                // pipes_tick( &pipes );
+                pipes_tick( &pipes );
                 // collision_tick( &bird, &pipes );
                 break;
         }
@@ -85,7 +86,7 @@ int main(void)
             background_draw_sprite( graphics, bg.ground_top );
 
             /* Draw the pipes */
-            // pipes_draw( graphics, pipes );
+            pipes_draw( graphics, pipes );
 
             /* Draw the bird */
             bird_draw( graphics, bird );
