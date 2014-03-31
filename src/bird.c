@@ -24,6 +24,7 @@ bird_t bird_setup(u8 color_type)
     bird_t bird = {
         .state = BIRD_STATE_TITLE,
         .color_type = color_type,
+        .dead_ms = 0,
         .anim_ms = 0,
         .anim_frame = 0,
         .x = BIRD_TITLE_X,
@@ -42,8 +43,8 @@ bird_t bird_setup(u8 color_type)
 void bird_draw(graphics_t *graphics, bird_t bird)
 {
     /* Calculate player space center position */
-    float cx = graphics->width * bird.x;
-    float cy = GROUND_TOP_Y * 0.5;
+    int cx = graphics->width * bird.x;
+    int cy = GROUND_TOP_Y >> 1;
     /* Calculate bird Y position */
     float bird_y = bird.y;
     switch (bird.state)
@@ -154,6 +155,7 @@ static void bird_tick_velocity(bird_t *bird, gamepad_state_t gamepad)
             y = BIRD_MAX_Y;
             dy = 0.0;
             bird->state = BIRD_STATE_DEAD;
+            bird->dead_ms = ticks_ms;
             audio_play_sfx( g_audio, SFX_HIT );
         }
         bird->y = y;
@@ -164,12 +166,14 @@ static void bird_tick_velocity(bird_t *bird, gamepad_state_t gamepad)
 
 void bird_tick(bird_t *bird, gamepad_state_t gamepad)
 {
+    u64 ticks_ms = get_ticks_ms();
     /* State transitions based on button input */
     switch (bird->state)
     {
         case BIRD_STATE_TITLE:
         case BIRD_STATE_DEAD:
-            if ( gamepad.A || gamepad.start )
+            if (( gamepad.A || gamepad.start ) &&
+                ( ticks_ms - bird->dead_ms > BIRD_DEAD_DELAY ))
             {
                 bird->state = BIRD_STATE_READY;
                 audio_play_sfx( g_audio, SFX_SWOOSH );

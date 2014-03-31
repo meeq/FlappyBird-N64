@@ -12,6 +12,7 @@
 #define BIRD_STATE_PLAY     1
 #define BIRD_STATE_DEAD     2
 #define BIRD_STATE_TITLE    3
+#define BIRD_DEAD_DELAY     1000
 /* Colors */
 #define BIRD_NUM_COLORS     3
 #define BIRD_COLOR_YELLOW   0
@@ -43,6 +44,7 @@ typedef struct
 {
     u8 state;
     u8 color_type;
+    u64 dead_ms;
     /* Animation */
     u64 anim_ms;
     u8 anim_frame;
