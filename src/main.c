@@ -49,6 +49,7 @@ int main(void)
         bird_tick( &bird, keys.c[0] );
         switch (bird.state)
         {
+            case BIRD_STATE_TITLE:
             case BIRD_STATE_READY:
                 background_tick( &bg );
                 // pipes_reset( &pipes );
@@ -88,6 +89,7 @@ int main(void)
             // u16 score = bird.score;
             switch (bird.state)
             {
+                case BIRD_STATE_TITLE:
                 case BIRD_STATE_READY:
                     // draw_get_ready( graphics, get_ready );
                     // draw_score( graphics, score );

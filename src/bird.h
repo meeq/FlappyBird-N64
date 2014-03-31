@@ -7,33 +7,37 @@
 /* Bird definitions */
 
 /* States */
-#define BIRD_NUM_STATES 3
-#define BIRD_STATE_READY 0
-#define BIRD_STATE_PLAY 1
-#define BIRD_STATE_DEAD 2
+#define BIRD_NUM_STATES     3
+#define BIRD_STATE_READY    0
+#define BIRD_STATE_PLAY     1
+#define BIRD_STATE_DEAD     2
+#define BIRD_STATE_TITLE    3
 /* Colors */
-#define BIRD_NUM_COLORS 3
-#define BIRD_COLOR_YELLOW 0
-#define BIRD_COLOR_RED 1
-#define BIRD_COLOR_BLUE 2
+#define BIRD_NUM_COLORS     3
+#define BIRD_COLOR_YELLOW   0
+#define BIRD_COLOR_RED      1
+#define BIRD_COLOR_BLUE     2
 /* Animation */
-#define BIRD_ANIM_RATE 120
-#define BIRD_ANIM_FRAMES 3
+#define BIRD_ANIM_RATE      120
+#define BIRD_ANIM_FRAMES    3
 /* Center point */
-#define BIRD_MIN_Y -0.90
-#define BIRD_MAX_Y 0.95
+#define BIRD_TITLE_X        0.5
+#define BIRD_PLAY_X         0.35
+#define BIRD_ACCEL_X        0.001
+#define BIRD_MIN_Y          -0.90
+#define BIRD_MAX_Y          0.95
 /* Rotation */
-#define BIRD_MIN_ROT -15.0
-#define BIRD_MAX_ROT 90.0
+#define BIRD_MIN_ROT        -15.0
+#define BIRD_MAX_ROT        90.0
 /* Flap */
 #define BIRD_VELOCITY_RATE 16
 #define BIRD_FLAP_VELOCITY 0.06
 #define BIRD_GRAVITY_ACCEL 0.005
 /* Sine "floating" effect */
-#define BIRD_SINE_RATE 20
+#define BIRD_SINE_RATE      20
 #define BIRD_SINE_INCREMENT 0.1
-#define BIRD_SINE_CYCLE (M_PI * 2.0)
-#define BIRD_SINE_DAMPEN 0.02
+#define BIRD_SINE_CYCLE     (M_PI * 2.0)
+#define BIRD_SINE_DAMPEN    0.02
 
 typedef struct
 {
@@ -43,7 +47,9 @@ typedef struct
     u64 anim_ms;
     u8 anim_frame;
     /* Center point */
+    float x;
     float y;
+    float dx;
     /* Rotation */
     float rot;
     /* Flapping */

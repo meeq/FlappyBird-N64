@@ -22,11 +22,13 @@ bird_t bird_setup(u8 color_type)
         bird_half_h = (slice_h / 2.0) * GRAPHICS_SCALE;
     }
     bird_t bird = {
-        .state = BIRD_STATE_READY,
+        .state = BIRD_STATE_TITLE,
         .color_type = color_type,
         .anim_ms = 0,
         .anim_frame = 0,
+        .x = BIRD_TITLE_X,
         .y = 0.0,
+        .dx = 0.0,
         .rot = 0.0,
         .dy = 0.0,
         .dy_ms = 0,
@@ -40,13 +42,16 @@ bird_t bird_setup(u8 color_type)
 void draw_bird(graphics_t *graphics, bird_t bird)
 {
     /* Calculate player space center position */
-    float cx = graphics->width / 2.5;
-    float cy = GROUND_TOP_Y / 2.0;
+    float cx = graphics->width * bird.x;
+    float cy = GROUND_TOP_Y * 0.5;
     /* Calculate bird Y position */
     float bird_y = bird.y;
-    if (bird.state == BIRD_STATE_READY)
+    switch (bird.state)
     {
-        bird_y += bird.sine_y;
+        case BIRD_STATE_READY:
+        case BIRD_STATE_TITLE:
+            bird_y += bird.sine_y;
+            break;
     }
     if (bird_y > BIRD_MAX_Y) bird_y = BIRD_MAX_Y;
     if (bird_y < BIRD_MIN_Y) bird_y = BIRD_MIN_Y;
@@ -64,7 +69,7 @@ void draw_bird(graphics_t *graphics, bird_t bird)
         tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
 }
 
-static void bird_tick_animation(bird_t *bird)
+inline static void bird_tick_animation(bird_t *bird)
 {
     u64 ticks_ms = get_ticks_ms(),
         anim_ms = bird->anim_ms;
@@ -89,7 +94,18 @@ static void bird_tick_animation(bird_t *bird)
     bird->anim_frame = anim_frame;
 }
 
-static void bird_tick_ready(bird_t *bird)
+inline static void bird_tick_dx(bird_t *bird)
+{
+    /* Move the bird over if needed */
+    if (bird->state != BIRD_STATE_TITLE && bird->x > BIRD_PLAY_X)
+    {
+        bird->dx += BIRD_ACCEL_X;
+        bird->x -= bird->dx;
+        if (bird->x < BIRD_PLAY_X) bird->x = BIRD_PLAY_X;
+    }
+}
+
+inline static void bird_tick_ready(bird_t *bird)
 {
     /* Center the bird in the sky */
     bird->y = 0.0;
@@ -98,6 +114,7 @@ static void bird_tick_ready(bird_t *bird)
     u64 ticks_ms = get_ticks_ms();
     if (ticks_ms - bird->sine_ms >= BIRD_SINE_RATE)
     {
+        bird_tick_dx( bird );
         /* Increment the "floating" effect sine wave */
         bird->sine_ms = ticks_ms;
         bird->sine_x += BIRD_SINE_INCREMENT;
@@ -121,6 +138,7 @@ static void bird_tick_velocity(bird_t *bird, gamepad_state_t gamepad)
     u64 ticks_ms = get_ticks_ms();
     if ( ticks_ms - bird->dy_ms >= BIRD_VELOCITY_RATE )
     {
+        bird_tick_dx( bird );
         float y = bird->y;
         float dy = bird->dy;
         dy += BIRD_GRAVITY_ACCEL;
@@ -166,6 +184,7 @@ void bird_tick(bird_t *bird, gamepad_state_t gamepad)
     switch (bird->state)
     {
         case BIRD_STATE_READY:
+        case BIRD_STATE_TITLE:
             bird_tick_ready( bird );
             break;
         case BIRD_STATE_PLAY:
