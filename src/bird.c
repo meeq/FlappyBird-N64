@@ -164,18 +164,22 @@ static void bird_tick_velocity(bird_t *bird, gamepad_state_t gamepad)
 
 void bird_tick(bird_t *bird, gamepad_state_t gamepad)
 {
-    /* Cycle through bird states with start button */
-    if ( gamepad.start && bird->state != BIRD_STATE_PLAY )
+    /* State transitions based on button input */
+    switch (bird->state)
     {
-        if (++bird->state >= BIRD_NUM_STATES)
-        {
-            bird->state = 0;
-        }
-    }
-    /* Move from ready to play state by tapping A button */
-    if ( gamepad.A && bird->state == BIRD_STATE_READY )
-    {
-        bird->state = BIRD_STATE_PLAY;
+        case BIRD_STATE_TITLE:
+        case BIRD_STATE_DEAD:
+            if ( gamepad.A || gamepad.start )
+            {
+                bird->state = BIRD_STATE_READY;
+                audio_play_sfx( g_audio, SFX_SWOOSH );
+            }
+            break;
+        case BIRD_STATE_READY:
+            if ( gamepad.A )
+            {
+                bird->state = BIRD_STATE_PLAY;
+            }
     }
     /* Cycle through bird colors with right trigger */
     if ( gamepad.R )
@@ -185,7 +189,7 @@ void bird_tick(bird_t *bird, gamepad_state_t gamepad)
             bird->color_type = 0;
         }
     }
-    bird_tick_animation( bird );
+    /* State-specific tick updates */
     switch (bird->state)
     {
         case BIRD_STATE_READY:
@@ -197,4 +201,5 @@ void bird_tick(bird_t *bird, gamepad_state_t gamepad)
             // bird_tick_rotation( bird );
             break;
     }
+    bird_tick_animation( bird );
 }
