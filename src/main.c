@@ -44,7 +44,6 @@ int main(void)
         {
             background_free( bg );
             bg = background_setup( !bg.time_mode );
-            // background_toggle_time_mode( &bg );
         }
 
         /* Update game state */

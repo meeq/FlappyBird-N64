@@ -1,5 +1,5 @@
-#ifndef __FLAPPY_GAME_H
-#define __FLAPPY_GAME_H
+#ifndef __FLAPPY_BACKGROUND_H
+#define __FLAPPY_BACKGROUND_H
 
 #include "system.h"
 #include "graphics.h"
