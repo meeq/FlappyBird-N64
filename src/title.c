@@ -1,9 +1,5 @@
 #include "title.h"
 
-#define TEXT_COLOR graphics_make_color( 0x57, 0x37, 0x47, 0xFF )
-#define SHADOW_COLOR graphics_make_color( 0xFF, 0xFF, 0xFF, 0xFF )
-#define CLEAR_COLOR graphics_make_color( 0x00, 0x00, 0x00, 0x00 )
-
 void draw_logo(graphics_t *graphics, sprite_t *logo)
 {
     graphics_detach_rdp( graphics );
@@ -34,4 +30,30 @@ void draw_logo(graphics_t *graphics, sprite_t *logo)
     graphics_set_color( TEXT_COLOR, CLEAR_COLOR );
     graphics_draw_text( disp, credit1_x, credit1_y, credit1_str );
     graphics_draw_text( disp, credit2_x, credit2_y, credit2_str );
+}
+
+void draw_heading(graphics_t *graphics, sprite_t *headings, u8 stride)
+{
+    graphics_detach_rdp( graphics );
+    int disp = graphics->disp;
+
+    int center_x = (graphics->width / 2.0);
+    int center_y = (graphics->height / 2.0);
+    int x = center_x - (headings->width / 2.0);
+    int y = center_y - 75;
+
+    graphics_draw_sprite_trans_stride( disp, x, y, headings, stride );
+}
+
+void draw_how_to(graphics_t *graphics, sprite_t *sprite)
+{
+    graphics_detach_rdp( graphics );
+    int disp = graphics->disp;
+
+    int center_x = (graphics->width / 2.0);
+    int center_y = (graphics->height / 2.0);
+    int x = center_x - (sprite->width / 2.0);
+    int y = center_y - (sprite->height / 1.45);
+
+    graphics_draw_sprite_trans( disp, x, y, sprite );
 }

@@ -26,8 +26,12 @@ int main(void)
     audio_t *audio = audio_setup( FREQUENCY_44KHZ, 1 );
     audio_write_silence();
 
-    /* Initialize game state */
+    /* Initialize game sprites */
     sprite_t *logo = read_dfs_sprite( "/gfx/logo.sprite" );
+    sprite_t *headings = read_dfs_sprite( "/gfx/headings.sprite" );
+    sprite_t *how_to = read_dfs_sprite( "/gfx/how-to.sprite" );
+
+    /* Initialize game state */
     background_t bg = background_setup( DAY_TIME );
     bird_t bird = bird_setup( BIRD_COLOR_YELLOW );
     // pipes_t pipes = pipes_setup();
@@ -92,17 +96,17 @@ int main(void)
             {
                 case BIRD_STATE_TITLE:
                     draw_logo( graphics, logo );
+                    break;
                 case BIRD_STATE_READY:
-                    // draw_get_ready( graphics, get_ready );
-                    // draw_score( graphics, score );
-                    // draw_how_to( graphics, how_to );
+                    draw_heading( graphics, headings, HEADING_GET_READY );
+                    // draw_score( graphics, font_large, score );
+                    draw_how_to( graphics, how_to );
                     break;
                 case BIRD_STATE_PLAY:
                     // draw_score( graphics, font_large, score );
                     break;
                 case BIRD_STATE_DEAD:
-                    // draw_death_flash( graphics );
-                    // draw_game_over( graphics, game_over );
+                    draw_heading( graphics, headings, HEADING_GAME_OVER );
                     // draw_scoreboard( graphics, scoreboard );
                     // draw_medal( graphics, medals, score );
                     // draw_scoreboard_scores( graphics, font_med, score );
