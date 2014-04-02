@@ -67,8 +67,8 @@ void pipes_draw(graphics_t *graphics, pipes_t pipes)
         pipe = pipes.n[i];
         /* Calculate X position */
         cx = graphics->width * pipe.x;
-        tx = cx - (PIPE_WIDTH >> 1);
-        bx = cx + (PIPE_WIDTH >> 1) - 1;
+        tx = cx - (PIPE_TUBE_WIDTH >> 1);
+        bx = cx + (PIPE_TUBE_WIDTH >> 1) - 1;
         if (bx < 0 || tx >= graphics->width) continue;
         /* Calculate Y position */
         cy = (GROUND_TOP_Y >> 1);

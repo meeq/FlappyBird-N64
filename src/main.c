@@ -100,8 +100,8 @@ int main(void)
                     logo_draw( graphics, logo, bg.time_mode );
                     break;
                 case BIRD_STATE_READY:
-                    heading_draw( graphics, headings, HEADING_GET_READY );
                     score_draw( graphics, font_large, score );
+                    heading_draw( graphics, headings, HEADING_GET_READY );
                     howto_draw( graphics, how_to );
                     break;
                 case BIRD_STATE_PLAY:

@@ -12,7 +12,7 @@
 #define PIPE_GREEN_COLOR    0
 #define PIPE_RED_COLOR      1
 
-#define PIPE_WIDTH          26
+#define PIPE_TUBE_WIDTH     26
 #define PIPE_CAP_HEIGHT     13
 #define PIPE_GAP_Y          80
 #define PIPE_GAP_X          0.3
