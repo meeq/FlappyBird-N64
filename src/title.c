@@ -1,6 +1,8 @@
 #include "title.h"
 
-void logo_draw(graphics_t *graphics, sprite_t *logo)
+#include "background.h"
+
+void logo_draw(graphics_t *graphics, sprite_t *logo, u8 time_mode)
 {
     graphics_detach_rdp( graphics );
     int disp = graphics->disp;
@@ -17,18 +19,30 @@ void logo_draw(graphics_t *graphics, sprite_t *logo)
     int credit1_x = center_x - (credit1_w >> 1);
     int credit1_y = graphics->height - 92;
 
-    char *credit2_str = "N64 Port by C. Bonhage";
-    int credit2_w = 175;
+    char *credit2_str = "N64 Port by Bonhage";
+    int credit2_w = 150;
     int credit2_x = center_x - (credit2_w >> 1);
     int credit2_y = graphics->height - 78;
 
+    u32 fg_color, bg_color;
+    if (time_mode == DAY_TIME)
+    {
+        fg_color = DARK_COLOR;
+        bg_color = LIGHT_COLOR;
+    }
+    else
+    {
+        fg_color = LIGHT_COLOR;
+        bg_color = DARK_COLOR;
+    }
+
     /* Draw a shadow under the text */
-    graphics_set_color( SHADOW_COLOR, CLEAR_COLOR );
+    graphics_set_color( bg_color, CLEAR_COLOR );
     graphics_draw_text( disp, credit1_x--, credit1_y--, credit1_str );
     graphics_draw_text( disp, credit2_x--, credit2_y--, credit2_str );
 
     /* Draw the same text on top of the shadow */
-    graphics_set_color( TEXT_COLOR, CLEAR_COLOR );
+    graphics_set_color( fg_color, CLEAR_COLOR );
     graphics_draw_text( disp, credit1_x, credit1_y, credit1_str );
     graphics_draw_text( disp, credit2_x, credit2_y, credit2_str );
 }

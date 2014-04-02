@@ -97,7 +97,7 @@ int main(void)
             switch (bird.state)
             {
                 case BIRD_STATE_TITLE:
-                    logo_draw( graphics, logo );
+                    logo_draw( graphics, logo, bg.time_mode );
                     break;
                 case BIRD_STATE_READY:
                     heading_draw( graphics, headings, HEADING_GET_READY );
