@@ -6,6 +6,7 @@
 #include "background.h"
 #include "bird.h"
 #include "pipes.h"
+#include "collision.h"
 
 int main(void)
 {
@@ -65,7 +66,7 @@ int main(void)
             case BIRD_STATE_PLAY:
                 background_tick( &bg );
                 pipes_tick( &pipes );
-                // collision_tick( &bird, &pipes );
+                collision_tick( &bird, &pipes, &score );
                 break;
         }
 
