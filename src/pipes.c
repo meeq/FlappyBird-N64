@@ -25,8 +25,8 @@ void pipes_reset(pipes_t *pipes)
     for (int i = 0; i < PIPES_MAX_NUM; i++)
     {
         pipe_t pipe = {
-            .x = 1.0 * (i + 1),
-            .y = 0.0
+            .x = PIPE_START_X + (i * PIPE_GAP_X),
+            .y = 0.0 /* TODO "Randomize" Y */
         };
         pipes->n[i] = pipe;
     }
@@ -38,9 +38,14 @@ void pipes_tick(pipes_t *pipes)
     u64 ticks_ms = get_ticks_ms();
     if (ticks_ms - pipes->scroll_ms >= PIPES_SCROLL_RATE)
     {
-        for (int i = 0; i < PIPES_MAX_NUM; i++)
+        for (int i = 0, j; i < PIPES_MAX_NUM; i++)
         {
             pipes->n[i].x += PIPES_SCROLL_DX;
+            if (pipes->n[i].x < PIPE_MIN_X)
+            {
+                j = (i > 0) ? i - 1 : PIPES_MAX_NUM - 1;
+                pipes->n[i].x = pipes->n[j].x + PIPE_GAP_X;
+            }
         }
         pipes->scroll_ms = ticks_ms;
     }

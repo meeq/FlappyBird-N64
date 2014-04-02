@@ -4,7 +4,7 @@
 #include "system.h"
 #include "graphics.h"
 
-#define PIPES_MAX_NUM       1
+#define PIPES_MAX_NUM       5
 
 #define PIPES_SCROLL_RATE   16
 #define PIPES_SCROLL_DX     -0.005
@@ -15,11 +15,14 @@
 #define PIPE_WIDTH          26
 #define PIPE_CAP_HEIGHT     13
 #define PIPE_GAP_Y          80
+#define PIPE_GAP_X          0.3
+#define PIPE_START_X        1.1
+#define PIPE_MIN_X          -0.1
 
 typedef struct
 {
     float x;
-    float y;
+    float y; /* Min: -1.0   Max: 1.0 */
 } pipe_t;
 
 typedef struct
