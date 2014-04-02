@@ -31,8 +31,10 @@ int main(void)
     sprite_t *logo = read_dfs_sprite( "/gfx/logo.sprite" );
     sprite_t *headings = read_dfs_sprite( "/gfx/headings.sprite" );
     sprite_t *how_to = read_dfs_sprite( "/gfx/how-to.sprite" );
+    sprite_t *font_large = read_dfs_sprite( "/gfx/font-large.sprite" );
 
     /* Initialize game state */
+    u16 score = 0;
     background_t bg = background_setup( DAY_TIME );
     bird_t bird = bird_setup( BIRD_COLOR_YELLOW );
     pipes_t pipes = pipes_setup();
@@ -92,7 +94,6 @@ int main(void)
             bird_draw( graphics, bird );
 
             /* Draw the UI */
-            // u16 score = bird.score;
             switch (bird.state)
             {
                 case BIRD_STATE_TITLE:
@@ -100,11 +101,11 @@ int main(void)
                     break;
                 case BIRD_STATE_READY:
                     heading_draw( graphics, headings, HEADING_GET_READY );
-                    // score_draw( graphics, font_large, score );
+                    score_draw( graphics, font_large, score );
                     howto_draw( graphics, how_to );
                     break;
                 case BIRD_STATE_PLAY:
-                    // score_draw( graphics, font_large, score );
+                    score_draw( graphics, font_large, score );
                     break;
                 case BIRD_STATE_DEAD:
                     heading_draw( graphics, headings, HEADING_GAME_OVER );

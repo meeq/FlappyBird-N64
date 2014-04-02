@@ -41,7 +41,7 @@ void heading_draw(graphics_t *graphics, sprite_t *headings, u8 stride)
     int center_x = (graphics->width >> 1);
     int center_y = (graphics->height >> 1);
     int x = center_x - (headings->width >> 1);
-    int y = center_y - 75;
+    int y = center_y - 70;
 
     graphics_draw_sprite_trans_stride( disp, x, y, headings, stride );
 }
@@ -57,4 +57,31 @@ void howto_draw(graphics_t *graphics, sprite_t *sprite)
     int y = center_y - (sprite->height / 1.45);
 
     graphics_draw_sprite_trans( disp, x, y, sprite );
+}
+
+void score_draw(graphics_t *graphics, sprite_t *sprite, u16 score)
+{
+    graphics_detach_rdp( graphics );
+    int disp = graphics->disp;
+
+    int i = 0, num_digits;
+    int digits[5];
+    do
+    {
+        digits[i] = score % 10;
+        score /= 10;
+        num_digits = ++i;
+    }
+    while (score != 0);
+
+    int digit_w = sprite->width / sprite->hslices;
+    int score_w = digit_w * num_digits;
+    int center_x = graphics->width >> 1;
+    int x = center_x + (score_w >> 1) - digit_w;
+    int y = 20;
+    for (i = 0; i < num_digits; i++)
+    {
+        graphics_draw_sprite_trans_stride( disp, x, y, sprite, digits[i] );
+        x -= digit_w;
+    }
 }

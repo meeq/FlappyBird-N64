@@ -14,5 +14,6 @@
 void logo_draw(graphics_t *graphics, sprite_t *logo);
 void heading_draw(graphics_t *graphics, sprite_t *headings, u8 stride);
 void howto_draw(graphics_t *graphics, sprite_t *sprite);
+void score_draw(graphics_t *graphics, sprite_t *font, u16 score);
 
 #endif
