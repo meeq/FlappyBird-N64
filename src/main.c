@@ -101,21 +101,21 @@ int main(void)
             switch (bird.state)
             {
                 case BIRD_STATE_TITLE:
-                    ui_logo_draw( g_graphics, logo, bg.time_mode );
+                    ui_logo_draw( logo, bg.time_mode );
                     break;
                 case BIRD_STATE_READY:
-                    ui_score_draw( g_graphics, font_large, bird.score );
-                    ui_heading_draw( g_graphics, headings, HEADING_GET_READY );
-                    ui_howto_draw( g_graphics, howto );
+                    ui_score_draw( font_large, bird.score );
+                    ui_heading_draw( headings, HEADING_GET_READY );
+                    ui_howto_draw( howto );
                     break;
                 case BIRD_STATE_PLAY:
-                    ui_score_draw( g_graphics, font_large, bird.score );
+                    ui_score_draw( font_large, bird.score );
                     break;
                 case BIRD_STATE_DEAD:
-                    ui_heading_draw( g_graphics, headings, HEADING_GAME_OVER );
-                    // ui_scoreboard_draw( g_graphics, scoreboard );
-                    // ui_medal_draw( g_graphics, medals, bird.score );
-                    // ui_highscores_draw( g_graphics, font_med, bird.score );
+                    ui_heading_draw( headings, HEADING_GAME_OVER );
+                    // ui_scoreboard_draw( scoreboard );
+                    // ui_medal_draw( medals, bird.score );
+                    // ui_highscores_draw( font_med, bird.score );
                     break;
             }
         }
