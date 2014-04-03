@@ -7,11 +7,11 @@
 /* Bird definitions */
 
 /* States */
-#define BIRD_NUM_STATES     3
 #define BIRD_STATE_READY    0
 #define BIRD_STATE_PLAY     1
-#define BIRD_STATE_DEAD     2
-#define BIRD_STATE_TITLE    3
+#define BIRD_STATE_DYING    2
+#define BIRD_STATE_DEAD     3
+#define BIRD_STATE_TITLE    4
 #define BIRD_DEAD_DELAY     1000
 /* Colors */
 #define BIRD_NUM_COLORS     3

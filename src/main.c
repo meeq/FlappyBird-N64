@@ -106,6 +106,7 @@ int main(void)
                     ui_howto_draw( ui );
                     break;
                 case BIRD_STATE_PLAY:
+                case BIRD_STATE_DYING:
                     ui_score_draw( ui, bird.score );
                     break;
                 case BIRD_STATE_DEAD:

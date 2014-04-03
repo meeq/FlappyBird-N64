@@ -77,21 +77,25 @@ inline static void bird_tick_animation(bird_t *bird)
     u64 ticks_ms = get_ticks_ms(),
         anim_ms = bird->anim_ms;
     u8 anim_frame = bird->anim_frame;
-    if (bird->state != BIRD_STATE_DEAD)
+    switch ( bird->state )
     {
-        if (ticks_ms - anim_ms >= BIRD_ANIM_RATE)
-        {
-            /* Update animation state */
-            if (++anim_frame >= BIRD_ANIM_FRAMES)
-            {
-                anim_frame = 0;
-            }
+        case BIRD_STATE_DYING:
+        case BIRD_STATE_DEAD:
+            /* Dead birds don't animate */
             anim_ms = ticks_ms;
-        }
-    } else {
-        /* Dead birds don't animate */
-        anim_ms = ticks_ms;
-        anim_frame = BIRD_ANIM_FRAMES - 1;
+            anim_frame = BIRD_ANIM_FRAMES - 1;
+            break;
+        default:
+            if ( ticks_ms - anim_ms >= BIRD_ANIM_RATE )
+            {
+                /* Update animation state */
+                if ( ++anim_frame >= BIRD_ANIM_FRAMES )
+                {
+                    anim_frame = 0;
+                }
+                anim_ms = ticks_ms;
+            }
+            break;
     }
     bird->anim_ms = anim_ms;
     bird->anim_frame = anim_frame;
@@ -132,7 +136,7 @@ inline static void bird_tick_sine_wave(bird_t *bird)
 static void bird_tick_velocity(bird_t *bird, gamepad_state_t gamepad)
 {
     /* Flap when the player presses A */
-    if ( gamepad.A )
+    if ( bird->state == BIRD_STATE_PLAY && gamepad.A )
     {
         bird->dy = -BIRD_FLAP_VELOCITY;
         bird->anim_frame = BIRD_ANIM_FRAMES - 1;
@@ -156,9 +160,12 @@ static void bird_tick_velocity(bird_t *bird, gamepad_state_t gamepad)
         {
             y = BIRD_MAX_Y;
             dy = 0.0;
+            if ( bird->state != BIRD_STATE_DYING )
+            {
+                audio_play_sfx( g_audio, SFX_HIT );
+            }
             bird->state = BIRD_STATE_DEAD;
             bird->dead_ms = ticks_ms;
-            audio_play_sfx( g_audio, SFX_HIT );
         }
         bird->y = y;
         bird->dy = dy;
@@ -204,6 +211,7 @@ void bird_tick(bird_t *bird, gamepad_state_t gamepad)
             bird_tick_sine_wave( bird );
             break;
         case BIRD_STATE_PLAY:
+        case BIRD_STATE_DYING:
             bird_tick_velocity( bird, gamepad );
             // bird_tick_rotation( bird );
             break;
