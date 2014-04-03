@@ -32,8 +32,8 @@
 #define BIRD_MAX_ROT        90.0
 /* Flap */
 #define BIRD_VELOCITY_RATE 16
-#define BIRD_FLAP_VELOCITY 0.06
-#define BIRD_GRAVITY_ACCEL 0.005
+#define BIRD_FLAP_VELOCITY 0.05
+#define BIRD_GRAVITY_ACCEL 0.0045
 /* Sine "floating" effect */
 #define BIRD_SINE_RATE      20
 #define BIRD_SINE_INCREMENT 0.1
