@@ -4,7 +4,7 @@ bg-cloud-day    1   1
 bg-cloud-night  1   1
 bg-hill-day     1   1
 bg-hill-night   1   1
-bird            3   3
+bird            4   3
 font-large      10  1
 font-medium     10  1
 font-small      10  1

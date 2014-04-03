@@ -14,10 +14,11 @@
 #define BIRD_STATE_TITLE    4
 #define BIRD_DEAD_DELAY     1000
 /* Colors */
-#define BIRD_NUM_COLORS     3
 #define BIRD_COLOR_YELLOW   0
 #define BIRD_COLOR_RED      1
 #define BIRD_COLOR_BLUE     2
+#define BIRD_NUM_COLORS     3
+#define BIRD_DYING_FRAME    3
 /* Animation */
 #define BIRD_ANIM_RATE      120
 #define BIRD_ANIM_FRAMES    3

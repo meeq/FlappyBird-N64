@@ -17,10 +17,10 @@ bird_t bird_setup(u8 color_type)
         /* Load the sprite and pre-calculate some size details */
         bird_sprite = read_dfs_sprite( "/gfx/bird.sprite" );
         /* Calculate the half-hypotenuse of the slice diagonal */
-        float slice_w = (bird_sprite->width / bird_sprite->hslices) - 1.0;
-        float slice_h = (bird_sprite->height / bird_sprite->vslices) - 1.0;
-        bird_half_w = (slice_w / 2.0) * GRAPHICS_SCALE;
-        bird_half_h = (slice_h / 2.0) * GRAPHICS_SCALE;
+        int slice_w = (bird_sprite->width / bird_sprite->hslices) - 1;
+        int slice_h = (bird_sprite->height / bird_sprite->vslices) - 1;
+        bird_half_w = (slice_w >> 1) * GRAPHICS_SCALE;
+        bird_half_h = (slice_h >> 1) * GRAPHICS_SCALE;
     }
     bird_t bird = {
         .state = BIRD_STATE_TITLE,
@@ -83,7 +83,9 @@ inline static void bird_tick_animation(bird_t *bird)
         case BIRD_STATE_DEAD:
             /* Dead birds don't animate */
             anim_ms = ticks_ms;
-            anim_frame = BIRD_ANIM_FRAMES - 1;
+            anim_frame = (bird->dy < 0.0)
+                ? BIRD_ANIM_FRAMES - 1
+                : BIRD_DYING_FRAME;
             break;
         default:
             if ( ticks_ms - anim_ms >= BIRD_ANIM_RATE )
