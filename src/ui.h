@@ -13,9 +13,27 @@
 #define HEADING_GET_READY 0
 #define HEADING_GAME_OVER 1
 
-void ui_logo_draw(sprite_t *logo, u8 time_mode);
-void ui_heading_draw(sprite_t *headings, u8 stride);
-void ui_howto_draw(sprite_t *sprite);
-void ui_score_draw(sprite_t *font, u16 score);
+#define UI_LOGO         0
+#define UI_HEADINGS     1
+#define UI_HOWTO        2
+#define UI_SCOREBOARD   3
+#define UI_MEDAL        4
+#define UI_FONT_LARGE   5
+#define UI_FONT_MED     6
+#define UI_NUM_SPRITES  7
+
+typedef struct
+{
+    u16 high_score;
+    sprite_t *sprites[UI_NUM_SPRITES];
+} ui_t;
+
+ui_t ui_setup(void);
+void ui_free(ui_t ui);
+
+void ui_logo_draw(ui_t ui, u8 time_mode);
+void ui_heading_draw(ui_t ui, u8 stride);
+void ui_howto_draw(ui_t ui);
+void ui_score_draw(ui_t ui, u16 score);
 
 #endif

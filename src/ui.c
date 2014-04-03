@@ -1,7 +1,38 @@
 #include "ui.h"
 
-void ui_logo_draw(sprite_t *logo, u8 time_mode)
+ui_t ui_setup(void)
 {
+    ui_t ui = {
+        .high_score = 0
+    };
+    char *sprite_files[UI_NUM_SPRITES] = {
+        "/gfx/logo.sprite",
+        "/gfx/headings.sprite",
+        "/gfx/how-to.sprite",
+        "/gfx/scoreboard.sprite",
+        "/gfx/medal.sprite",
+        "/gfx/font-large.sprite",
+        "/gfx/font-med.sprite"
+    };
+    for (int i = 0; i < UI_NUM_SPRITES; i++)
+    {
+        ui.sprites[i] = read_dfs_sprite( sprite_files[i] );
+    }
+    return ui;
+}
+
+void ui_free(ui_t ui)
+{
+    for (int i = 0; i < UI_NUM_SPRITES; i++)
+    {
+        free( ui.sprites[i] );
+    }
+}
+
+void ui_logo_draw(ui_t ui, u8 time_mode)
+{
+    sprite_t *logo = ui.sprites[UI_LOGO];
+
     graphics_detach_rdp( g_graphics );
     int disp = g_graphics->disp;
 
@@ -45,8 +76,10 @@ void ui_logo_draw(sprite_t *logo, u8 time_mode)
     graphics_draw_text( disp, credit2_x, credit2_y, credit2_str );
 }
 
-void ui_heading_draw(sprite_t *headings, u8 stride)
+void ui_heading_draw(ui_t ui, u8 stride)
 {
+    sprite_t *headings = ui.sprites[UI_HEADINGS];
+
     graphics_detach_rdp( g_graphics );
     int disp = g_graphics->disp;
 
@@ -58,21 +91,25 @@ void ui_heading_draw(sprite_t *headings, u8 stride)
     graphics_draw_sprite_trans_stride( disp, x, y, headings, stride );
 }
 
-void ui_howto_draw(sprite_t *sprite)
+void ui_howto_draw(ui_t ui)
 {
+    sprite_t *howto = ui.sprites[UI_HOWTO];
+
     graphics_detach_rdp( g_graphics );
     int disp = g_graphics->disp;
 
     int center_x = (g_graphics->width >> 1);
     int center_y = (g_graphics->height >> 1);
-    int x = center_x - (sprite->width >> 1);
-    int y = center_y - (sprite->height / 1.45);
+    int x = center_x - (howto->width >> 1);
+    int y = center_y - (howto->height / 1.45);
 
-    graphics_draw_sprite_trans( disp, x, y, sprite );
+    graphics_draw_sprite_trans( disp, x, y, howto );
 }
 
-void ui_score_draw(sprite_t *sprite, u16 score)
+void ui_score_draw(ui_t ui, u16 score)
 {
+    sprite_t *font = ui.sprites[UI_FONT_LARGE];
+
     graphics_detach_rdp( g_graphics );
     int disp = g_graphics->disp;
 
@@ -86,14 +123,14 @@ void ui_score_draw(sprite_t *sprite, u16 score)
     }
     while (score != 0);
 
-    int digit_w = sprite->width / sprite->hslices;
+    int digit_w = font->width / font->hslices;
     int score_w = digit_w * num_digits;
     int center_x = g_graphics->width >> 1;
     int x = center_x + (score_w >> 1) - digit_w;
     int y = 20;
     for (i = 0; i < num_digits; i++)
     {
-        graphics_draw_sprite_trans_stride( disp, x, y, sprite, digits[i] );
+        graphics_draw_sprite_trans_stride( disp, x, y, font, digits[i] );
         x -= digit_w;
     }
 }
