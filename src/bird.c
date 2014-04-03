@@ -24,6 +24,7 @@ bird_t bird_setup(u8 color_type)
     bird_t bird = {
         .state = BIRD_STATE_TITLE,
         .color_type = color_type,
+        .score = 0,
         .dead_ms = 0,
         .anim_ms = 0,
         .anim_frame = 0,
@@ -176,6 +177,7 @@ void bird_tick(bird_t *bird, gamepad_state_t gamepad)
                 ( ticks_ms - bird->dead_ms > BIRD_DEAD_DELAY ))
             {
                 bird->state = BIRD_STATE_READY;
+                bird->score = 0;
                 audio_play_sfx( g_audio, SFX_SWOOSH );
             }
             break;

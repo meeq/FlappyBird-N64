@@ -1,8 +1,8 @@
-#include "title.h"
+#include "ui.h"
 
 #include "background.h"
 
-void logo_draw(graphics_t *graphics, sprite_t *logo, u8 time_mode)
+void ui_logo_draw(graphics_t *graphics, sprite_t *logo, u8 time_mode)
 {
     graphics_detach_rdp( graphics );
     int disp = graphics->disp;
@@ -47,7 +47,7 @@ void logo_draw(graphics_t *graphics, sprite_t *logo, u8 time_mode)
     graphics_draw_text( disp, credit2_x, credit2_y, credit2_str );
 }
 
-void heading_draw(graphics_t *graphics, sprite_t *headings, u8 stride)
+void ui_heading_draw(graphics_t *graphics, sprite_t *headings, u8 stride)
 {
     graphics_detach_rdp( graphics );
     int disp = graphics->disp;
@@ -60,7 +60,7 @@ void heading_draw(graphics_t *graphics, sprite_t *headings, u8 stride)
     graphics_draw_sprite_trans_stride( disp, x, y, headings, stride );
 }
 
-void howto_draw(graphics_t *graphics, sprite_t *sprite)
+void ui_howto_draw(graphics_t *graphics, sprite_t *sprite)
 {
     graphics_detach_rdp( graphics );
     int disp = graphics->disp;
@@ -73,7 +73,7 @@ void howto_draw(graphics_t *graphics, sprite_t *sprite)
     graphics_draw_sprite_trans( disp, x, y, sprite );
 }
 
-void score_draw(graphics_t *graphics, sprite_t *sprite, u16 score)
+void ui_score_draw(graphics_t *graphics, sprite_t *sprite, u16 score)
 {
     graphics_detach_rdp( graphics );
     int disp = graphics->disp;

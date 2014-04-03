@@ -1,6 +1,6 @@
 #include "collision.h"
 
-void collision_tick(bird_t *bird, pipes_t *pipes, u16 *score)
+void collision_tick(bird_t *bird, pipes_t *pipes)
 {
     pipe_t pipe;
     float pipe_x, pipe_y;
@@ -15,7 +15,7 @@ void collision_tick(bird_t *bird, pipes_t *pipes, u16 *score)
         if (bird_x > pipe_x - COLLISION_SCORE_X_TOLERANCE &&
             bird_x < pipe_x + COLLISION_SCORE_X_TOLERANCE)
         {
-            *score += 1;
+            bird->score += 1;
             audio_play_sfx( g_audio, SFX_POINT );
         }
     }

@@ -2,7 +2,7 @@
 #include "audio.h"
 #include "graphics.h"
 
-#include "title.h"
+#include "ui.h"
 #include "background.h"
 #include "bird.h"
 #include "pipes.h"
@@ -23,7 +23,6 @@ int main(void)
     controller_init();
 
     /* Initialize display */
-    /* TODO Support 640x480 for 2-player splitscreen */
     g_graphics = graphics_setup(
         RESOLUTION_320x240, DEPTH_16_BPP,
         BUFFERING_DOUBLE, GAMMA_NONE, ANTIALIAS_RESAMPLE
@@ -36,11 +35,10 @@ int main(void)
     /* Initialize game sprites */
     sprite_t *logo = read_dfs_sprite( "/gfx/logo.sprite" );
     sprite_t *headings = read_dfs_sprite( "/gfx/headings.sprite" );
-    sprite_t *how_to = read_dfs_sprite( "/gfx/how-to.sprite" );
+    sprite_t *howto = read_dfs_sprite( "/gfx/how-to.sprite" );
     sprite_t *font_large = read_dfs_sprite( "/gfx/font-large.sprite" );
 
     /* Initialize game state */
-    u16 score = 0;
     background_t bg = background_setup( DAY_TIME );
     bird_t bird = bird_setup( BIRD_COLOR_YELLOW );
     pipes_t pipes = pipes_setup();
@@ -71,7 +69,7 @@ int main(void)
             case BIRD_STATE_PLAY:
                 background_tick( &bg );
                 pipes_tick( &pipes );
-                collision_tick( &bird, &pipes, &score );
+                collision_tick( &bird, &pipes );
                 break;
         }
 
@@ -103,21 +101,21 @@ int main(void)
             switch (bird.state)
             {
                 case BIRD_STATE_TITLE:
-                    logo_draw( g_graphics, logo, bg.time_mode );
+                    ui_logo_draw( g_graphics, logo, bg.time_mode );
                     break;
                 case BIRD_STATE_READY:
-                    score_draw( g_graphics, font_large, score );
-                    heading_draw( g_graphics, headings, HEADING_GET_READY );
-                    howto_draw( g_graphics, how_to );
+                    ui_score_draw( g_graphics, font_large, bird.score );
+                    ui_heading_draw( g_graphics, headings, HEADING_GET_READY );
+                    ui_howto_draw( g_graphics, howto );
                     break;
                 case BIRD_STATE_PLAY:
-                    score_draw( g_graphics, font_large, score );
+                    ui_score_draw( g_graphics, font_large, bird.score );
                     break;
                 case BIRD_STATE_DEAD:
-                    heading_draw( g_graphics, headings, HEADING_GAME_OVER );
-                    // scoreboard_draw( g_graphics, scoreboard );
-                    // medal_draw( g_graphics, medals, score );
-                    // scoreboard_scores_draw( g_graphics, font_med, score );
+                    ui_heading_draw( g_graphics, headings, HEADING_GAME_OVER );
+                    // ui_scoreboard_draw( g_graphics, scoreboard );
+                    // ui_medal_draw( g_graphics, medals, bird.score );
+                    // ui_highscores_draw( g_graphics, font_med, bird.score );
                     break;
             }
         }

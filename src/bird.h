@@ -47,6 +47,7 @@ typedef struct
     u8 state;
     u8 color_type;
     u64 dead_ms;
+    u16 score;
     /* Animation */
     u64 anim_ms;
     u8 anim_frame;
