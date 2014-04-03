@@ -41,11 +41,9 @@ typedef struct
 
 /* Audio helpers */
 
-extern audio_t *g_audio; /* Global audio pointer */
-
 audio_t *audio_setup(u16 sample_rate, u8 buffers);
 
-void free_audio(audio_t *audio);
+void audio_free(audio_t *audio);
 
 void audio_tick(audio_t *audio);
 

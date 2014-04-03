@@ -4,6 +4,8 @@
 #include "system.h"
 #include "graphics.h"
 
+#include "global.h"
+
 /* Bird definitions */
 
 /* States */

@@ -1,14 +1,12 @@
 #include "audio.h"
 
-audio_t *g_audio = NULL;
-
 audio_t *audio_setup(u16 sample_rate, u8 buffers)
 {
     /* Start up the audio subsystem */
     audio_init( sample_rate, buffers );
     int buffer_length = audio_get_buffer_length();
     s16 *buffer = malloc( buffer_length * STEREO_PCM_SAMPLE_SIZE );
-    audio_t *audio = g_audio = malloc( sizeof( audio_t ) );
+    audio_t *audio = malloc( sizeof( audio_t ) );
     audio->sample_rate = sample_rate;
     audio->frames = buffer_length * 2;
     audio->buffer = buffer;
@@ -31,7 +29,7 @@ audio_t *audio_setup(u16 sample_rate, u8 buffers)
     return audio;
 }
 
-void free_audio(audio_t *audio)
+void audio_free(audio_t *audio)
 {
     /* Clear the sound effects cache */
     for (int i = 0; i < SFX_NUM_SOUNDS; i++)
@@ -41,7 +39,6 @@ void free_audio(audio_t *audio)
         audio->sfx_cache[i] = NULL;
     }
     /* Shut down the audio subsystem */
-    g_audio = NULL;
     free( audio->buffer );
     free( audio );
     audio_close();

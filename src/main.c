@@ -8,6 +8,11 @@
 #include "pipes.h"
 #include "collision.h"
 
+#include "global.h"
+
+audio_t *g_audio = NULL;
+graphics_t *g_graphics = NULL;
+
 int main(void)
 {
     /* Enable interrupts (on the CPU) */
@@ -19,13 +24,13 @@ int main(void)
 
     /* Initialize display */
     /* TODO Support 640x480 for 2-player splitscreen */
-    graphics_t *graphics = graphics_setup(
+    g_graphics = graphics_setup(
         RESOLUTION_320x240, DEPTH_16_BPP,
         BUFFERING_DOUBLE, GAMMA_NONE, ANTIALIAS_RESAMPLE
     );
 
     /* Initialize audio */
-    audio_t *audio = audio_setup( FREQUENCY_44KHZ, 1 );
+    g_audio = audio_setup( FREQUENCY_44KHZ, 1 );
     audio_write_silence();
 
     /* Initialize game sprites */
@@ -71,51 +76,59 @@ int main(void)
         }
 
         /* Buffer sound effects */
-        audio_tick( audio );
+        audio_tick( g_audio );
 
         /* Grab a display buffer and start drawing */
-        graphics_display_lock( graphics );
+        graphics_display_lock( g_graphics );
         {
             /* Color fills */
-            background_draw_color( graphics, bg.sky_fill );
-            background_draw_color( graphics, bg.cloud_fill );
-            background_draw_color( graphics, bg.hill_fill );
-            background_draw_color( graphics, bg.ground_fill );
+            background_draw_color( g_graphics, bg.sky_fill );
+            background_draw_color( g_graphics, bg.cloud_fill );
+            background_draw_color( g_graphics, bg.hill_fill );
+            background_draw_color( g_graphics, bg.ground_fill );
 
             /* Texture fills */
-            background_draw_sprite( graphics, bg.cloud_top );
-            background_draw_sprite( graphics, bg.city );
-            background_draw_sprite( graphics, bg.hill_top );
-            background_draw_sprite( graphics, bg.ground_top );
+            background_draw_sprite( g_graphics, bg.cloud_top );
+            background_draw_sprite( g_graphics, bg.city );
+            background_draw_sprite( g_graphics, bg.hill_top );
+            background_draw_sprite( g_graphics, bg.ground_top );
 
             /* Draw the pipes */
-            pipes_draw( graphics, pipes );
+            pipes_draw( g_graphics, pipes );
 
             /* Draw the bird */
-            bird_draw( graphics, bird );
+            bird_draw( g_graphics, bird );
 
             /* Draw the UI */
             switch (bird.state)
             {
                 case BIRD_STATE_TITLE:
-                    logo_draw( graphics, logo, bg.time_mode );
+                    logo_draw( g_graphics, logo, bg.time_mode );
                     break;
                 case BIRD_STATE_READY:
-                    score_draw( graphics, font_large, score );
-                    heading_draw( graphics, headings, HEADING_GET_READY );
-                    howto_draw( graphics, how_to );
+                    score_draw( g_graphics, font_large, score );
+                    heading_draw( g_graphics, headings, HEADING_GET_READY );
+                    howto_draw( g_graphics, how_to );
                     break;
                 case BIRD_STATE_PLAY:
-                    score_draw( graphics, font_large, score );
+                    score_draw( g_graphics, font_large, score );
                     break;
                 case BIRD_STATE_DEAD:
-                    heading_draw( graphics, headings, HEADING_GAME_OVER );
-                    // scoreboard_draw( graphics, scoreboard );
-                    // medal_draw( graphics, medals, score );
-                    // scoreboard_scores_draw( graphics, font_med, score );
+                    heading_draw( g_graphics, headings, HEADING_GAME_OVER );
+                    // scoreboard_draw( g_graphics, scoreboard );
+                    // medal_draw( g_graphics, medals, score );
+                    // scoreboard_scores_draw( g_graphics, font_med, score );
                     break;
             }
         }
-        graphics_display_flip( graphics );
+        graphics_display_flip( g_graphics );
     }
+
+    /* Clean up the initialized subsystems */
+    audio_free( g_audio );
+    g_audio = NULL;
+    graphics_free( g_graphics );
+    g_graphics = NULL;
+
+    return 0;
 }

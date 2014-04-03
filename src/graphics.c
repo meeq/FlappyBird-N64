@@ -46,7 +46,7 @@ graphics_t *graphics_setup(resolution_t res, bitdepth_t depth,
     return graphics;
 }
 
-void free_graphics(graphics_t *graphics)
+void graphics_free(graphics_t *graphics)
 {
     free( graphics );
     rdp_close();
