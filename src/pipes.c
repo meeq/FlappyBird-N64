@@ -1,6 +1,7 @@
 #include "pipes.h"
 
 #include "background.h"
+#include "global.h"
 
 pipes_t pipes_setup(void)
 {
@@ -51,7 +52,7 @@ void pipes_tick(pipes_t *pipes)
     }
 }
 
-void pipes_draw(graphics_t *graphics, pipes_t pipes)
+void pipes_draw(const pipes_t pipes)
 {
     sprite_t *tube = pipes.tube_sprite;
     sprite_t *cap = pipes.cap_sprite;
@@ -59,17 +60,17 @@ void pipes_draw(graphics_t *graphics, pipes_t pipes)
     pipe_t pipe;
     int cx, cy, tx, ty, bx, by, gap_y;
 
-    graphics_rdp_texture_fill( graphics );
+    graphics_rdp_texture_fill( g_graphics );
     mirror_t mirror = MIRROR_DISABLED;
     rdp_sync( SYNC_PIPE );
     for (int i = 0; i < PIPES_MAX_NUM; i++)
     {
         pipe = pipes.n[i];
         /* Calculate X position */
-        cx = graphics->width * pipe.x;
+        cx = g_graphics->width * pipe.x;
         tx = cx - (PIPE_TUBE_WIDTH >> 1);
         bx = cx + (PIPE_TUBE_WIDTH >> 1) - 1;
-        if (bx < 0 || tx >= graphics->width) continue;
+        if (bx < 0 || tx >= g_graphics->width) continue;
         /* Calculate Y position */
         cy = (GROUND_TOP_Y >> 1);
         gap_y = cy + pipe.y * cy;

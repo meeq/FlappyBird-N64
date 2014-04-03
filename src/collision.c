@@ -1,5 +1,8 @@
 #include "collision.h"
 
+#include "audio.h"
+#include "global.h"
+
 void collision_tick(bird_t *bird, pipes_t *pipes)
 {
     pipe_t pipe;

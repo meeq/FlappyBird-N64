@@ -1,6 +1,5 @@
 #include "graphics.h"
 
-
 graphics_t *graphics_setup(resolution_t res, bitdepth_t depth,
                            u32 num_buffers, gamma_t gamma,
                            antialias_t aa)

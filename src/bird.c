@@ -1,9 +1,10 @@
 #include <math.h>
 
-#include "audio.h"
-#include "background.h"
 #include "bird.h"
 
+#include "audio.h"
+#include "background.h"
+#include "global.h"
 
 static sprite_t *bird_sprite = NULL;
 static float bird_half_w = 0.0;
@@ -41,10 +42,10 @@ bird_t bird_setup(u8 color_type)
     return bird;
 }
 
-void bird_draw(graphics_t *graphics, bird_t bird)
+void bird_draw(const bird_t bird)
 {
     /* Calculate player space center position */
-    int cx = graphics->width * bird.x;
+    int cx = g_graphics->width * bird.x;
     int cy = GROUND_TOP_Y >> 1;
     /* Calculate bird Y position */
     float bird_y = bird.y;
@@ -62,7 +63,7 @@ void bird_draw(graphics_t *graphics, bird_t bird)
     u16 tx = cx - bird_half_w, bx = cx + bird_half_w,
         ty = cy - bird_half_h, by = cy + bird_half_h;
     /* Load the current animation sprite slice as a texture */
-    graphics_rdp_texture_fill( graphics );
+    graphics_rdp_texture_fill( g_graphics );
     rdp_sync( SYNC_PIPE );
     u8 stride = (bird.color_type * BIRD_NUM_COLORS) + bird.anim_frame;
     rdp_load_texture_stride( 0, 0, MIRROR_DISABLED, bird_sprite, stride );

@@ -2,7 +2,6 @@
 #define __FLAPPY_COLLISION_H
 
 #include "system.h"
-#include "audio.h"
 
 #include "bird.h"
 #include "pipes.h"

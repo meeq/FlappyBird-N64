@@ -1,5 +1,8 @@
 #include "ui.h"
 
+#include "global.h"
+#include "background.h"
+
 ui_t ui_setup(void)
 {
     ui_t ui = {
@@ -29,7 +32,7 @@ void ui_free(ui_t ui)
     }
 }
 
-void ui_logo_draw(ui_t ui, u8 time_mode)
+void ui_logo_draw(const ui_t ui, u8 time_mode)
 {
     sprite_t *logo = ui.sprites[UI_LOGO];
 
@@ -76,7 +79,7 @@ void ui_logo_draw(ui_t ui, u8 time_mode)
     graphics_draw_text( disp, credit2_x, credit2_y, credit2_str );
 }
 
-void ui_heading_draw(ui_t ui, u8 stride)
+void ui_heading_draw(const ui_t ui, u8 stride)
 {
     sprite_t *headings = ui.sprites[UI_HEADINGS];
 
@@ -91,7 +94,7 @@ void ui_heading_draw(ui_t ui, u8 stride)
     graphics_draw_sprite_trans_stride( disp, x, y, headings, stride );
 }
 
-void ui_howto_draw(ui_t ui)
+void ui_howto_draw(const ui_t ui)
 {
     sprite_t *howto = ui.sprites[UI_HOWTO];
 
@@ -106,7 +109,7 @@ void ui_howto_draw(ui_t ui)
     graphics_draw_sprite_trans( disp, x, y, howto );
 }
 
-void ui_score_draw(ui_t ui, u16 score)
+void ui_score_draw(const ui_t ui, u16 score)
 {
     sprite_t *font = ui.sprites[UI_FONT_LARGE];
 

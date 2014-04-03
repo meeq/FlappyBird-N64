@@ -1,5 +1,6 @@
 #include "background.h"
 
+#include "global.h"
 
 background_t background_setup(u8 time_mode)
 {
@@ -94,21 +95,21 @@ void background_tick(background_t *bg)
     }
 }
 
-void background_draw_color(graphics_t *graphics, bg_fill_color_t fill)
+void background_draw_color(const bg_fill_color_t fill)
 {
-    graphics_rdp_color_fill( graphics );
+    graphics_rdp_color_fill( g_graphics );
     rdp_set_primitive_color( fill.color );
-    rdp_draw_filled_rectangle( 0, fill.y, graphics->width, fill.y + fill.h );
+    rdp_draw_filled_rectangle( 0, fill.y, g_graphics->width, fill.y + fill.h );
 }
 
-void background_draw_sprite(graphics_t *graphics, bg_fill_sprite_t fill)
+void background_draw_sprite(const bg_fill_sprite_t fill)
 {
-    graphics_rdp_texture_fill( graphics );
+    graphics_rdp_texture_fill( g_graphics );
     mirror_t mirror = MIRROR_DISABLED;
     sprite_t *sprite = fill.sprite;
     s16 scroll_x = fill.scroll_x, tx, bx;
     u16 ty = fill.y, by = (fill.y + sprite->height * GRAPHICS_SCALE) - 1;
-    int slices = sprite->hslices, max_w = graphics->width;
+    int slices = sprite->hslices, max_w = g_graphics->width;
     if (slices > 1)
     {
         /* Manually tile horizontally-sliced repeating fills */

@@ -4,8 +4,6 @@
 #include "system.h"
 #include "graphics.h"
 
-#include "global.h"
-
 /* Bird definitions */
 
 /* States */
@@ -70,7 +68,7 @@ typedef struct
 
 bird_t bird_setup(u8 color_type);
 
-void bird_draw(graphics_t *graphics, bird_t bird);
+void bird_draw(const bird_t bird);
 
 void bird_tick(bird_t *bird, gamepad_state_t gamepad);
 

@@ -77,22 +77,22 @@ int main(void)
         graphics_display_lock( g_graphics );
         {
             /* Color fills */
-            background_draw_color( g_graphics, bg.sky_fill );
-            background_draw_color( g_graphics, bg.cloud_fill );
-            background_draw_color( g_graphics, bg.hill_fill );
-            background_draw_color( g_graphics, bg.ground_fill );
+            background_draw_color( bg.sky_fill );
+            background_draw_color( bg.cloud_fill );
+            background_draw_color( bg.hill_fill );
+            background_draw_color( bg.ground_fill );
 
             /* Texture fills */
-            background_draw_sprite( g_graphics, bg.cloud_top );
-            background_draw_sprite( g_graphics, bg.city );
-            background_draw_sprite( g_graphics, bg.hill_top );
-            background_draw_sprite( g_graphics, bg.ground_top );
+            background_draw_sprite( bg.cloud_top );
+            background_draw_sprite( bg.city );
+            background_draw_sprite( bg.hill_top );
+            background_draw_sprite( bg.ground_top );
 
             /* Draw the pipes */
-            pipes_draw( g_graphics, pipes );
+            pipes_draw( pipes );
 
             /* Draw the bird */
-            bird_draw( g_graphics, bird );
+            bird_draw( bird );
 
             /* Draw the UI */
             switch (bird.state)
