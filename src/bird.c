@@ -62,7 +62,7 @@ void bird_draw(const bird_t bird)
     /* Load the current animation sprite slice as a texture */
     graphics_rdp_texture_fill( g_graphics );
     rdp_sync( SYNC_PIPE );
-    u8 stride = (bird.color_type * BIRD_NUM_COLORS) + bird.anim_frame;
+    u8 stride = (bird.color_type * bird.sprite->hslices) + bird.anim_frame;
     rdp_load_texture_stride( 0, 0, MIRROR_DISABLED, bird.sprite, stride );
     /* Draw the bird rectangle */
     rdp_draw_textured_rectangle_scaled( 0,
