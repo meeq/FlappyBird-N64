@@ -43,7 +43,7 @@ int main(void)
     {
         /* Update controller state */
         controller_scan();
-        struct controller_data keys = get_keys_down();
+        controllers_state_t keys = get_keys_down();
 
         /* Switch between day and night */
         if( keys.c[0].L )
