@@ -185,6 +185,7 @@ void bird_tick(bird_t *bird, gamepad_state_t gamepad)
                 bird->state = BIRD_STATE_READY;
                 bird->score = 0;
                 bird->anim_frame = 0;
+                bird->played_die_sfx = 0;
                 audio_play_sfx( g_audio, SFX_SWOOSH );
             }
             break;
@@ -193,6 +194,14 @@ void bird_tick(bird_t *bird, gamepad_state_t gamepad)
             {
                 bird->state = BIRD_STATE_PLAY;
             }
+            break;
+        case BIRD_STATE_DYING:
+            if ( bird->dy > 0 && !bird->played_die_sfx )
+            {
+                bird->played_die_sfx = 1;
+                audio_play_sfx( g_audio, SFX_DIE );
+            }
+            break;
     }
     /* Cycle through bird colors with right trigger */
     if ( gamepad.R )
