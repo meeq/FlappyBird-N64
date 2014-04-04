@@ -14,10 +14,12 @@ pipes_t pipes_setup(void)
     return pipes;
 }
 
-void pipes_free(pipes_t pipes)
+void pipes_free(pipes_t *pipes)
 {
-    free(pipes.cap_sprite);
-    free(pipes.tube_sprite);
+    free(pipes->cap_sprite);
+    pipes->cap_sprite = NULL;
+    free(pipes->tube_sprite);
+    pipes->tube_sprite = NULL;
 }
 
 void pipes_reset(pipes_t *pipes)

@@ -27,7 +27,7 @@ typedef struct
 } ui_t;
 
 ui_t ui_setup(void);
-void ui_free(ui_t ui);
+void ui_free(ui_t *ui);
 
 void ui_logo_draw(const ui_t ui, u8 time_mode);
 void ui_heading_draw(const ui_t ui, u8 stride);

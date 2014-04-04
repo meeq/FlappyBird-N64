@@ -63,13 +63,17 @@ background_t background_setup(u8 time_mode)
     return background;
 }
 
-void background_free(background_t bg)
+void background_free(background_t *bg)
 {
     /* Deallocate the sprites */
-    free( bg.cloud_top.sprite );
-    free( bg.city.sprite );
-    free( bg.hill_top.sprite );
-    free( bg.ground_top.sprite );
+    free( bg->cloud_top.sprite );
+    bg->cloud_top.sprite = NULL;
+    free( bg->city.sprite );
+    bg->city.sprite = NULL;
+    free( bg->hill_top.sprite );
+    bg->hill_top.sprite = NULL;
+    free( bg->ground_top.sprite );
+    bg->ground_top.sprite = NULL;
 }
 
 inline void background_tick_scroll(bg_fill_sprite_t *fill)
@@ -148,4 +152,19 @@ void background_draw_sprite(const bg_fill_sprite_t fill)
         rdp_draw_textured_rectangle_scaled( 0,
             tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
     }
+}
+
+void background_draw(const background_t bg)
+{
+    /* Color fills */
+    background_draw_color( bg.sky_fill );
+    background_draw_color( bg.cloud_fill );
+    background_draw_color( bg.hill_fill );
+    background_draw_color( bg.ground_fill );
+
+    /* Texture fills */
+    background_draw_sprite( bg.cloud_top );
+    background_draw_sprite( bg.city );
+    background_draw_sprite( bg.hill_top );
+    background_draw_sprite( bg.ground_top );
 }

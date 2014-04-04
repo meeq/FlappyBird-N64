@@ -36,8 +36,6 @@ int main(void)
     background_t bg = background_setup( DAY_TIME );
     bird_t bird = bird_setup( BIRD_COLOR_YELLOW );
     pipes_t pipes = pipes_setup();
-
-    /* Initialize interface sprites */
     ui_t ui = ui_setup();
 
     /* Run the main loop */
@@ -50,7 +48,7 @@ int main(void)
         /* Switch between day and night */
         if( keys.c[0].L )
         {
-            background_free( bg );
+            background_free( &bg );
             bg = background_setup( !bg.time_mode );
         }
 
@@ -76,22 +74,10 @@ int main(void)
         /* Grab a display buffer and start drawing */
         graphics_display_lock( g_graphics );
         {
-            /* Color fills */
-            background_draw_color( bg.sky_fill );
-            background_draw_color( bg.cloud_fill );
-            background_draw_color( bg.hill_fill );
-            background_draw_color( bg.ground_fill );
 
-            /* Texture fills */
-            background_draw_sprite( bg.cloud_top );
-            background_draw_sprite( bg.city );
-            background_draw_sprite( bg.hill_top );
-            background_draw_sprite( bg.ground_top );
-
-            /* Draw the pipes */
+            /* Draw the game state */
+            background_draw( bg );
             pipes_draw( pipes );
-
-            /* Draw the bird */
             bird_draw( bird );
 
             /* Draw the UI */
@@ -119,6 +105,12 @@ int main(void)
         }
         graphics_display_flip( g_graphics );
     }
+
+    /* Clean up game state */
+    ui_free( &ui );
+    pipes_free( &pipes );
+    bird_free( &bird );
+    background_free( &bg );
 
     /* Clean up the initialized subsystems */
     audio_free( g_audio );

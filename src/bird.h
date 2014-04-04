@@ -28,13 +28,10 @@
 #define BIRD_ACCEL_X        0.001
 #define BIRD_MIN_Y          -0.90
 #define BIRD_MAX_Y          0.95
-/* Rotation */
-#define BIRD_MIN_ROT        -15.0
-#define BIRD_MAX_ROT        90.0
 /* Flap */
-#define BIRD_VELOCITY_RATE 16
-#define BIRD_FLAP_VELOCITY 0.05
-#define BIRD_GRAVITY_ACCEL 0.0045
+#define BIRD_VELOCITY_RATE  16
+#define BIRD_FLAP_VELOCITY  0.05
+#define BIRD_GRAVITY_ACCEL  0.0045
 /* Sine "floating" effect */
 #define BIRD_SINE_RATE      20
 #define BIRD_SINE_INCREMENT 0.1
@@ -43,6 +40,9 @@
 
 typedef struct
 {
+    sprite_t *sprite;
+    u8 slice_w;
+    u8 slice_h;
     u8 state;
     u8 color_type;
     u64 dead_ms;
@@ -54,9 +54,6 @@ typedef struct
     float x;
     float y;
     float dx;
-    /* Rotation */
-    float rot;
-    /* Flapping */
     float dy;
     u64 dy_ms;
     /* Ready "floating" wave */
@@ -68,6 +65,7 @@ typedef struct
 /* Bird helpers */
 
 bird_t bird_setup(u8 color_type);
+void bird_free(bird_t *bird);
 
 void bird_draw(const bird_t bird);
 

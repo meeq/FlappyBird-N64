@@ -73,12 +73,10 @@ typedef struct
 /* Background helpers */
 
 background_t background_setup(u8 time_mode);
-
-void background_free(background_t bg);
+void background_free(background_t *bg);
 
 void background_tick(background_t *bg);
 
-void background_draw_color(const bg_fill_color_t fill);
-void background_draw_sprite(const bg_fill_sprite_t fill);
+void background_draw(const background_t bg);
 
 #endif

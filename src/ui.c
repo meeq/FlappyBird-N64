@@ -24,11 +24,12 @@ ui_t ui_setup(void)
     return ui;
 }
 
-void ui_free(ui_t ui)
+void ui_free(ui_t *ui)
 {
     for (int i = 0; i < UI_NUM_SPRITES; i++)
     {
-        free( ui.sprites[i] );
+        free( ui->sprites[i] );
+        ui->sprites[i] = NULL;
     }
 }
 

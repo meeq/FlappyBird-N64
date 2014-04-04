@@ -37,7 +37,7 @@ typedef struct
 
 pipes_t pipes_setup(void);
 
-void pipes_free(pipes_t pipes);
+void pipes_free(pipes_t *pipes);
 
 void pipes_reset(pipes_t *pipes);
 
