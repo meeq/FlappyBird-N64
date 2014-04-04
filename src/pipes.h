@@ -7,7 +7,7 @@
 #define PIPES_MAX_NUM       5
 
 #define PIPES_SCROLL_RATE   16
-#define PIPES_SCROLL_DX     -0.005
+#define PIPES_SCROLL_DX     -0.00312
 
 #define PIPE_GREEN_COLOR    0
 #define PIPE_RED_COLOR      1
