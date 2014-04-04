@@ -97,9 +97,9 @@ int main(void)
                     break;
                 case BIRD_STATE_DEAD:
                     ui_heading_draw( ui, HEADING_GAME_OVER );
-                    // ui_scoreboard_draw( ui );
-                    // ui_medal_draw( ui, bird.score );
-                    // ui_highscores_draw( ui, bird.score );
+                    ui_scoreboard_draw( ui );
+                    ui_medal_draw( ui, bird.score );
+                    ui_highscores_draw( ui, bird.score );
                     break;
             }
         }

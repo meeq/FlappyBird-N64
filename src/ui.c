@@ -15,7 +15,7 @@ ui_t ui_setup(void)
         "/gfx/scoreboard.sprite",
         "/gfx/medal.sprite",
         "/gfx/font-large.sprite",
-        "/gfx/font-med.sprite"
+        "/gfx/font-medium.sprite"
     };
     for (int i = 0; i < UI_NUM_SPRITES; i++)
     {
@@ -137,4 +137,75 @@ void ui_score_draw(const ui_t ui, u16 score)
         graphics_draw_sprite_trans_stride( disp, x, y, font, digits[i] );
         x -= digit_w;
     }
+}
+
+void ui_scoreboard_draw(const ui_t ui)
+{
+    sprite_t *scoreboard = ui.sprites[UI_SCOREBOARD];
+
+    graphics_detach_rdp( g_graphics );
+    int disp = g_graphics->disp;
+
+    int center_x = (g_graphics->width >> 1);
+    int center_y = (g_graphics->height >> 1);
+    int x = center_x - (scoreboard->width >> 1);
+    int y = center_y - (scoreboard->height >> 1);
+
+    graphics_draw_sprite_trans( disp, x, y, scoreboard );
+}
+
+void ui_medal_draw(const ui_t ui, u16 score)
+{
+    u8 stride;
+    if (score >= UI_MEDAL_SCORE_PLATINUM) stride = UI_MEDAL_STRIDE_PLATINUM;
+    else if (score >= UI_MEDAL_SCORE_GOLD) stride = UI_MEDAL_STRIDE_GOLD;
+    else if (score >= UI_MEDAL_SCORE_SILVER) stride = UI_MEDAL_STRIDE_SILVER;
+    else if (score >= UI_MEDAL_SCORE_BRONZE) stride = UI_MEDAL_STRIDE_BRONZE;
+    else return;
+
+    sprite_t *medal = ui.sprites[UI_MEDAL];
+
+    graphics_detach_rdp( g_graphics );
+    int disp = g_graphics->disp;
+
+    int center_x = (g_graphics->width >> 1);
+    int center_y = (g_graphics->height >> 1);
+    int x = center_x - ((medal->width / medal->hslices) >> 1) - 32;
+    int y = center_y - ((medal->height / medal->vslices) >> 1) + 4;
+
+    graphics_draw_sprite_trans_stride( disp, x, y, medal, stride );
+}
+
+static inline void ui_highscores_score_draw(const ui_t ui, u16 score, u16 y)
+{
+    sprite_t *font = ui.sprites[UI_FONT_MED];
+    int disp = g_graphics->disp;
+
+    int i = 0, num_digits;
+    int digits[5];
+    do
+    {
+        digits[i] = score % 10;
+        score /= 10;
+        num_digits = ++i;
+    }
+    while (score != 0);
+
+    int digit_w = font->width / font->hslices;
+    int center_x = g_graphics->width >> 1;
+    int x = center_x + 38;
+    for (i = 0; i < num_digits; i++)
+    {
+        graphics_draw_sprite_trans_stride( disp, x, y, font, digits[i] );
+        x -= digit_w;
+    }
+}
+
+void ui_highscores_draw(const ui_t ui, u16 score)
+{
+    graphics_detach_rdp( g_graphics );
+
+    int center_y = (g_graphics->height >> 1);
+    ui_highscores_score_draw( ui, score, center_y - 11 );
+    ui_highscores_score_draw( ui, ui.high_score, center_y + 10);
 }
