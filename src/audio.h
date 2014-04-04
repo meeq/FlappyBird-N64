@@ -11,12 +11,13 @@
 
 /* Sound FX definitions */
 
-#define SFX_NUM_SOUNDS 5
-#define SFX_DIE 0
-#define SFX_HIT 1
-#define SFX_POINT 2
-#define SFX_SWOOSH 3
-#define SFX_WING 4
+#define SFX_NUM_CHANNELS    4
+#define SFX_NUM_SOUNDS      5
+#define SFX_DIE             0
+#define SFX_HIT             1
+#define SFX_POINT           2
+#define SFX_SWOOSH          3
+#define SFX_WING            4
 
 typedef struct
 {
@@ -29,14 +30,19 @@ typedef struct
 
 typedef struct
 {
+    u32 cursor;
+    pcm_sound_t *sfx;
+} sfx_channel_t;
+
+typedef struct
+{
     // Setup state
     u16 sample_rate;
     u32 frames;
     s16 *buffer;
     pcm_sound_t *sfx_cache[SFX_NUM_SOUNDS];
     // Playback state
-    u32 sfx_cursor;
-    pcm_sound_t *sfx;
+    sfx_channel_t channels[SFX_NUM_CHANNELS];
 } audio_t;
 
 /* Audio helpers */

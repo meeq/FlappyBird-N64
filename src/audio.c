@@ -8,10 +8,8 @@ audio_t *audio_setup(u16 sample_rate, u8 buffers)
     s16 *buffer = malloc( buffer_length * STEREO_PCM_SAMPLE_SIZE );
     audio_t *audio = malloc( sizeof( audio_t ) );
     audio->sample_rate = sample_rate;
-    audio->frames = buffer_length * 2;
+    audio->frames = buffer_length << 1;
     audio->buffer = buffer;
-    audio->sfx_cursor = 0;
-    audio->sfx = NULL;
     /* Load the sound effects cache */
     char *sfx_files[SFX_NUM_SOUNDS] = {
         "/sfx/die.raw",
@@ -26,6 +24,12 @@ audio_t *audio_setup(u16 sample_rate, u8 buffers)
         sfx = read_dfs_pcm_sound( sfx_files[i], sample_rate, 1);
         audio->sfx_cache[i] = sfx;
     }
+    /* Setup the sound effects channels */
+    for (int i = 0; i < SFX_NUM_CHANNELS; i++)
+    {
+        audio->channels[i].cursor = 0;
+        audio->channels[i].sfx = NULL;
+    }
     return audio;
 }
 
@@ -38,6 +42,11 @@ void audio_free(audio_t *audio)
         free(audio->sfx_cache[i]);
         audio->sfx_cache[i] = NULL;
     }
+    /* Clear sound effects pointers from playback channels */
+    for (int i = 0; i < SFX_NUM_CHANNELS; i++)
+    {
+        audio->channels[i].sfx = NULL;
+    }
     /* Shut down the audio subsystem */
     free( audio->buffer );
     free( audio );
@@ -48,44 +57,52 @@ void audio_tick(audio_t *audio)
 {
     if (audio_can_write())
     {
-        pcm_sound_t *sfx = audio->sfx;
-        if (sfx != NULL)
+        sfx_channel_t channel;
+        pcm_sound_t *sfx;
+        s32 left_mix, right_mix;
+        u8 num_left, num_right;
+        s16 left_sample, right_sample;
+        /* Fill the audio buffer with stereo sample frames */
+        for (int frame = 0; frame < audio->frames;
+             left_mix = num_left = right_mix = num_right = 0)
         {
-            u32 sfx_cursor = audio->sfx_cursor;
-            u32 sfx_length = sfx->samples;
-            if (sfx_cursor < sfx_length)
+            /* Accumulate all currently playing sound effects samples */
+            for (int i = 0; i < SFX_NUM_CHANNELS; i++)
             {
-                u32 buffer_frames = audio->frames;
-                s16 *buffer = audio->buffer;
-                u8  sfx_channels = sfx->channels;
-                s16 *sfx_data = sfx->data;
-                s16 sfx_sample = 0;
-                // Fill the audio buffer with stereo sample frames
-                for (int i = 0; i < buffer_frames; sfx_sample = 0)
+                channel = audio->channels[i];
+                sfx = channel.sfx;
+                if ( sfx != NULL && channel.cursor < sfx->samples )
                 {
-                    // Play silence if we're past the end of the data
-                    if (sfx_cursor < sfx_length)
+                    left_mix += sfx->data[channel.cursor++];
+                    num_left++;
+                    /* Play mono sound effects in both speakers */
+                    if ( sfx->channels == 1 )
                     {
-                        // Copy sound effect sample and advance the cursor
-                        sfx_sample = sfx_data[sfx_cursor++];
+                        right_mix += sfx->data[channel.cursor - 1];
+                        num_right++;
                     }
-                    // For stereo, alternate between left and right channels
-                    buffer[i++] = sfx_sample;
-                    // For mono, copy the left channel to the right
-                    if (sfx_channels == 1)
+                    /* Play stereo sound effects in separate speakers */
+                    else if ( channel.cursor < sfx->samples )
                     {
-                        // Pan the mono signal into stereo at full strength
-                        buffer[i++] = sfx_sample;
+                        right_mix += sfx->data[channel.cursor++];
+                        num_right++;
+                    }
+                    /* Reset channels that have finished playing */
+                    if ( channel.cursor >= sfx->samples )
+                    {
+                        channel.cursor = 0;
+                        channel.sfx = NULL;
                     }
                 }
-                audio->sfx_cursor = sfx_cursor;
-                audio_write( buffer );
-            } else {
-                audio_write_silence();
+                audio->channels[i] = channel;
             }
-        } else {
-            audio_write_silence();
+            /* Mix down all of the samples as an average */
+            left_sample = (num_left > 1) ? left_mix / num_left : left_mix;
+            right_sample = (num_right > 1) ? right_mix / num_right : right_mix;
+            audio->buffer[frame++] = left_sample;
+            audio->buffer[frame++] = right_sample;
         }
+        audio_write( audio->buffer );
     }
 }
 
@@ -96,8 +113,15 @@ void audio_play_sfx(audio_t *audio, u8 sfx_index)
         pcm_sound_t *sfx = audio->sfx_cache[sfx_index];
         if (sfx != NULL)
         {
-            audio->sfx_cursor = 0;
-            audio->sfx = sfx;
+            for (int i = 0; i < SFX_NUM_CHANNELS; i++)
+            {
+                if ( audio->channels[i].sfx == NULL )
+                {
+                    audio->channels[i].sfx = sfx;
+                    audio->channels[i].cursor = 0;
+                    break;
+                }
+            }
         }
     }
 }
