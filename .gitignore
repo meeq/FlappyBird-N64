@@ -1,6 +1,7 @@
 *.bin
 *.dfs
 *.elf
+*.tar.bz
 *.o
 *.d
 

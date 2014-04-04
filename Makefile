@@ -1,8 +1,10 @@
 PROG_NAME = FlappyBird
 PROG_TITLE = "FlappyBird64"
+SRC_ARCHIVE = $(PROG_NAME)-src.tar.bz
 # OUT_SIZE = 52672B HEADER + 1M ROM
 OUT_SIZE = 1052672B
 DFS_OFFSET = 256K
+SRC_OFFSET = 622K
 
 # Paths
 DFSDIR = filesystem/
@@ -17,6 +19,7 @@ HEADERNAME = header
 # Code files
 SRCDIR = src/
 C_FILES = $(wildcard $(SRCDIR)*.c)
+H_FILES = $(wildcard $(SRCDIR)*.h)
 OBJS := $(C_FILES:.c=.o)
 DEPS := $(OBJS:.o=.d)
 
@@ -58,7 +61,7 @@ OBJCOPY = $(GCCN64PREFIX)objcopy
 # Compilation pipeline
 
 # ROM Image
-$(PROG_NAME).v64: $(PROG_NAME).elf $(PROG_NAME).dfs
+$(PROG_NAME).v64: $(PROG_NAME).elf $(PROG_NAME).dfs $(SRC_ARCHIVE)
 	$(OBJCOPY) $(PROG_NAME).elf $(PROG_NAME).bin -O binary
 	rm -f $(PROG_NAME).v64
 	$(N64TOOL) \
@@ -67,7 +70,8 @@ $(PROG_NAME).v64: $(PROG_NAME).elf $(PROG_NAME).dfs
 		-h $(HEADERPATH)/$(HEADERNAME) \
 		-o $(PROG_NAME).v64  \
 		$(PROG_NAME).bin \
-		-s $(DFS_OFFSET) $(PROG_NAME).dfs
+		-s $(DFS_OFFSET) $(PROG_NAME).dfs \
+		-s $(SRC_OFFSET) $(SRC_ARCHIVE)
 	$(CHKSUM64PATH) $(PROG_NAME).v64
 
 # Linked binary
@@ -89,6 +93,13 @@ $(PROG_NAME).dfs: $(SPRITE_FILES) $(PCM_FILES)
 	find $(DFSDIR) -name ".DS_Store" -depth -exec rm {} \;
 	$(MKDFSPATH) $(PROG_NAME).dfs $(DFSDIR)
 
+# Source archive
+$(SRC_ARCHIVE): $(C_FILES) $(H_FILES) $(PNG_FILES) $(AIFF_FILES)
+	tar -cjf $(SRC_ARCHIVE) \
+		--exclude *.[do] \
+		--exclude .DS_Store \
+		src Makefile *.sh resources
+
 # Housekeeping
 
 all: $(PROG_NAME).v64
@@ -98,7 +109,7 @@ emulate: $(PROG_NAME).v64
 
 clean:
 	rm -Rf $(DFSDIR)
-	rm -f *.v64 *.elf src/*.o src/*.d *.bin *.dfs
+	rm -f *.v64 *.elf src/*.o src/*.d *.bin *.dfs *.tar.bz
 
 .PHONY: all clean
 
