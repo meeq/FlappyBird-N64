@@ -7,7 +7,7 @@ void collision_tick(bird_t *bird, pipes_t *pipes)
 {
     pipe_t pipe;
     float pipe_x, pipe_y;
-    float bird_x = bird->x, bird_y = bird->y;
+    const float bird_x = bird->x, bird_y = bird->y;
 
     for (int i = 0; i < PIPES_MAX_NUM; i++)
     {

@@ -7,15 +7,24 @@
 
 #define GRAPHICS_SCALE 1
 
-#define BUFFERING_DOUBLE 2
-#define BUFFERING_TRIPLE 3
+typedef enum graphics_buffering_mode
+{
+    BUFFERING_DOUBLE = 2,
+    BUFFERING_TRIPLE = 3
+} buffer_mode_t;
 
-#define RDP_DETACHED 0
-#define RDP_ATTACHED 1
+typedef enum graphics_rdp_attached_state
+{
+    RDP_DETACHED,
+    RDP_ATTACHED
+} rdp_attached_t;
 
-#define RDP_FILL_NONE 0
-#define RDP_FILL_COLOR 1
-#define RDP_FILL_TEXTURE 2
+typedef enum graphics_rdp_fill_state
+{
+    RDP_FILL_NONE,
+    RDP_FILL_COLOR,
+    RDP_FILL_TEXTURE
+} rdp_fill_mode_t;
 
 typedef struct
 {
@@ -24,21 +33,22 @@ typedef struct
     u16 width;
     u16 height;
     bitdepth_t color_depth;
-    u32 num_buffers;
+    buffer_mode_t num_buffers;
     gamma_t gamma;
     antialias_t antialias;
     // Drawing state
     u32 disp;
     // RDP state
-    u8 rdp_attached;
-    u8 rdp_fill_mode;
+    rdp_attached_t rdp_attached;
+    rdp_fill_mode_t rdp_fill_mode;
 } graphics_t;
 
 /* Graphics helpers */
 
 graphics_t *graphics_setup(resolution_t res, bitdepth_t bit,
-                           u32 num_buffers, gamma_t gamma,
+                           buffer_mode_t num_buffers, gamma_t gamma,
                            antialias_t aa);
+
 void graphics_free(graphics_t *graphics);
 
 void graphics_display_lock(graphics_t *graphics);
