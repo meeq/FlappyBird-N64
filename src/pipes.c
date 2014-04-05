@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <math.h>
+
 #include "pipes.h"
 
 #include "background.h"
@@ -6,7 +9,7 @@
 pipes_t pipes_setup(void)
 {
     pipes_t pipes = {
-        .color = PIPE_GREEN_COLOR,
+        .color = PIPE_COLOR_GREEN,
         .reset_ms = 0, .scroll_ms = get_ticks_ms(),
         .cap_sprite = read_dfs_sprite( "/gfx/pipe-cap.sprite" ),
         .tube_sprite = read_dfs_sprite( "/gfx/pipe-tube.sprite" )
@@ -22,17 +25,51 @@ void pipes_free(pipes_t *pipes)
     pipes->tube_sprite = NULL;
 }
 
+inline static pipe_colors_t pipes_random_color(void)
+{
+    return ((float) rand() / (float) RAND_MAX) * PIPE_NUM_COLORS;
+}
+
+inline static u8 pipe_prev_index(u8 i)
+{
+    return (i > 0) ? i - 1 : PIPES_MAX_NUM - 1;
+}
+
+inline static float pipe_random_y(void)
+{
+    float y = ((float) rand() / (float) RAND_MAX) * PIPE_MAX_Y;
+    if ( roundf( (float) rand() / (float) RAND_MAX ) ) y *= -1.0;
+    return y;
+}
+
+inline static float pipe_random_bias_y(const float prev_y)
+{
+    float bias_y = ((float) rand() / (float) RAND_MAX) * PIPE_MAX_BIAS_Y;
+    if ( roundf( (float) rand() / (float) RAND_MAX ) ) bias_y *= -1.0;
+    float y = prev_y + bias_y;
+    if ( y > PIPE_MAX_Y ) y = PIPE_MAX_Y;
+    if ( y < -PIPE_MAX_Y ) y = -PIPE_MAX_Y;
+    return y;
+}
+
 void pipes_reset(pipes_t *pipes)
 {
     if (pipes->reset_ms == pipes->scroll_ms) return;
+    float y = pipe_random_y(), prev_y = y;
     for (u8 i = 0; i < PIPES_MAX_NUM; i++)
     {
+        if (i > 0)
+        {
+            y = pipe_random_bias_y( prev_y );
+        }
         pipe_t pipe = {
             .x = PIPE_START_X + (i * PIPE_GAP_X),
-            .y = 0.0 /* TODO "Randomize" Y */
+            .y = y
         };
         pipes->n[i] = pipe;
+        prev_y = y;
     }
+    pipes->color = pipes_random_color();
     pipes->reset_ms = pipes->scroll_ms = get_ticks_ms();
 }
 
@@ -46,8 +83,9 @@ void pipes_tick(pipes_t *pipes)
             pipes->n[i].x += PIPES_SCROLL_DX;
             if (pipes->n[i].x < PIPE_MIN_X)
             {
-                j = (i > 0) ? i - 1 : PIPES_MAX_NUM - 1;
+                j = pipe_prev_index( i );
                 pipes->n[i].x = pipes->n[j].x + PIPE_GAP_X;
+                pipes->n[i].y = pipe_random_bias_y( pipes->n[j].y );
             }
         }
         pipes->scroll_ms = ticks_ms;

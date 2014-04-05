@@ -13,8 +13,9 @@
 
 typedef enum pipe_colors
 {
-    PIPE_GREEN_COLOR,
-    PIPE_RED_COLOR
+    PIPE_COLOR_GREEN,
+    PIPE_COLOR_RED,
+    PIPE_NUM_COLORS
 } pipe_colors_t;
 
 #define PIPE_TUBE_WIDTH     26
@@ -23,6 +24,8 @@ typedef enum pipe_colors
 #define PIPE_GAP_X          0.3
 #define PIPE_START_X        1.1
 #define PIPE_MIN_X          -0.1
+#define PIPE_MAX_Y          0.5
+#define PIPE_MAX_BIAS_Y     0.3
 
 typedef struct
 {
