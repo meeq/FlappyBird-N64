@@ -7,17 +7,21 @@
 
 #define FREQUENCY_44KHZ 44100
 #define MONO_PCM_SAMPLE_SIZE sizeof(s16)
-#define STEREO_PCM_SAMPLE_SIZE (2 * MONO_PCM_SAMPLE_SIZE)
+#define STEREO_PCM_SAMPLE_SIZE (MONO_PCM_SAMPLE_SIZE << 1)
 
 /* Sound FX definitions */
 
 #define SFX_NUM_CHANNELS    4
 #define SFX_NUM_SOUNDS      5
-#define SFX_DIE             0
-#define SFX_HIT             1
-#define SFX_POINT           2
-#define SFX_SWOOSH          3
-#define SFX_WING            4
+
+typedef enum sfx_sounds
+{
+    SFX_DIE,
+    SFX_HIT,
+    SFX_POINT,
+    SFX_SWOOSH,
+    SFX_WING
+} sfx_sounds_t;
 
 typedef struct
 {
@@ -53,7 +57,7 @@ void audio_free(audio_t *audio);
 
 void audio_tick(audio_t *audio);
 
-void audio_play_sfx(audio_t *audio, u8 sfx_index);
+void audio_play_sfx(audio_t *audio, sfx_sounds_t sfx_sound);
 
 pcm_sound_t *read_dfs_pcm_sound(char *file, u16 sample_rate, u8 channels);
 
