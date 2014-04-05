@@ -6,15 +6,15 @@
 
 /* Background definitions */
 
-#define BACKGROUND_SCROLL_RATE 16
+#define BG_SCROLL_RATE          16
 
-#define SKY_COLOR_DAY       graphics_make_color( 0x4E, 0xC0, 0xCA, 0xFF )
-#define SKY_COLOR_NIGHT     graphics_make_color( 0x00, 0x87, 0x93, 0xFF )
-#define CLOUD_COLOR_DAY     graphics_make_color( 0xE4, 0xFD, 0xD0, 0xFF )
-#define CLOUD_COLOR_NIGHT   graphics_make_color( 0x15, 0xA5, 0xB5, 0xFF )
-#define HILL_COLOR_DAY      graphics_make_color( 0x52, 0xE0, 0x5D, 0xFF )
-#define HILL_COLOR_NIGHT    graphics_make_color( 0x14, 0x96, 0x02, 0xFF )
-#define GROUND_COLOR        graphics_make_color( 0xDF, 0xD8, 0x93, 0xFF )
+#define BG_COLOR_DAY_SKY        graphics_make_color( 0x4E, 0xC0, 0xCA, 0xFF )
+#define BG_COLOR_NIGHT_SKY      graphics_make_color( 0x00, 0x87, 0x93, 0xFF )
+#define BG_COLOR_DAY_CLOUD      graphics_make_color( 0xE4, 0xFD, 0xD0, 0xFF )
+#define BG_COLOR_NIGHT_CLOUD    graphics_make_color( 0x15, 0xA5, 0xB5, 0xFF )
+#define BG_COLOR_DAY_HILL       graphics_make_color( 0x52, 0xE0, 0x5D, 0xFF )
+#define BG_COLOR_NIGHT_HILL     graphics_make_color( 0x14, 0x96, 0x02, 0xFF )
+#define BG_COLOR_GROUND         graphics_make_color( 0xDF, 0xD8, 0x93, 0xFF )
 
 #define SKY_FILL_Y      0
 #define SKY_FILL_H      141 * GRAPHICS_SCALE
@@ -37,6 +37,16 @@
 #define DAY_TIME    0
 #define NIGHT_TIME  1
 
+#define BG_NUM_SPRITES  7
+
+typedef enum bg_sprite_index
+{
+    cloud_day_sprite, cloud_night_sprite,
+    city_day_sprite,  city_night_sprite,
+    hill_day_sprite,  hill_night_sprite,
+    ground_sprite
+} bg_sprite_index_t;
+
 typedef struct
 {
     u32 color;
@@ -46,7 +56,7 @@ typedef struct
 
 typedef struct
 {
-    sprite_t *sprite;
+    bg_sprite_index_t sprite;
     s16 y;
     double scroll_x;
     u16 scroll_w;
@@ -55,6 +65,7 @@ typedef struct
 
 typedef struct
 {
+    sprite_t *sprites[BG_NUM_SPRITES];
     // Setup state
     u8 time_mode;
     u64 scroll_ms;
@@ -74,6 +85,8 @@ typedef struct
 
 background_t background_setup(u8 time_mode);
 void background_free(background_t *bg);
+
+void background_set_time_mode(background_t *bg, u8 time_mode);
 
 void background_tick(background_t *bg);
 

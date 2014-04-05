@@ -48,8 +48,7 @@ int main(void)
         /* Switch between day and night */
         if( keys.c[0].L )
         {
-            background_free( &bg );
-            bg = background_setup( !bg.time_mode );
+            background_set_time_mode( &bg, !bg.time_mode );
         }
 
         /* Update game state */
