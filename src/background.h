@@ -47,7 +47,8 @@ typedef enum bg_sprite_index
 typedef enum bg_time_mode
 {
     BG_DAY_TIME,
-    BG_NIGHT_TIME
+    BG_NIGHT_TIME,
+    BG_NUM_TIME_MODES
 } bg_time_mode_t;
 
 typedef struct
@@ -91,6 +92,8 @@ background_t background_setup(bg_time_mode_t time_mode);
 void background_free(background_t *bg);
 
 void background_set_time_mode(background_t *bg, bg_time_mode_t time_mode);
+
+void background_randomize_time_mode(background_t *bg);
 
 void background_tick(background_t *bg, const gamepad_state_t gamepad);
 

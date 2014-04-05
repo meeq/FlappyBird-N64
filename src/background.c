@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "background.h"
 
 #include "global.h"
@@ -84,6 +86,16 @@ void background_set_time_mode(background_t *bg, bg_time_mode_t time_mode)
         bg->city.sprite = BG_CITY_NIGHT_SPRITE;
         bg->hill_top.sprite = BG_HILL_NIGHT_SPRITE;
     }
+}
+
+inline static bg_time_mode_t background_random_time_mode(void)
+{
+    return ((float) rand() / (float) RAND_MAX) * BG_NUM_TIME_MODES;
+}
+
+void background_randomize_time_mode(background_t *bg)
+{
+    background_set_time_mode( bg, background_random_time_mode() );
 }
 
 void background_free(background_t *bg)

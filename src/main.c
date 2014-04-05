@@ -51,7 +51,12 @@ int main(void)
         const controllers_state_t keys = get_keys_down();
 
         /* Update game state */
+        bird_state_t old_state = bird.state;
         bird_tick( &bird, keys.c[0] );
+        if ( old_state != bird.state && old_state == BIRD_STATE_DEAD )
+        {
+            background_randomize_time_mode( &bg );
+        }
         switch (bird.state)
         {
             case BIRD_STATE_TITLE:

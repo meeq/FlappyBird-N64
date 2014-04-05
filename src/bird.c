@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <math.h>
 
 #include "bird.h"
@@ -172,6 +173,11 @@ static void bird_tick_velocity(bird_t *bird, const gamepad_state_t gamepad)
     }
 }
 
+inline static bird_color_t bird_random_color_type(void)
+{
+    return ((float) rand() / (float) RAND_MAX) * BIRD_NUM_COLORS;
+}
+
 void bird_tick(bird_t *bird, const gamepad_state_t gamepad)
 {
     const u64 ticks_ms = get_ticks_ms();
@@ -183,6 +189,11 @@ void bird_tick(bird_t *bird, const gamepad_state_t gamepad)
             if (( gamepad.A || gamepad.start ) &&
                 ( ticks_ms - bird->dead_ms > BIRD_DEAD_DELAY ))
             {
+                /* Change the bird color after each death */
+                if ( bird->state == BIRD_STATE_DEAD )
+                {
+                    bird->color_type = bird_random_color_type();
+                }
                 bird->state = BIRD_STATE_READY;
                 bird->score = 0;
                 bird->anim_frame = 0;
