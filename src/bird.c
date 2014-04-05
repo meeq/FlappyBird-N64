@@ -57,10 +57,10 @@ void bird_draw(const bird_t bird)
     if (bird_y < BIRD_MIN_Y) bird_y = BIRD_MIN_Y;
     bird_y = cy + bird_y * cy;
     /* Calculate bird corner coordinates from center point */
-    u8 bird_half_w = (bird.slice_w >> 1) * GRAPHICS_SCALE;
-    u8 bird_half_h = (bird.slice_h >> 1) * GRAPHICS_SCALE;
-    u16 tx = cx - bird_half_w,     bx = cx + bird_half_w - 1,
-        ty = bird_y - bird_half_h, by = bird_y + bird_half_h - 1;
+    const u8 bird_half_w = (bird.slice_w >> 1) * GRAPHICS_SCALE,
+             bird_half_h = (bird.slice_h >> 1) * GRAPHICS_SCALE;
+    const u16 tx = cx - bird_half_w,     bx = cx + bird_half_w - 1,
+              ty = bird_y - bird_half_h, by = bird_y + bird_half_h - 1;
     /* Load the current animation sprite slice as a texture */
     graphics_rdp_texture_fill( g_graphics );
     rdp_sync( SYNC_PIPE );

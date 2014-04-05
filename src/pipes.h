@@ -9,8 +9,11 @@
 #define PIPES_SCROLL_RATE   16
 #define PIPES_SCROLL_DX     -0.00312
 
-#define PIPE_GREEN_COLOR    0
-#define PIPE_RED_COLOR      1
+typedef enum pipe_colors
+{
+    PIPE_GREEN_COLOR,
+    PIPE_RED_COLOR
+} pipe_colors_t;
 
 #define PIPE_TUBE_WIDTH     26
 #define PIPE_CAP_HEIGHT     13
@@ -27,7 +30,7 @@ typedef struct
 
 typedef struct
 {
-    u8 color;
+    pipe_colors_t color;
     u64 reset_ms;
     u64 scroll_ms;
     pipe_t n[PIPES_MAX_NUM];

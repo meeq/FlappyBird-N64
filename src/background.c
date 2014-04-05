@@ -12,7 +12,7 @@ background_t background_setup(bg_time_mode_t time_mode)
         "/gfx/ground.sprite"
     };
     sprite_t *sprites[BG_NUM_SPRITES];
-    for (int i = 0; i < BG_NUM_SPRITES; i++)
+    for (u8 i = 0; i < BG_NUM_SPRITES; i++)
     {
         sprites[i] = read_dfs_sprite( sprite_files[i] );
     }
@@ -56,7 +56,7 @@ background_t background_setup(bg_time_mode_t time_mode)
     };
     background_set_time_mode( &bg, time_mode );
     /* Set the sprites on the background struct */
-    for (int i = 0; i < BG_NUM_SPRITES; i++)
+    for (u8 i = 0; i < BG_NUM_SPRITES; i++)
     {
         bg.sprites[i] = sprites[i];
     }
@@ -89,7 +89,7 @@ void background_set_time_mode(background_t *bg, bg_time_mode_t time_mode)
 void background_free(background_t *bg)
 {
     /* Deallocate the sprites */
-    for (int i = 0; i < BG_NUM_SPRITES; i++)
+    for (u8 i = 0; i < BG_NUM_SPRITES; i++)
     {
         free( bg->sprites[i] );
         bg->sprites[i] = NULL;
@@ -140,7 +140,7 @@ void background_draw_sprite(const background_t bg, const bg_fill_sprite_t fill)
     if (slices > 1)
     {
         /* Manually tile horizontally-sliced repeating fills */
-        int repeat_x = scroll_x;
+        s16 repeat_x = scroll_x;
         const u16 repeat_w = sprite->width / slices;
         u8 slice;
         while (repeat_x < max_w)

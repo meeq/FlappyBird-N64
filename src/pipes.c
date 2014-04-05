@@ -25,7 +25,7 @@ void pipes_free(pipes_t *pipes)
 void pipes_reset(pipes_t *pipes)
 {
     if (pipes->reset_ms == pipes->scroll_ms) return;
-    for (int i = 0; i < PIPES_MAX_NUM; i++)
+    for (u8 i = 0; i < PIPES_MAX_NUM; i++)
     {
         pipe_t pipe = {
             .x = PIPE_START_X + (i * PIPE_GAP_X),
@@ -38,10 +38,10 @@ void pipes_reset(pipes_t *pipes)
 
 void pipes_tick(pipes_t *pipes)
 {
-    u64 ticks_ms = get_ticks_ms();
+    const u64 ticks_ms = get_ticks_ms();
     if (ticks_ms - pipes->scroll_ms >= PIPES_SCROLL_RATE)
     {
-        for (int i = 0, j; i < PIPES_MAX_NUM; i++)
+        for (u8 i = 0, j; i < PIPES_MAX_NUM; i++)
         {
             pipes->n[i].x += PIPES_SCROLL_DX;
             if (pipes->n[i].x < PIPE_MIN_X)
@@ -58,14 +58,14 @@ void pipes_draw(const pipes_t pipes)
 {
     sprite_t *tube = pipes.tube_sprite;
     sprite_t *cap = pipes.cap_sprite;
-    u8 color = pipes.color, cap_hslices = cap->hslices;
+    const u8 color = pipes.color, cap_hslices = cap->hslices;
     pipe_t pipe;
-    int cx, cy, tx, ty, bx, by, gap_y;
+    s16 cx, cy, tx, ty, bx, by, gap_y;
 
     graphics_rdp_texture_fill( g_graphics );
     mirror_t mirror = MIRROR_DISABLED;
     rdp_sync( SYNC_PIPE );
-    for (int i = 0; i < PIPES_MAX_NUM; i++)
+    for (u8 i = 0; i < PIPES_MAX_NUM; i++)
     {
         pipe = pipes.n[i];
         /* Calculate X position */

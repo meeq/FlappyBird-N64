@@ -51,13 +51,13 @@ typedef struct
 
 /* Audio helpers */
 
-audio_t *audio_setup(u16 sample_rate, u8 buffers);
+audio_t *audio_setup(const u16 sample_rate, const u8 buffers);
 
 void audio_free(audio_t *audio);
 
 void audio_tick(audio_t *audio);
 
-void audio_play_sfx(audio_t *audio, sfx_sounds_t sfx_sound);
+void audio_play_sfx(audio_t *audio, const sfx_sounds_t sfx_sound);
 
 pcm_sound_t *read_dfs_pcm_sound(char *file, u16 sample_rate, u8 channels);
 

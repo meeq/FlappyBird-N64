@@ -17,7 +17,7 @@ ui_t ui_setup(void)
         "/gfx/font-large.sprite",
         "/gfx/font-medium.sprite"
     };
-    for (int i = 0; i < UI_NUM_SPRITES; i++)
+    for (u8 i = 0; i < UI_NUM_SPRITES; i++)
     {
         ui.sprites[i] = read_dfs_sprite( sprite_files[i] );
     }
@@ -26,7 +26,7 @@ ui_t ui_setup(void)
 
 void ui_free(ui_t *ui)
 {
-    for (int i = 0; i < UI_NUM_SPRITES; i++)
+    for (u8 i = 0; i < UI_NUM_SPRITES; i++)
     {
         free( ui->sprites[i] );
         ui->sprites[i] = NULL;
