@@ -8,6 +8,7 @@
 #include "pipes.h"
 #include "collision.h"
 
+#include "fps.h"
 #include "global.h"
 
 audio_t *g_audio = NULL;
@@ -27,6 +28,7 @@ int main(void)
         RESOLUTION_320x240, DEPTH_16_BPP,
         BUFFERING_DOUBLE, GAMMA_NONE, ANTIALIAS_RESAMPLE
     );
+    fps_counter_t fps = fps_setup();
 
     /* Initialize audio */
     g_audio = audio_setup( FREQUENCY_44KHZ, 1 );
@@ -41,6 +43,9 @@ int main(void)
     /* Run the main loop */
     while(1)
     {
+        /* Calculate frame timing */
+        fps_tick( &fps );
+
         /* Update controller state */
         controller_scan();
         const controllers_state_t keys = get_keys_down();
@@ -75,6 +80,7 @@ int main(void)
             pipes_draw( pipes );
             bird_draw( bird );
             ui_draw( ui );
+            fps_draw( fps );
         }
         /* Finish drawing and show the framebuffer */
         graphics_display_flip( g_graphics );
