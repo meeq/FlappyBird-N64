@@ -36,7 +36,7 @@ int main(void)
     background_t bg = background_setup( BG_DAY_TIME );
     bird_t bird = bird_setup( BIRD_COLOR_YELLOW );
     pipes_t pipes = pipes_setup();
-    ui_t ui = ui_setup();
+    ui_t ui = ui_setup( bg );
 
     /* Run the main loop */
     while(1)
@@ -68,6 +68,7 @@ int main(void)
             default:
                 break;
         }
+        ui_tick( &ui, bird, bg );
 
         /* Buffer sound effects */
         audio_tick( g_audio );
@@ -79,7 +80,7 @@ int main(void)
             background_draw( bg );
             pipes_draw( pipes );
             bird_draw( bird );
-            ui_draw( ui, bird, bg );
+            ui_draw( ui );
         }
         /* Finish drawing and show the framebuffer */
         graphics_display_flip( g_graphics );

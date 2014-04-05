@@ -7,42 +7,62 @@
 #include "bird.h"
 #include "background.h"
 
-#define DARK_COLOR  graphics_make_color( 0x57, 0x37, 0x47, 0xFF )
-#define LIGHT_COLOR graphics_make_color( 0xFF, 0xFF, 0xFF, 0xFF )
-#define CLEAR_COLOR graphics_make_color( 0x00, 0x00, 0x00, 0x00 )
+#define UI_DARK_COLOR       graphics_make_color( 0x57, 0x37, 0x47, 0xFF )
+#define UI_LIGHT_COLOR      graphics_make_color( 0xFF, 0xFF, 0xFF, 0xFF )
+#define UI_CLEAR_COLOR      graphics_make_color( 0x00, 0x00, 0x00, 0x00 )
 
-#define HEADING_GET_READY   0
-#define HEADING_GAME_OVER   1
+typedef enum ui_heading
+{
+    UI_HEADING_GET_READY,
+    UI_HEADING_GAME_OVER
+} ui_heading_t;
 
-#define UI_LOGO             0
-#define UI_HEADINGS         1
-#define UI_HOWTO            2
-#define UI_SCOREBOARD       3
-#define UI_MEDAL            4
-#define UI_FONT_LARGE       5
-#define UI_FONT_MED         6
-#define UI_NUM_SPRITES      7
+typedef enum ui_sprite
+{
+    UI_SPRITE_LOGO,
+    UI_SPRITE_HEADINGS,
+    UI_SPRITE_HOWTO,
+    UI_SPRITE_SCOREBOARD,
+    UI_SPRITE_MEDAL,
+    UI_SPRITE_FONT_LARGE,
+    UI_SPRITE_FONT_MED,
+    UI_NUM_SPRITES
+} ui_sprite_t;
 
-#define UI_MEDAL_SCORE_BRONZE       10
-#define UI_MEDAL_SCORE_SILVER       20
-#define UI_MEDAL_SCORE_GOLD         30
-#define UI_MEDAL_SCORE_PLATINUM     40
+typedef enum ui_medal_score
+{
+    UI_MEDAL_SCORE_BRONZE   = 10,
+    UI_MEDAL_SCORE_SILVER   = 20,
+    UI_MEDAL_SCORE_GOLD     = 30,
+    UI_MEDAL_SCORE_PLATINUM = 40
+} ui_medal_score_t;
 
-#define UI_MEDAL_STRIDE_BRONZE      0
-#define UI_MEDAL_STRIDE_SILVER      1
-#define UI_MEDAL_STRIDE_GOLD        2
-#define UI_MEDAL_STRIDE_PLATINUM    3
+typedef enum ui_medal_stride
+{
+    UI_MEDAL_STRIDE_BRONZE,
+    UI_MEDAL_STRIDE_SILVER,
+    UI_MEDAL_STRIDE_GOLD,
+    UI_MEDAL_STRIDE_PLATINUM
+} ui_medal_stride_t;
 
 typedef struct
 {
+    bird_state_t state;
+    u16 current_score;
     u16 high_score;
+    bg_time_mode_t time_mode;
+    u32 text_color;
+    u32 shadow_color;
+    u32 clear_color;
     sprite_t *sprites[UI_NUM_SPRITES];
 } ui_t;
 
-ui_t ui_setup(void);
+ui_t ui_setup(const background_t bg);
 
 void ui_free(ui_t *ui);
 
-void ui_draw(const ui_t ui, const bird_t bird, const background_t bg);
+void ui_tick(ui_t *ui, const bird_t bird, const background_t bg);
+
+void ui_draw(const ui_t ui);
 
 #endif
