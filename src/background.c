@@ -136,7 +136,7 @@ void background_draw_sprite(const background_t bg, const bg_fill_sprite_t fill)
     const s16 scroll_x = fill.scroll_x;
     const u16 slices = sprite->hslices, max_w = g_graphics->width;
     s16 tx, bx;
-    u16 ty = fill.y, by = (fill.y + sprite->height * GRAPHICS_SCALE) - 1;
+    u16 ty = fill.y, by = fill.y + sprite->height - 1;
     if (slices > 1)
     {
         /* Manually tile horizontally-sliced repeating fills */
@@ -149,12 +149,11 @@ void background_draw_sprite(const background_t bg, const bg_fill_sprite_t fill)
                  slice < slices && repeat_x < max_w;
                  slice++, repeat_x += repeat_w)
             {
-                tx = repeat_x * GRAPHICS_SCALE;
-                bx = ((repeat_x + repeat_w) * GRAPHICS_SCALE);
+                tx = repeat_x;
+                bx = repeat_x + repeat_w;
                 rdp_sync( SYNC_PIPE );
                 rdp_load_texture_stride( 0, 0, mirror, sprite, slice );
-                rdp_draw_textured_rectangle_scaled( 0,
-                    tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
+                rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
             }
         }
     } else {
@@ -166,14 +165,12 @@ void background_draw_sprite(const background_t bg, const bg_fill_sprite_t fill)
         if (tx < 0)
         {
             bx = tx + fill.scroll_w;
-            rdp_draw_textured_rectangle_scaled( 0,
-                tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
+            rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
             tx += fill.scroll_w;
         }
         /* Draw full-tiles for the rest */
         bx = max_w;
-        rdp_draw_textured_rectangle_scaled( 0,
-            tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
+        rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
     }
 }
 

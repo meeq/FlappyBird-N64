@@ -5,8 +5,6 @@
 
 /* Graphics definitions */
 
-#define GRAPHICS_SCALE 1
-
 typedef enum graphics_buffering_mode
 {
     BUFFERING_DOUBLE = 2,

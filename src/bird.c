@@ -57,8 +57,8 @@ void bird_draw(const bird_t bird)
     if (bird_y < BIRD_MIN_Y) bird_y = BIRD_MIN_Y;
     bird_y = cy + bird_y * cy;
     /* Calculate bird corner coordinates from center point */
-    const u8 bird_half_w = (bird.slice_w >> 1) * GRAPHICS_SCALE,
-             bird_half_h = (bird.slice_h >> 1) * GRAPHICS_SCALE;
+    const u8 bird_half_w = bird.slice_w >> 1,
+             bird_half_h = bird.slice_h >> 1;
     const u16 tx = cx - bird_half_w,     bx = cx + bird_half_w - 1,
               ty = bird_y - bird_half_h, by = bird_y + bird_half_h - 1;
     /* Load the current animation sprite slice as a texture */
@@ -67,8 +67,7 @@ void bird_draw(const bird_t bird)
     u8 stride = (bird.color_type * bird.sprite->hslices) + bird.anim_frame;
     rdp_load_texture_stride( 0, 0, MIRROR_DISABLED, bird.sprite, stride );
     /* Draw the bird rectangle */
-    rdp_draw_textured_rectangle_scaled( 0,
-        tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
+    rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
 }
 
 inline static void bird_tick_animation(bird_t *bird)

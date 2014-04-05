@@ -17,17 +17,17 @@
 #define BG_COLOR_GROUND         graphics_make_color( 0xDF, 0xD8, 0x93, 0xFF )
 
 #define BG_SKY_FILL_Y           0
-#define BG_SKY_FILL_H           141 * GRAPHICS_SCALE
-#define BG_CLOUD_TOP_Y          130 * GRAPHICS_SCALE
-#define BG_CLOUD_FILL_Y         141 * GRAPHICS_SCALE
-#define BG_CLOUD_FILL_H         32 * GRAPHICS_SCALE
-#define BG_CITY_TOP_Y           155 * GRAPHICS_SCALE
-#define BG_HILL_TOP_Y           170 * GRAPHICS_SCALE
-#define BG_HILL_FILL_Y          179 * GRAPHICS_SCALE
-#define BG_HILL_FILL_H          11 * GRAPHICS_SCALE
-#define BG_GROUND_TOP_Y         190 * GRAPHICS_SCALE
-#define BG_GROUND_FILL_Y        200 * GRAPHICS_SCALE
-#define BG_GROUND_FILL_H        40 * GRAPHICS_SCALE
+#define BG_SKY_FILL_H           141
+#define BG_CLOUD_TOP_Y          130
+#define BG_CLOUD_FILL_Y         141
+#define BG_CLOUD_FILL_H         32
+#define BG_CITY_TOP_Y           155
+#define BG_HILL_TOP_Y           170
+#define BG_HILL_FILL_Y          179
+#define BG_HILL_FILL_H          11
+#define BG_GROUND_TOP_Y         190
+#define BG_GROUND_FILL_Y        200
+#define BG_GROUND_FILL_H        40
 
 #define BG_SKY_SCROLL_DX        -0.008
 #define BG_CITY_SCROLL_DX       -0.04
