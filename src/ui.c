@@ -33,7 +33,7 @@ void ui_free(ui_t *ui)
     }
 }
 
-void ui_logo_draw(const ui_t ui, u8 time_mode)
+inline static void ui_logo_draw(const ui_t ui, u8 time_mode)
 {
     sprite_t *logo = ui.sprites[UI_LOGO];
 
@@ -80,7 +80,7 @@ void ui_logo_draw(const ui_t ui, u8 time_mode)
     graphics_draw_text( disp, credit2_x, credit2_y, credit2_str );
 }
 
-void ui_heading_draw(const ui_t ui, u8 stride)
+inline static void ui_heading_draw(const ui_t ui, u8 stride)
 {
     sprite_t *headings = ui.sprites[UI_HEADINGS];
 
@@ -95,7 +95,7 @@ void ui_heading_draw(const ui_t ui, u8 stride)
     graphics_draw_sprite_trans_stride( disp, x, y, headings, stride );
 }
 
-void ui_howto_draw(const ui_t ui)
+inline static void ui_howto_draw(const ui_t ui)
 {
     sprite_t *howto = ui.sprites[UI_HOWTO];
 
@@ -110,7 +110,7 @@ void ui_howto_draw(const ui_t ui)
     graphics_draw_sprite_trans( disp, x, y, howto );
 }
 
-void ui_score_draw(const ui_t ui, u16 score)
+inline static void ui_score_draw(const ui_t ui, u16 score)
 {
     sprite_t *font = ui.sprites[UI_FONT_LARGE];
 
@@ -139,7 +139,7 @@ void ui_score_draw(const ui_t ui, u16 score)
     }
 }
 
-void ui_scoreboard_draw(const ui_t ui)
+inline static void ui_scoreboard_draw(const ui_t ui)
 {
     sprite_t *scoreboard = ui.sprites[UI_SCOREBOARD];
 
@@ -154,7 +154,7 @@ void ui_scoreboard_draw(const ui_t ui)
     graphics_draw_sprite_trans( disp, x, y, scoreboard );
 }
 
-void ui_medal_draw(const ui_t ui, u16 score)
+inline static void ui_medal_draw(const ui_t ui, u16 score)
 {
     u8 stride;
     if (score >= UI_MEDAL_SCORE_PLATINUM) stride = UI_MEDAL_STRIDE_PLATINUM;
@@ -176,7 +176,7 @@ void ui_medal_draw(const ui_t ui, u16 score)
     graphics_draw_sprite_trans_stride( disp, x, y, medal, stride );
 }
 
-static inline void ui_highscores_score_draw(const ui_t ui, u16 score, u16 y)
+inline static void ui_highscores_score_draw(const ui_t ui, u16 score, u16 y)
 {
     sprite_t *font = ui.sprites[UI_FONT_MED];
     int disp = g_graphics->disp;
@@ -201,11 +201,36 @@ static inline void ui_highscores_score_draw(const ui_t ui, u16 score, u16 y)
     }
 }
 
-void ui_highscores_draw(const ui_t ui, u16 score)
+inline static void ui_highscores_draw(const ui_t ui, u16 score)
 {
     graphics_detach_rdp( g_graphics );
 
     int center_y = (g_graphics->height >> 1);
     ui_highscores_score_draw( ui, score, center_y - 11 );
     ui_highscores_score_draw( ui, ui.high_score, center_y + 10);
+}
+
+void ui_draw(const ui_t ui, const bird_t bird, const background_t bg)
+{
+    switch (bird.state)
+    {
+        case BIRD_STATE_TITLE:
+            ui_logo_draw( ui, bg.time_mode );
+            break;
+        case BIRD_STATE_READY:
+            ui_score_draw( ui, bird.score );
+            ui_heading_draw( ui, HEADING_GET_READY );
+            ui_howto_draw( ui );
+            break;
+        case BIRD_STATE_PLAY:
+        case BIRD_STATE_DYING:
+            ui_score_draw( ui, bird.score );
+            break;
+        case BIRD_STATE_DEAD:
+            ui_heading_draw( ui, HEADING_GAME_OVER );
+            ui_scoreboard_draw( ui );
+            ui_medal_draw( ui, bird.score );
+            ui_highscores_draw( ui, bird.score );
+            break;
+    }
 }

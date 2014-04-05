@@ -74,35 +74,13 @@ int main(void)
         /* Grab a display buffer and start drawing */
         graphics_display_lock( g_graphics );
         {
-
             /* Draw the game state */
             background_draw( bg );
             pipes_draw( pipes );
             bird_draw( bird );
-
-            /* Draw the UI */
-            switch (bird.state)
-            {
-                case BIRD_STATE_TITLE:
-                    ui_logo_draw( ui, bg.time_mode );
-                    break;
-                case BIRD_STATE_READY:
-                    ui_score_draw( ui, bird.score );
-                    ui_heading_draw( ui, HEADING_GET_READY );
-                    ui_howto_draw( ui );
-                    break;
-                case BIRD_STATE_PLAY:
-                case BIRD_STATE_DYING:
-                    ui_score_draw( ui, bird.score );
-                    break;
-                case BIRD_STATE_DEAD:
-                    ui_heading_draw( ui, HEADING_GAME_OVER );
-                    ui_scoreboard_draw( ui );
-                    ui_medal_draw( ui, bird.score );
-                    ui_highscores_draw( ui, bird.score );
-                    break;
-            }
+            ui_draw( ui, bird, bg );
         }
+        /* Finish drawing and show the framebuffer */
         graphics_display_flip( g_graphics );
     }
 
