@@ -37,10 +37,6 @@ SPRITEDIR = $(DFSDIR)gfx/
 SPRITE_TMP = $(subst $(PNGDIR),$(SPRITEDIR),$(PNG_FILES))
 SPRITE_FILES := $(SPRITE_TMP:.png=.sprite)
 
-# N64 Emulator
-MESSEMUDIR = $(N64_INST)/../mess0152-64bit
-MESSEMUPATH = $(MESSEMUDIR)/mess64
-
 # Flags
 LINK_FLAGS = -L$(ROOTDIR)/lib -L$(ROOTDIR)/mips64-elf/lib
 LINK_FLAGS += -ldragon -lm -lc -ldragonsys
