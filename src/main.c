@@ -45,23 +45,17 @@ int main(void)
         controller_scan();
         const controllers_state_t keys = get_keys_down();
 
-        /* Switch between day and night */
-        if( keys.c[0].L )
-        {
-            background_set_time_mode( &bg, !bg.time_mode );
-        }
-
         /* Update game state */
         bird_tick( &bird, keys.c[0] );
         switch (bird.state)
         {
             case BIRD_STATE_TITLE:
             case BIRD_STATE_READY:
-                background_tick( &bg );
+                background_tick( &bg, keys.c[0] );
                 pipes_reset( &pipes );
                 break;
             case BIRD_STATE_PLAY:
-                background_tick( &bg );
+                background_tick( &bg, keys.c[0] );
                 pipes_tick( &pipes );
                 collision_tick( &bird, &pipes );
                 break;

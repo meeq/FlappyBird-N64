@@ -106,8 +106,14 @@ inline void background_tick_scroll(bg_fill_sprite_t *fill)
     fill->scroll_x = x;
 }
 
-void background_tick(background_t *bg)
+void background_tick(background_t *bg, const gamepad_state_t gamepad)
 {
+     /* Switch between day and night */
+    if( gamepad.L )
+    {
+        background_set_time_mode( bg, !bg->time_mode );
+    }
+    /* Scroll the background */
     const u64 ticks_ms = get_ticks_ms();
     if (ticks_ms - bg->scroll_ms >= BG_SCROLL_RATE)
     {
