@@ -41,7 +41,7 @@ void bird_draw(const bird_t bird)
 {
     /* Calculate player space center position */
     int cx = g_graphics->width * bird.x;
-    int cy = GROUND_TOP_Y >> 1;
+    int cy = BG_GROUND_TOP_Y >> 1;
     /* Calculate bird Y position */
     float bird_y = bird.y;
     switch (bird.state)

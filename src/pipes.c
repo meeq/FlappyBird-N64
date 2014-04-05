@@ -74,7 +74,7 @@ void pipes_draw(const pipes_t pipes)
         bx = cx + (PIPE_TUBE_WIDTH >> 1) - 1;
         if (bx < 0 || tx >= g_graphics->width) continue;
         /* Calculate Y position */
-        cy = (GROUND_TOP_Y >> 1);
+        cy = (BG_GROUND_TOP_Y >> 1);
         gap_y = cy + pipe.y * cy;
         /* Load tube texture */
         rdp_load_texture_stride( 0, 0, mirror, tube, color );
@@ -85,7 +85,7 @@ void pipes_draw(const pipes_t pipes)
             tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
         /* Bottom tube */
         ty = gap_y + (PIPE_GAP_Y >> 1);
-        by = GROUND_TOP_Y - 1;
+        by = BG_GROUND_TOP_Y - 1;
         rdp_draw_textured_rectangle_scaled( 0,
             tx, ty, bx, by, GRAPHICS_SCALE, GRAPHICS_SCALE );
         /* Load top cap texture */

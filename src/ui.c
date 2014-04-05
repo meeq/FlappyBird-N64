@@ -58,7 +58,7 @@ inline static void ui_logo_draw(const ui_t ui, u8 time_mode)
     int credit2_y = g_graphics->height - 78;
 
     u32 fg_color, bg_color;
-    if (time_mode == DAY_TIME)
+    if ( time_mode == BG_DAY_TIME )
     {
         fg_color = DARK_COLOR;
         bg_color = LIGHT_COLOR;

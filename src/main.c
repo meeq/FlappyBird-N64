@@ -33,7 +33,7 @@ int main(void)
     audio_write_silence();
 
     /* Initialize game state */
-    background_t bg = background_setup( DAY_TIME );
+    background_t bg = background_setup( BG_DAY_TIME );
     bird_t bird = bird_setup( BIRD_COLOR_YELLOW );
     pipes_t pipes = pipes_setup();
     ui_t ui = ui_setup();

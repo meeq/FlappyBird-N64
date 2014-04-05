@@ -16,36 +16,39 @@
 #define BG_COLOR_NIGHT_HILL     graphics_make_color( 0x14, 0x96, 0x02, 0xFF )
 #define BG_COLOR_GROUND         graphics_make_color( 0xDF, 0xD8, 0x93, 0xFF )
 
-#define SKY_FILL_Y      0
-#define SKY_FILL_H      141 * GRAPHICS_SCALE
-#define CLOUD_TOP_Y     130 * GRAPHICS_SCALE
-#define CLOUD_FILL_Y    141 * GRAPHICS_SCALE
-#define CLOUD_FILL_H    32 * GRAPHICS_SCALE
-#define CITY_TOP_Y      155 * GRAPHICS_SCALE
-#define HILL_TOP_Y      170 * GRAPHICS_SCALE
-#define HILL_FILL_Y     179 * GRAPHICS_SCALE
-#define HILL_FILL_H     11 * GRAPHICS_SCALE
-#define GROUND_TOP_Y    190 * GRAPHICS_SCALE
-#define GROUND_FILL_Y   200 * GRAPHICS_SCALE
-#define GROUND_FILL_H   40 * GRAPHICS_SCALE
+#define BG_SKY_FILL_Y           0
+#define BG_SKY_FILL_H           141 * GRAPHICS_SCALE
+#define BG_CLOUD_TOP_Y          130 * GRAPHICS_SCALE
+#define BG_CLOUD_FILL_Y         141 * GRAPHICS_SCALE
+#define BG_CLOUD_FILL_H         32 * GRAPHICS_SCALE
+#define BG_CITY_TOP_Y           155 * GRAPHICS_SCALE
+#define BG_HILL_TOP_Y           170 * GRAPHICS_SCALE
+#define BG_HILL_FILL_Y          179 * GRAPHICS_SCALE
+#define BG_HILL_FILL_H          11 * GRAPHICS_SCALE
+#define BG_GROUND_TOP_Y         190 * GRAPHICS_SCALE
+#define BG_GROUND_FILL_Y        200 * GRAPHICS_SCALE
+#define BG_GROUND_FILL_H        40 * GRAPHICS_SCALE
 
-#define SKY_SCROLL_DX       -0.008
-#define CITY_SCROLL_DX      -0.04
-#define HILL_SCROLL_DX      -0.2
-#define GROUND_SCROLL_DX    -1.0
+#define BG_SKY_SCROLL_DX        -0.008
+#define BG_CITY_SCROLL_DX       -0.04
+#define BG_HILL_SCROLL_DX       -0.2
+#define BG_GROUND_SCROLL_DX     -1.0
 
-#define DAY_TIME    0
-#define NIGHT_TIME  1
-
-#define BG_NUM_SPRITES  7
+#define BG_NUM_SPRITES          7
 
 typedef enum bg_sprite_index
 {
-    cloud_day_sprite, cloud_night_sprite,
-    city_day_sprite,  city_night_sprite,
-    hill_day_sprite,  hill_night_sprite,
-    ground_sprite
+    BG_CLOUD_DAY_SPRITE, BG_CLOUD_NIGHT_SPRITE,
+    BG_CITY_DAY_SPRITE,  BG_CITY_NIGHT_SPRITE,
+    BG_HILL_DAY_SPRITE,  BG_HILL_NIGHT_SPRITE,
+    BG_GROUND_SPRITE
 } bg_sprite_index_t;
+
+typedef enum bg_time_mode
+{
+    BG_DAY_TIME,
+    BG_NIGHT_TIME
+} bg_time_mode_t;
 
 typedef struct
 {
@@ -67,7 +70,7 @@ typedef struct
 {
     sprite_t *sprites[BG_NUM_SPRITES];
     // Setup state
-    u8 time_mode;
+    bg_time_mode_t time_mode;
     u64 scroll_ms;
     // Color fills
     bg_fill_color_t sky_fill;
@@ -83,10 +86,11 @@ typedef struct
 
 /* Background helpers */
 
-background_t background_setup(u8 time_mode);
+background_t background_setup(bg_time_mode_t time_mode);
+
 void background_free(background_t *bg);
 
-void background_set_time_mode(background_t *bg, u8 time_mode);
+void background_set_time_mode(background_t *bg, bg_time_mode_t time_mode);
 
 void background_tick(background_t *bg);
 

@@ -2,7 +2,7 @@
 
 #include "global.h"
 
-background_t background_setup(u8 time_mode)
+background_t background_setup(bg_time_mode_t time_mode)
 {
     /* Load the sprite files from the cartridge */
     char *sprite_files[BG_NUM_SPRITES] = {
@@ -20,38 +20,38 @@ background_t background_setup(u8 time_mode)
     background_t bg = {
         .scroll_ms = 0,
         .sky_fill = {
-            .y = SKY_FILL_Y, .h = SKY_FILL_H
+            .y = BG_SKY_FILL_Y, .h = BG_SKY_FILL_H
         },
         .cloud_top = {
-            .y = CLOUD_TOP_Y,
-            .scroll_x = 0, .scroll_dx = SKY_SCROLL_DX,
-            .scroll_w = sprites[cloud_day_sprite]->width
+            .y = BG_CLOUD_TOP_Y,
+            .scroll_x = 0, .scroll_dx = BG_SKY_SCROLL_DX,
+            .scroll_w = sprites[BG_CLOUD_DAY_SPRITE]->width
         },
         .cloud_fill = {
-            .y = CLOUD_FILL_Y, .h = CLOUD_FILL_H
+            .y = BG_CLOUD_FILL_Y, .h = BG_CLOUD_FILL_H
         },
         .city = {
-            .y = CITY_TOP_Y,
-            .scroll_x = 0, .scroll_dx = CITY_SCROLL_DX,
-            .scroll_w = sprites[city_day_sprite]->width
+            .y = BG_CITY_TOP_Y,
+            .scroll_x = 0, .scroll_dx = BG_CITY_SCROLL_DX,
+            .scroll_w = sprites[BG_CITY_DAY_SPRITE]->width
         },
         .hill_top = {
-            .y = HILL_TOP_Y,
-            .scroll_x = 0, .scroll_dx = HILL_SCROLL_DX,
-            .scroll_w = sprites[hill_day_sprite]->width
+            .y = BG_HILL_TOP_Y,
+            .scroll_x = 0, .scroll_dx = BG_HILL_SCROLL_DX,
+            .scroll_w = sprites[BG_HILL_DAY_SPRITE]->width
         },
         .hill_fill = {
-            .y = HILL_FILL_Y, .h = HILL_FILL_H
+            .y = BG_HILL_FILL_Y, .h = BG_HILL_FILL_H
         },
         .ground_top = {
-            .sprite = ground_sprite,
-            .y = GROUND_TOP_Y,
-            .scroll_x = 0, .scroll_dx = GROUND_SCROLL_DX,
-            .scroll_w = sprites[ground_sprite]->width
+            .sprite = BG_GROUND_SPRITE,
+            .y = BG_GROUND_TOP_Y,
+            .scroll_x = 0, .scroll_dx = BG_GROUND_SCROLL_DX,
+            .scroll_w = sprites[BG_GROUND_SPRITE]->width
         },
         .ground_fill = {
             .color = BG_COLOR_GROUND,
-            .y = GROUND_FILL_Y, .h = GROUND_FILL_H
+            .y = BG_GROUND_FILL_Y, .h = BG_GROUND_FILL_H
         }
     };
     background_set_time_mode( &bg, time_mode );
@@ -63,26 +63,26 @@ background_t background_setup(u8 time_mode)
     return bg;
 }
 
-void background_set_time_mode(background_t *bg, u8 time_mode)
+void background_set_time_mode(background_t *bg, bg_time_mode_t time_mode)
 {
     bg->time_mode = time_mode;
-    if ( time_mode == DAY_TIME )
+    if ( time_mode == BG_DAY_TIME )
     {
         bg->sky_fill.color = BG_COLOR_DAY_SKY;
         bg->cloud_fill.color = BG_COLOR_DAY_CLOUD;
         bg->hill_fill.color = BG_COLOR_DAY_HILL;
-        bg->cloud_top.sprite = cloud_day_sprite;
-        bg->city.sprite = city_day_sprite;
-        bg->hill_top.sprite = hill_day_sprite;
+        bg->cloud_top.sprite = BG_CLOUD_DAY_SPRITE;
+        bg->city.sprite = BG_CITY_DAY_SPRITE;
+        bg->hill_top.sprite = BG_HILL_DAY_SPRITE;
     }
     else
     {
         bg->sky_fill.color = BG_COLOR_NIGHT_SKY;
         bg->cloud_fill.color = BG_COLOR_NIGHT_CLOUD;
         bg->hill_fill.color = BG_COLOR_NIGHT_HILL;
-        bg->cloud_top.sprite = cloud_night_sprite;
-        bg->city.sprite = city_night_sprite;
-        bg->hill_top.sprite = hill_night_sprite;
+        bg->cloud_top.sprite = BG_CLOUD_NIGHT_SPRITE;
+        bg->city.sprite = BG_CITY_NIGHT_SPRITE;
+        bg->hill_top.sprite = BG_HILL_NIGHT_SPRITE;
     }
 }
 
