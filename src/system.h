@@ -19,6 +19,12 @@ typedef uint64_t u64;
 typedef signed short s16;
 typedef signed int s32;
 
+typedef enum boolean
+{
+    FALSE,
+    TRUE
+} bool;
+
 typedef struct SI_condat gamepad_state_t;
 typedef struct controller_data controllers_state_t;
 

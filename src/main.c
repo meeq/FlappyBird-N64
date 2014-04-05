@@ -43,7 +43,7 @@ int main(void)
     {
         /* Update controller state */
         controller_scan();
-        controllers_state_t keys = get_keys_down();
+        const controllers_state_t keys = get_keys_down();
 
         /* Switch between day and night */
         if( keys.c[0].L )
@@ -64,6 +64,8 @@ int main(void)
                 background_tick( &bg );
                 pipes_tick( &pipes );
                 collision_tick( &bird, &pipes );
+                break;
+            default:
                 break;
         }
 
