@@ -63,6 +63,8 @@ void ui_tick(ui_t *ui, const bird_t bird, const background_t bg)
     }
 }
 
+/* Below this point there be magic numbers! */
+
 inline static void ui_logo_draw(const ui_t ui)
 {
     sprite_t *logo = ui.sprites[UI_SPRITE_LOGO];

@@ -41,7 +41,7 @@ typedef struct
     rdp_fill_mode_t rdp_fill_mode;
 } graphics_t;
 
-/* Graphics helpers */
+/* Graphics functions */
 
 graphics_t *graphics_setup(resolution_t res, bitdepth_t bit,
                            buffer_mode_t num_buffers, gamma_t gamma,

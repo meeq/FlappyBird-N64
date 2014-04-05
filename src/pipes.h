@@ -4,6 +4,8 @@
 #include "system.h"
 #include "graphics.h"
 
+/* Pipes definitions */
+
 #define PIPES_MAX_NUM       5
 
 #define PIPES_SCROLL_RATE   16
@@ -37,6 +39,8 @@ typedef struct
     sprite_t *cap_sprite;
     sprite_t *tube_sprite;
 } pipes_t;
+
+/* Pipes functions */
 
 pipes_t pipes_setup(void);
 

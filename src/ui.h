@@ -7,6 +7,8 @@
 #include "bird.h"
 #include "background.h"
 
+/* UI definitions */
+
 #define UI_DARK_COLOR       graphics_make_color( 0x57, 0x37, 0x47, 0xFF )
 #define UI_LIGHT_COLOR      graphics_make_color( 0xFF, 0xFF, 0xFF, 0xFF )
 #define UI_CLEAR_COLOR      graphics_make_color( 0x00, 0x00, 0x00, 0x00 )
@@ -56,6 +58,8 @@ typedef struct
     u32 clear_color;
     sprite_t *sprites[UI_NUM_SPRITES];
 } ui_t;
+
+/* UI functions */
 
 ui_t ui_setup(const background_t bg);
 

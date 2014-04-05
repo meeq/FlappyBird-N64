@@ -84,7 +84,7 @@ typedef struct
     bg_fill_sprite_t ground_top;
 } background_t;
 
-/* Background helpers */
+/* Background functions */
 
 background_t background_setup(bg_time_mode_t time_mode);
 

@@ -49,7 +49,7 @@ typedef struct
     sfx_channel_t channels[SFX_NUM_CHANNELS];
 } audio_t;
 
-/* Audio helpers */
+/* Audio functions */
 
 audio_t *audio_setup(const u16 sample_rate, const u8 buffers);
 

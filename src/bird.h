@@ -19,13 +19,12 @@ typedef enum bird_state
 #define BIRD_DEAD_DELAY     1000
 
 /* Colors */
-#define BIRD_NUM_COLORS     3
-
 typedef enum bird_color
 {
     BIRD_COLOR_YELLOW,
     BIRD_COLOR_RED,
-    BIRD_COLOR_BLUE
+    BIRD_COLOR_BLUE,
+    BIRD_NUM_COLORS
 } bird_color_t;
 
 /* Animation */
@@ -76,7 +75,7 @@ typedef struct
     float sine_y;
 } bird_t;
 
-/* Bird helpers */
+/* Bird functions */
 
 bird_t bird_setup(bird_color_t color_type);
 
