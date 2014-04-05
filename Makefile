@@ -57,7 +57,7 @@ OBJCOPY = $(GCCN64PREFIX)objcopy
 # Compilation pipeline
 
 # ROM Image
-$(PROG_NAME).v64: $(PROG_NAME).elf $(PROG_NAME).dfs $(SRC_ARCHIVE)
+$(PROG_NAME).v64: $(PROG_NAME).elf $(PROG_NAME).dfs
 	$(OBJCOPY) $(PROG_NAME).elf $(PROG_NAME).bin -O binary
 	rm -f $(PROG_NAME).v64
 	$(N64TOOL) \
@@ -66,8 +66,7 @@ $(PROG_NAME).v64: $(PROG_NAME).elf $(PROG_NAME).dfs $(SRC_ARCHIVE)
 		-h $(HEADERPATH)/$(HEADERNAME) \
 		-o $(PROG_NAME).v64  \
 		$(PROG_NAME).bin \
-		-s $(DFS_OFFSET) $(PROG_NAME).dfs \
-		-s $(SRC_OFFSET) $(SRC_ARCHIVE)
+		-s $(DFS_OFFSET) $(PROG_NAME).dfs
 	$(CHKSUM64PATH) $(PROG_NAME).v64
 
 # Linked binary
