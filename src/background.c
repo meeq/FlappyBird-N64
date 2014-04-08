@@ -148,19 +148,40 @@ inline static void background_draw_color(const bg_fill_color_t fill)
 
 void background_draw_sprite(const background_t bg, const bg_fill_sprite_t fill)
 {
+    sprite_t *sprite = bg.sprites[fill.sprite];
+    if ( sprite == NULL ) return;
+
     graphics_rdp_texture_fill( g_graphics );
     mirror_t mirror = MIRROR_DISABLED;
-    sprite_t *sprite = bg.sprites[fill.sprite];
     const s16 scroll_x = fill.scroll_x;
     const u16 slices = sprite->hslices, max_w = g_graphics->width;
     s16 tx, bx;
     u16 ty = fill.y, by = fill.y + sprite->height - 1;
+
+    /* Take advantage of native tiling if the sprite is only 1 slice wide */
     if ( slices > 1 )
     {
+        /* Small sprites can be drawn using fewer rectangles and tiling */
+        rdp_sync( SYNC_PIPE );
+        rdp_load_texture( 0, 0, mirror, sprite );
+        /* If cut off on the left side, draw clipped version separately */
+        tx = scroll_x;
+        if ( tx < 0 )
+        {
+            bx = tx + fill.scroll_w;
+            rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
+            tx += fill.scroll_w;
+        }
+        /* Draw full-tiles for the rest */
+        bx = max_w;
+        rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
+    }
+    else
+    {
         /* Manually tile horizontally-sliced repeating fills */
+        u8 slice;
         s16 repeat_x = scroll_x;
         const u16 repeat_w = sprite->width / slices;
-        u8 slice;
         while ( repeat_x < max_w )
         {
             for (slice = 0;
@@ -174,23 +195,6 @@ void background_draw_sprite(const background_t bg, const bg_fill_sprite_t fill)
                 rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
             }
         }
-    }
-    else
-    {
-        /* Small sprites can be drawn using fewer rectangles and tiling */
-        rdp_sync( SYNC_PIPE );
-        rdp_load_texture( 0, 0, mirror, sprite );
-        /* If cut off on the left side, draw clipped version separately */
-        tx = scroll_x;
-        if (tx < 0)
-        {
-            bx = tx + fill.scroll_w;
-            rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
-            tx += fill.scroll_w;
-        }
-        /* Draw full-tiles for the rest */
-        bx = max_w;
-        rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
     }
 }
 
