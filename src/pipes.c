@@ -14,6 +14,7 @@ pipes_t pipes_setup(void)
         .cap_sprite = read_dfs_sprite( "/gfx/pipe-cap.sprite" ),
         .tube_sprite = read_dfs_sprite( "/gfx/pipe-tube.sprite" )
     };
+    pipes_reset( &pipes );
     return pipes;
 }
 
