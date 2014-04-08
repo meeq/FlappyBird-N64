@@ -46,32 +46,39 @@ int main(void)
         /* Update controller state */
         controller_scan();
         const controllers_state_t controllers = get_keys_down();
+        const gamepad_state_t gamepad = controllers.c[0];
 
         /* Calculate frame timing */
-        fps_tick( &fps, controllers.c[0] );
+        fps_tick( &fps, gamepad );
 
-        /* Update game state */
+        /* Update bird state before the rest of the world */
         bird_state_t old_state = bird.state;
-        bird_tick( &bird, controllers.c[0] );
+        bird_tick( &bird, gamepad );
+
+        /* Change the background when the bird resets after dying */
         if ( old_state != bird.state && old_state == BIRD_STATE_DEAD )
         {
             background_randomize_time_mode( &bg );
         }
+
+        /* Update the world state based on the bird state */
         switch (bird.state)
         {
             case BIRD_STATE_TITLE:
             case BIRD_STATE_READY:
-                background_tick( &bg, controllers.c[0] );
+                background_tick( &bg, gamepad );
                 pipes_reset( &pipes );
                 break;
             case BIRD_STATE_PLAY:
-                background_tick( &bg, controllers.c[0] );
+                background_tick( &bg, gamepad );
                 pipes_tick( &pipes );
                 collision_tick( &bird, &pipes );
                 break;
             default:
                 break;
         }
+
+        /* Update the UI based on the world state */
         ui_tick( &ui, bird, bg );
 
         /* Buffer sound effects */
