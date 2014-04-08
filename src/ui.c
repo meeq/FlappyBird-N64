@@ -5,6 +5,7 @@
 
 inline static void ui_set_time_mode(ui_t *ui, bg_time_mode_t time_mode)
 {
+    ui->time_mode = time_mode;
     if ( time_mode == BG_DAY_TIME )
     {
         ui->text_color = UI_DARK_COLOR;
@@ -15,7 +16,6 @@ inline static void ui_set_time_mode(ui_t *ui, bg_time_mode_t time_mode)
         ui->text_color = UI_LIGHT_COLOR;
         ui->shadow_color = UI_DARK_COLOR;
     }
-    ui->time_mode = time_mode;
 }
 
 ui_t ui_setup(const background_t bg)
@@ -23,7 +23,11 @@ ui_t ui_setup(const background_t bg)
     ui_t ui = {
         .current_score = 0,
         .high_score = 0,
-        .clear_color = UI_CLEAR_COLOR
+        .new_high_score = FALSE,
+        .clear_color = UI_CLEAR_COLOR,
+        .flash_color = UI_FLASH_COLOR,
+        .flash = FALSE,
+        .gameover_ms = 0
     };
     ui_set_time_mode( &ui, bg.time_mode );
     char *sprite_files[UI_NUM_SPRITES] = {
@@ -53,9 +57,17 @@ void ui_free(ui_t *ui)
 
 void ui_tick(ui_t *ui, const bird_t bird, const background_t bg)
 {
+    const u64 ticks_ms = get_ticks_ms();
     /* Synchronize bird state to UI */
-    ui->state = bird.state;
     ui->current_score = bird.score;
+    ui->state = bird.state;
+    /* Flash the screen for a split second after the bird dies */
+    if ( bird.state == BIRD_STATE_DYING ||
+         bird.state == BIRD_STATE_DEAD )
+    {
+        ui->flash = ticks_ms - bird.die_ms <= UI_DEATH_FLASH_MS;
+        ui->gameover_ms = bird.splat_ms;
+    }
     /* Synchronize background state to UI */
     if ( ui->time_mode != bg.time_mode )
     {
@@ -230,8 +242,23 @@ inline static void ui_highscores_draw(const ui_t ui, u16 score)
     ui_highscores_score_draw( ui, ui.high_score, center_y + 10);
 }
 
+inline static void ui_flash_draw(const ui_t ui)
+{
+    graphics_rdp_color_fill( g_graphics );
+    rdp_set_primitive_color( ui.flash_color );
+    const u16 bx = g_graphics->width - 1;
+    const u16 by = g_graphics->height - 1;
+    rdp_draw_filled_rectangle( 0, 0, bx, by );
+}
+
 void ui_draw(const ui_t ui)
 {
+    if ( ui.flash )
+    {
+        ui_flash_draw( ui );
+        return;
+    }
+    const u64 ticks_ms = get_ticks_ms();
     switch (ui.state)
     {
         case BIRD_STATE_TITLE:
@@ -247,10 +274,16 @@ void ui_draw(const ui_t ui)
             ui_score_draw( ui, ui.current_score );
             break;
         case BIRD_STATE_DEAD:
-            ui_heading_draw( ui, UI_HEADING_GAME_OVER );
-            ui_scoreboard_draw( ui );
-            ui_medal_draw( ui, ui.current_score );
-            ui_highscores_draw( ui, ui.current_score );
+            if ( ticks_ms - ui.gameover_ms >= UI_DEATH_TITLE_MS )
+            {
+                ui_heading_draw( ui, UI_HEADING_GAME_OVER );
+            }
+            if ( ticks_ms - ui.gameover_ms >= UI_DEATH_SCORE_MS )
+            {
+                ui_scoreboard_draw( ui );
+                ui_medal_draw( ui, ui.current_score );
+                ui_highscores_draw( ui, ui.current_score );
+            }
             break;
     }
 }

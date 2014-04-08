@@ -9,6 +9,13 @@
 
 /* UI definitions */
 
+#define UI_DEATH_FLASH_MS   64
+#define UI_FLASH_COLOR      graphics_make_color( 0xFF, 0xFF, 0xFF, 0xFF )
+
+#define UI_DEATH_TITLE_MS   500
+#define UI_DEATH_SCORE_MS   1000
+#define UI_DEATH_POINT_MS   32
+
 #define UI_DARK_COLOR       graphics_make_color( 0x57, 0x37, 0x47, 0xFF )
 #define UI_LIGHT_COLOR      graphics_make_color( 0xFF, 0xFF, 0xFF, 0xFF )
 #define UI_CLEAR_COLOR      graphics_make_color( 0x00, 0x00, 0x00, 0x00 )
@@ -52,11 +59,18 @@ typedef struct
     bird_state_t state;
     u16 current_score;
     u16 high_score;
+    bool new_high_score;
+    u16 current_score_acc;
+    u16 high_score_acc;
     bg_time_mode_t time_mode;
     u32 text_color;
     u32 shadow_color;
     u32 clear_color;
     sprite_t *sprites[UI_NUM_SPRITES];
+    /* Death */
+    bool flash;
+    u32 flash_color;
+    u64 gameover_ms;
 } ui_t;
 
 /* UI functions */

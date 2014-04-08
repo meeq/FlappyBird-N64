@@ -25,7 +25,7 @@ typedef enum pipe_colors
 #define PIPE_START_X        1.1
 #define PIPE_MIN_X          -0.1
 #define PIPE_MAX_Y          0.5
-#define PIPE_MAX_BIAS_Y     0.3
+#define PIPE_MAX_BIAS_Y     0.4
 
 typedef struct
 {

@@ -17,7 +17,8 @@ bird_t bird_setup(bird_color_t color_type)
         .state = BIRD_STATE_TITLE,
         .color_type = color_type,
         .score = 0,
-        .dead_ms = 0,
+        .die_ms = 0,
+        .splat_ms = 0,
         .anim_ms = 0,
         .anim_frame = 0,
         .x = BIRD_TITLE_X,
@@ -162,10 +163,11 @@ static void bird_tick_velocity(bird_t *bird, const gamepad_state_t gamepad)
             dy = 0.0;
             if ( bird->state != BIRD_STATE_DYING )
             {
+                bird->die_ms = ticks_ms;
                 audio_play_sfx( g_audio, SFX_HIT );
             }
+            bird->splat_ms = ticks_ms;
             bird->state = BIRD_STATE_DEAD;
-            bird->dead_ms = ticks_ms;
         }
         bird->y = y;
         bird->dy = dy;
@@ -187,7 +189,7 @@ void bird_tick(bird_t *bird, const gamepad_state_t gamepad)
         case BIRD_STATE_TITLE:
         case BIRD_STATE_DEAD:
             if (( gamepad.A || gamepad.start ) &&
-                ( ticks_ms - bird->dead_ms > BIRD_DEAD_DELAY ))
+                ( ticks_ms - bird->splat_ms > BIRD_RESET_DELAY ))
             {
                 /* Change the bird color after each death */
                 if ( bird->state == BIRD_STATE_DEAD )
