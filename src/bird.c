@@ -45,7 +45,7 @@ void bird_draw(const bird_t bird)
     const int cy = BG_GROUND_TOP_Y >> 1;
     /* Calculate bird Y position */
     float bird_y = bird.y;
-    switch (bird.state)
+    switch ( bird.state )
     {
         case BIRD_STATE_READY:
         case BIRD_STATE_TITLE:
@@ -54,8 +54,8 @@ void bird_draw(const bird_t bird)
         default:
             break;
     }
-    if (bird_y > BIRD_MAX_Y) bird_y = BIRD_MAX_Y;
-    if (bird_y < BIRD_MIN_Y) bird_y = BIRD_MIN_Y;
+    if ( bird_y > BIRD_MAX_Y ) bird_y = BIRD_MAX_Y;
+    if ( bird_y < BIRD_MIN_Y ) bird_y = BIRD_MIN_Y;
     bird_y = cy + bird_y * cy;
     /* Calculate bird corner coordinates from center point */
     const u8 bird_half_w = bird.slice_w >> 1,
@@ -109,7 +109,7 @@ inline static void bird_tick_dx(bird_t *bird)
     {
         bird->dx += BIRD_ACCEL_X;
         bird->x -= bird->dx;
-        if (bird->x < BIRD_PLAY_X) bird->x = BIRD_PLAY_X;
+        if ( bird->x < BIRD_PLAY_X ) bird->x = BIRD_PLAY_X;
     }
 }
 
@@ -119,14 +119,14 @@ inline static void bird_tick_sine_wave(bird_t *bird)
     bird->y = 0.0;
     /* Periodically update the "floating" effect */
     const u64 ticks_ms = get_ticks_ms();
-    if (ticks_ms - bird->sine_ms >= BIRD_SINE_RATE)
+    if ( ticks_ms - bird->sine_ms >= BIRD_SINE_RATE )
     {
         bird_tick_dx( bird );
         /* Increment the "floating" effect sine wave */
         bird->sine_ms = ticks_ms;
         bird->sine_x += BIRD_SINE_INCREMENT;
         bird->sine_y = sinf( bird->sine_x ) * BIRD_SINE_DAMPEN;
-        while (bird->sine_x >= BIRD_SINE_CYCLE)
+        while ( bird->sine_x >= BIRD_SINE_CYCLE )
         {
             bird->sine_x -= BIRD_SINE_CYCLE;
         }
@@ -220,7 +220,7 @@ void bird_tick(bird_t *bird, const gamepad_state_t gamepad)
     /* Cycle through bird colors with right trigger */
     if ( gamepad.R )
     {
-        if (++bird->color_type >= BIRD_NUM_COLORS)
+        if ( ++bird->color_type >= BIRD_NUM_COLORS )
         {
             bird->color_type = 0;
         }

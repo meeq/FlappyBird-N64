@@ -19,9 +19,9 @@ pipes_t pipes_setup(void)
 
 void pipes_free(pipes_t *pipes)
 {
-    free(pipes->cap_sprite);
+    free( pipes->cap_sprite );
     pipes->cap_sprite = NULL;
-    free(pipes->tube_sprite);
+    free( pipes->tube_sprite );
     pipes->tube_sprite = NULL;
 }
 
@@ -107,8 +107,9 @@ void pipes_draw(const pipes_t pipes)
     s16 cx, cy, tx, ty, bx, by, gap_y;
 
     graphics_rdp_texture_fill( g_graphics );
-    mirror_t mirror = MIRROR_DISABLED;
     rdp_sync( SYNC_PIPE );
+    mirror_t mirror = MIRROR_DISABLED;
+
     for (u8 i = 0; i < PIPES_MAX_NUM; i++)
     {
         pipe = pipes.n[i];
@@ -143,5 +144,4 @@ void pipes_draw(const pipes_t pipes)
         by = ty + PIPE_CAP_HEIGHT - 1;
         rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
     }
-
 }

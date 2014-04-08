@@ -21,7 +21,7 @@ audio_t *audio_setup(const u16 sample_rate, const u8 buffers)
     pcm_sound_t *sfx;
     for (u8 i = 0; i < SFX_NUM_SOUNDS; i++)
     {
-        sfx = read_dfs_pcm_sound( sfx_files[i], sample_rate, 1);
+        sfx = read_dfs_pcm_sound( sfx_files[i], sample_rate, 1 );
         audio->sfx_cache[i] = sfx;
     }
     /* Setup the sound effects channels */
@@ -38,8 +38,8 @@ void audio_free(audio_t *audio)
     /* Clear the sound effects cache */
     for (u8 i = 0; i < SFX_NUM_SOUNDS; i++)
     {
-        free(audio->sfx_cache[i]->data);
-        free(audio->sfx_cache[i]);
+        free( audio->sfx_cache[i]->data );
+        free( audio->sfx_cache[i] );
         audio->sfx_cache[i] = NULL;
     }
     /* Clear sound effects pointers from playback channels */

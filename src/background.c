@@ -113,8 +113,8 @@ inline void background_tick_scroll(bg_fill_sprite_t *fill)
     double x = fill->scroll_x;
     const u16 w = fill->scroll_w;
     x += fill->scroll_dx;
-    while (x > w) x -= w;
-    while (x < -w) x += w;
+    while ( x > w ) x -= w;
+    while ( x < -w ) x += w;
     fill->scroll_x = x;
 }
 
@@ -127,7 +127,7 @@ void background_tick(background_t *bg, const gamepad_state_t gamepad)
     }
     /* Scroll the background */
     const u64 ticks_ms = get_ticks_ms();
-    if (ticks_ms - bg->scroll_ms >= BG_SCROLL_RATE)
+    if ( ticks_ms - bg->scroll_ms >= BG_SCROLL_RATE )
     {
         bg->scroll_ms = ticks_ms;
         background_tick_scroll( &bg->cloud_top );
@@ -155,13 +155,13 @@ void background_draw_sprite(const background_t bg, const bg_fill_sprite_t fill)
     const u16 slices = sprite->hslices, max_w = g_graphics->width;
     s16 tx, bx;
     u16 ty = fill.y, by = fill.y + sprite->height - 1;
-    if (slices > 1)
+    if ( slices > 1 )
     {
         /* Manually tile horizontally-sliced repeating fills */
         s16 repeat_x = scroll_x;
         const u16 repeat_w = sprite->width / slices;
         u8 slice;
-        while (repeat_x < max_w)
+        while ( repeat_x < max_w )
         {
             for (slice = 0;
                  slice < slices && repeat_x < max_w;
@@ -174,7 +174,9 @@ void background_draw_sprite(const background_t bg, const bg_fill_sprite_t fill)
                 rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
             }
         }
-    } else {
+    }
+    else
+    {
         /* Small sprites can be drawn using fewer rectangles and tiling */
         rdp_sync( SYNC_PIPE );
         rdp_load_texture( 0, 0, mirror, sprite );

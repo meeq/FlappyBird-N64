@@ -41,7 +41,7 @@ int main(void)
     ui_t ui = ui_setup( bg );
 
     /* Run the main loop */
-    while(1)
+    while ( TRUE )
     {
         /* Update controller state */
         controller_scan();
@@ -52,11 +52,11 @@ int main(void)
         fps_tick( &fps, gamepad );
 
         /* Update bird state before the rest of the world */
-        bird_state_t old_state = bird.state;
+        const bird_state_t prev_state = bird.state;
         bird_tick( &bird, gamepad );
 
         /* Reset the world when the bird resets after dying */
-        if ( old_state != bird.state && old_state == BIRD_STATE_DEAD )
+        if ( prev_state != bird.state && prev_state == BIRD_STATE_DEAD )
         {
             background_randomize_time_mode( &bg );
             pipes_reset( &pipes );
