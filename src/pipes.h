@@ -31,6 +31,7 @@ typedef struct
 {
     float x;
     float y; /* Min: -1.0   Max: 1.0 */
+    bool has_scored;
 } pipe_t;
 
 typedef struct

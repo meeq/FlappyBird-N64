@@ -8,7 +8,7 @@
 
 #define COLLISION_PIPE_HALF_WIDTH   0.052
 #define COLLISION_PIPE_HALF_GAP     0.23
-#define COLLISION_SCORE_X_TOLERANCE 0.0015
+#define COLLISION_SCORE_X_TOLERANCE 0.01
 
 void collision_tick(bird_t *bird, pipes_t *pipes);
 
