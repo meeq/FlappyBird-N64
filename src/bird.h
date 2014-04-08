@@ -42,7 +42,7 @@ typedef enum bird_color
 /* Flap */
 #define BIRD_VELOCITY_RATE  16
 #define BIRD_FLAP_VELOCITY  0.0270
-#define BIRD_GRAVITY_ACCEL  0.0012
+#define BIRD_GRAVITY_ACCEL  0.0013
 
 /* Sine "floating" effect */
 #define BIRD_SINE_RATE      20
