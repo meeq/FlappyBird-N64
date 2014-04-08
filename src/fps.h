@@ -17,6 +17,7 @@
 
 typedef struct
 {
+    bool should_draw;
     u64 frame_ms;
     u64 total_frames;
     u64 total_misses;
@@ -31,7 +32,7 @@ typedef struct
 
 fps_counter_t fps_setup(void);
 
-void fps_tick(fps_counter_t *fps);
+void fps_tick(fps_counter_t *fps, const gamepad_state_t gamepad);
 
 void fps_draw(const fps_counter_t fps);
 

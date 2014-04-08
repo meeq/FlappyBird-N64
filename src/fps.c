@@ -5,6 +5,7 @@
 fps_counter_t fps_setup(void)
 {
     fps_counter_t fps = {
+        .should_draw = FALSE,
         .frame_ms = 0,
         .total_frames = 0,
         .total_misses = 0,
@@ -20,8 +21,14 @@ fps_counter_t fps_setup(void)
     return fps;
 }
 
-void fps_tick(fps_counter_t *fps)
+void fps_tick(fps_counter_t *fps, const gamepad_state_t gamepad)
 {
+    /* Toggle drawing flag on C-up */
+    if ( gamepad.C_up )
+    {
+        fps->should_draw = !fps->should_draw;
+    }
+
     /* Increment frame counters */
     fps->total_frames++;
     fps->frames_per_stat++;
@@ -59,6 +66,8 @@ void fps_tick(fps_counter_t *fps)
 
 void fps_draw(const fps_counter_t fps)
 {
+    if ( !fps.should_draw ) return;
+
     graphics_detach_rdp( g_graphics );
     int disp = g_graphics->disp;
 

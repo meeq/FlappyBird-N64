@@ -43,16 +43,16 @@ int main(void)
     /* Run the main loop */
     while(1)
     {
-        /* Calculate frame timing */
-        fps_tick( &fps );
-
         /* Update controller state */
         controller_scan();
-        const controllers_state_t keys = get_keys_down();
+        const controllers_state_t controllers = get_keys_down();
+
+        /* Calculate frame timing */
+        fps_tick( &fps, controllers.c[0] );
 
         /* Update game state */
         bird_state_t old_state = bird.state;
-        bird_tick( &bird, keys.c[0] );
+        bird_tick( &bird, controllers.c[0] );
         if ( old_state != bird.state && old_state == BIRD_STATE_DEAD )
         {
             background_randomize_time_mode( &bg );
@@ -61,11 +61,11 @@ int main(void)
         {
             case BIRD_STATE_TITLE:
             case BIRD_STATE_READY:
-                background_tick( &bg, keys.c[0] );
+                background_tick( &bg, controllers.c[0] );
                 pipes_reset( &pipes );
                 break;
             case BIRD_STATE_PLAY:
-                background_tick( &bg, keys.c[0] );
+                background_tick( &bg, controllers.c[0] );
                 pipes_tick( &pipes );
                 collision_tick( &bird, &pipes );
                 break;
