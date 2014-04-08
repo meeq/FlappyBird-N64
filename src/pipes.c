@@ -39,35 +39,32 @@ inline static u8 pipe_prev_index(u8 i)
 inline static float pipe_random_y(void)
 {
     float y = ((float) rand() / (float) RAND_MAX) * PIPE_MAX_Y;
-    if ( roundf( (float) rand() / (float) RAND_MAX ) ) y *= -1.0;
+    if ( roundf( (float) rand() / (float) RAND_MAX ) ) y = -y;
     return y;
 }
 
 inline static float pipe_random_bias_y(const float prev_y)
 {
     float bias_y = ((float) rand() / (float) RAND_MAX) * PIPE_MAX_BIAS_Y;
-    if ( roundf( (float) rand() / (float) RAND_MAX ) ) bias_y *= -1.0;
+    if ( roundf( (float) rand() / (float) RAND_MAX ) ) bias_y = -bias_y;
     float y = prev_y + bias_y;
-    if ( y > PIPE_MAX_Y ) y = PIPE_MAX_Y;
-    if ( y < -PIPE_MAX_Y ) y = -PIPE_MAX_Y;
+    /* If the pipe will be outside the limit, reverse the bias */
+    if ( y > PIPE_MAX_Y || y < -PIPE_MAX_Y ) y = prev_y - bias_y;
     return y;
 }
 
 void pipes_reset(pipes_t *pipes)
 {
-    float y = pipe_random_y(), prev_y = y;
+    float y = pipe_random_y();
     for (u8 i = 0; i < PIPES_MAX_NUM; i++)
     {
-        if (i > 0)
-        {
-            y = pipe_random_bias_y( prev_y );
-        }
         pipe_t pipe = {
             .x = PIPE_START_X + (i * PIPE_GAP_X),
             .y = y
         };
         pipes->n[i] = pipe;
-        prev_y = y;
+        /* Pipes are positioned relative to the previous pipe */
+        y = pipe_random_bias_y( y );
     }
     pipes->color = pipes_random_color();
     pipes->scroll_ms = 0;
@@ -87,7 +84,7 @@ void pipes_tick(pipes_t *pipes)
         for (u8 i = 0, j; i < PIPES_MAX_NUM; i++)
         {
             pipes->n[i].x += PIPES_SCROLL_DX;
-            /* Has the pipe gone off-screen? */
+            /* Has the pipe gone off the left of the screen? */
             if (pipes->n[i].x < PIPE_MIN_X)
             {
                 j = pipe_prev_index( i );
@@ -104,8 +101,7 @@ void pipes_draw(const pipes_t pipes)
     sprite_t *tube = pipes.tube_sprite;
     sprite_t *cap = pipes.cap_sprite;
     const u8 color = pipes.color, cap_hslices = cap->hslices;
-    pipe_t pipe;
-    s16 cx, cy, tx, ty, bx, by, gap_y;
+    s16 cx, cy, tx, ty, bx, by, gap_cy;
 
     graphics_rdp_texture_fill( g_graphics );
     rdp_sync( SYNC_PIPE );
@@ -113,35 +109,36 @@ void pipes_draw(const pipes_t pipes)
 
     for (u8 i = 0; i < PIPES_MAX_NUM; i++)
     {
-        pipe = pipes.n[i];
+        const pipe_t pipe = pipes.n[i];
         /* Calculate X position */
         cx = g_graphics->width * pipe.x;
         tx = cx - (PIPE_TUBE_WIDTH >> 1);
         bx = cx + (PIPE_TUBE_WIDTH >> 1) - 1;
-        if (bx < 0 || tx >= g_graphics->width) continue;
+        /* Don't bother drawing the pipe if it is off-screen */
+        if ( bx < 0 || tx >= g_graphics->width ) continue;
         /* Calculate Y position */
         cy = (BG_GROUND_TOP_Y >> 1);
-        gap_y = cy + pipe.y * cy;
+        gap_cy = cy + pipe.y * cy;
         /* Load tube texture */
         rdp_load_texture_stride( 0, 0, mirror, tube, color );
         /* Top tube */
         ty = 0;
-        by = gap_y - (PIPE_GAP_Y >> 1);
+        by = gap_cy - (PIPE_GAP_Y >> 1);
         rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
         /* Bottom tube */
-        ty = gap_y + (PIPE_GAP_Y >> 1);
+        ty = gap_cy + (PIPE_GAP_Y >> 1);
         by = BG_GROUND_TOP_Y - 1;
         rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
         /* Load top cap texture */
         rdp_load_texture_stride( 0, 0, mirror, cap, color + cap_hslices );
         /* Top cap */
-        ty = gap_y - (PIPE_GAP_Y >> 1);
+        ty = gap_cy - (PIPE_GAP_Y >> 1);
         by = ty + PIPE_CAP_HEIGHT - 1;
         rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
         /* Load bottom cap texture */
         rdp_load_texture_stride( 0, 0, mirror, cap, color );
         /* Bottom cap */
-        ty = gap_y + (PIPE_GAP_Y >> 1) - PIPE_CAP_HEIGHT;
+        ty = gap_cy + (PIPE_GAP_Y >> 1) - PIPE_CAP_HEIGHT;
         by = ty + PIPE_CAP_HEIGHT - 1;
         rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
     }
