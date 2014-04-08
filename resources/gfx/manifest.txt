@@ -13,6 +13,8 @@ headings        1   2
 how-to          1   1
 logo            1   1
 medal           1   4
+new             1   1
 pipe-cap        2   2
 pipe-tube       2   1
 scoreboard      1   1
+sparkle         3   1
