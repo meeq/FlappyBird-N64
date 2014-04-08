@@ -55,10 +55,11 @@ int main(void)
         bird_state_t old_state = bird.state;
         bird_tick( &bird, gamepad );
 
-        /* Change the background when the bird resets after dying */
+        /* Reset the world when the bird resets after dying */
         if ( old_state != bird.state && old_state == BIRD_STATE_DEAD )
         {
             background_randomize_time_mode( &bg );
+            pipes_reset( &pipes );
         }
 
         /* Update the world state based on the bird state */
@@ -67,7 +68,6 @@ int main(void)
             case BIRD_STATE_TITLE:
             case BIRD_STATE_READY:
                 background_tick( &bg, gamepad );
-                pipes_reset( &pipes );
                 break;
             case BIRD_STATE_PLAY:
                 background_tick( &bg, gamepad );

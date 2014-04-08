@@ -10,7 +10,7 @@ pipes_t pipes_setup(void)
 {
     pipes_t pipes = {
         .color = PIPE_COLOR_GREEN,
-        .reset_ms = 0, .scroll_ms = get_ticks_ms(),
+        .scroll_ms = 0,
         .cap_sprite = read_dfs_sprite( "/gfx/pipe-cap.sprite" ),
         .tube_sprite = read_dfs_sprite( "/gfx/pipe-tube.sprite" )
     };
@@ -54,7 +54,6 @@ inline static float pipe_random_bias_y(const float prev_y)
 
 void pipes_reset(pipes_t *pipes)
 {
-    if (pipes->reset_ms == pipes->scroll_ms) return;
     float y = pipe_random_y(), prev_y = y;
     for (u8 i = 0; i < PIPES_MAX_NUM; i++)
     {
@@ -70,17 +69,24 @@ void pipes_reset(pipes_t *pipes)
         prev_y = y;
     }
     pipes->color = pipes_random_color();
-    pipes->reset_ms = pipes->scroll_ms = get_ticks_ms();
+    pipes->scroll_ms = 0;
 }
 
 void pipes_tick(pipes_t *pipes)
 {
     const u64 ticks_ms = get_ticks_ms();
-    if (ticks_ms - pipes->scroll_ms >= PIPES_SCROLL_RATE)
+    /* Start scrolling after a reset */
+    if ( pipes->scroll_ms == 0 )
+    {
+        pipes->scroll_ms = ticks_ms;
+    }
+    /* Scroll the pipes and reset them as they go off-screen */
+    if ( ticks_ms - pipes->scroll_ms >= PIPES_SCROLL_RATE )
     {
         for (u8 i = 0, j; i < PIPES_MAX_NUM; i++)
         {
             pipes->n[i].x += PIPES_SCROLL_DX;
+            /* Has the pipe gone off-screen? */
             if (pipes->n[i].x < PIPE_MIN_X)
             {
                 j = pipe_prev_index( i );
