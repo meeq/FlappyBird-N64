@@ -23,16 +23,16 @@ int main(void)
     dfs_init( DFS_ROM_LOCATION );
     controller_init();
 
+    /* Initialize audio */
+    g_audio = audio_setup( FREQUENCY_44KHZ, 1 );
+    audio_write_silence();
+
     /* Initialize display */
     g_graphics = graphics_setup(
         RESOLUTION_320x240, DEPTH_16_BPP,
         BUFFERING_DOUBLE, GAMMA_NONE, ANTIALIAS_RESAMPLE
     );
     fps_counter_t fps = fps_setup();
-
-    /* Initialize audio */
-    g_audio = audio_setup( FREQUENCY_44KHZ, 1 );
-    audio_write_silence();
 
     /* Initialize game state */
     background_t bg = background_setup( BG_DAY_TIME );
