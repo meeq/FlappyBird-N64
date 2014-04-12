@@ -18,10 +18,10 @@
 typedef struct
 {
     bool should_draw;
-    u64 frame_ms;
-    u64 total_frames;
-    u64 total_misses;
-    u64 stat_ms;
+    u32 frame_ms;
+    u32 total_frames;
+    u32 total_misses;
+    u32 stat_ms;
     u8 frames_per_stat;
     u8 stat_count;
     double stat_fps[FPS_NUM_HISTORY];
