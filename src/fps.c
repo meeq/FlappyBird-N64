@@ -35,14 +35,12 @@ void fps_tick(fps_counter_t *fps, const gamepad_state_t gamepad)
 
     /* Check timing */
     const u64 ticks_ms = get_ticks_ms();
-    const s64 frame_diff_ms = ticks_ms - fps->frame_ms;
-    if ( fps->total_frames > 1 && frame_diff_ms > FPS_FRAME_PERIOD )
+    if ( fps->total_frames > 1 && ticks_ms - fps->frame_ms > FPS_FRAME_PERIOD )
     {
-        s64 frame_period_diff = ticks_ms - fps->frame_ms - FPS_FRAME_PERIOD;
+        u8 frame_period_diff = ticks_ms - fps->frame_ms - FPS_FRAME_PERIOD;
         fps->total_misses += frame_period_diff / FPS_FRAME_PERIOD;
     }
-    const s64 stat_diff_ms = ticks_ms - fps->stat_ms;
-    if ( stat_diff_ms >= FPS_STAT_PERIOD )
+    if ( ticks_ms - fps->stat_ms >= FPS_STAT_PERIOD )
     {
         double stat_fps = fps->frames_per_stat / FPS_STATS_PER_SEC;
         fps->stat_fps[fps->stat_count % FPS_NUM_HISTORY] = stat_fps;
@@ -60,7 +58,7 @@ void fps_tick(fps_counter_t *fps, const gamepad_state_t gamepad)
 
         /* Reset the stat counters */
         fps->frames_per_stat = 0;
-        s64 stat_period_diff = ticks_ms - fps->stat_ms - FPS_STAT_PERIOD;
+        u16 stat_period_diff = ticks_ms - fps->stat_ms - FPS_STAT_PERIOD;
         fps->stat_ms = ticks_ms - stat_period_diff;
     }
     fps->frame_ms = ticks_ms;
