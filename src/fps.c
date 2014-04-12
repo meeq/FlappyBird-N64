@@ -75,11 +75,12 @@ void fps_draw(const fps_counter_t fps)
 
     char fps_text[32];
     graphics_set_color( FPS_TEXT_COLOR, FPS_CLEAR_COLOR );
+    const u64 ticks_ms = get_ticks_ms();
 
-    sprintf( fps_text, "FPS: %05.2f", fps.average_fps );
+    sprintf( fps_text, "FPS: %05.2f, MS: %llu", fps.average_fps, ticks_ms );
     graphics_draw_text( disp, 10, g_graphics->height - 33, fps_text );
 
     u32 frames = fps.total_frames, misses = fps.total_misses;
-    sprintf( fps_text, "Total Frames: %d, Misses: %d", frames, misses );
+    sprintf( fps_text, "Total Frames: %u, Misses: %u", frames, misses );
     graphics_draw_text( disp, 10, g_graphics->height - 20, fps_text );
 }
