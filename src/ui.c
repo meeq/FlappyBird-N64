@@ -103,8 +103,7 @@ inline static void ui_flash_tick(ui_t *ui)
         if ( !ui->did_flash )
         {
             const bool was_flash_draw = ui->flash_draw;
-            const s64 die_diff_ms = ticks_ms - ui->die_ms;
-            ui->flash_draw = die_diff_ms <= UI_DEATH_FLASH_MS;
+            ui->flash_draw = ticks_ms - ui->die_ms <= UI_DEATH_FLASH_MS;
             if ( was_flash_draw && !ui->flash_draw )
             {
                 ui->did_flash = TRUE;
@@ -131,7 +130,7 @@ inline static void ui_gameover_tick(ui_t *ui)
     }
     /* Animate the Game Over UI */
     const u64 ticks_ms = get_ticks_ms();
-    const s64 dead_diff_ms = ticks_ms - ui->dead_ms;
+    const u64 dead_diff_ms = ticks_ms - ui->dead_ms;
     /* Only show the scores and medal after the scoreboard appears */
     ui->score_draw = FALSE;
     ui->medal_draw = FALSE;
@@ -151,7 +150,7 @@ inline static void ui_gameover_tick(ui_t *ui)
     }
     if ( ui->board_draw )
     {
-        const s64 board_diff_ms = dead_diff_ms - UI_DEATH_BOARD_DELAY;
+        const u64 board_diff_ms = dead_diff_ms - UI_DEATH_BOARD_DELAY;
         sprite_t *scoreboard = ui->sprites[UI_SPRITE_SCOREBOARD];
         const u16 max_y = g_graphics->height;
         const u16 center_y = max_y >> 1;
@@ -177,8 +176,7 @@ inline static void ui_gameover_tick(ui_t *ui)
         if ( ui->last_score_acc < ui->last_score ||
              ui->high_score_acc < ui->high_score )
         {
-            const s64 score_diff_ms = ticks_ms - ui->score_ms;
-            if ( score_diff_ms >= UI_DEATH_SCORE_DELAY )
+            if ( ticks_ms - ui->score_ms >= UI_DEATH_SCORE_DELAY )
             {
                 if ( ui->last_score_acc < ui->last_score )
                 {
