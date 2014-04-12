@@ -80,7 +80,8 @@ void pipes_tick(pipes_t *pipes)
         pipes->scroll_ms = ticks_ms;
     }
     /* Scroll the pipes and reset them as they go off-screen */
-    if ( ticks_ms - pipes->scroll_ms >= PIPES_SCROLL_RATE )
+    const s64 scroll_diff_ms = ticks_ms - pipes->scroll_ms;
+    if ( scroll_diff_ms >= PIPES_SCROLL_RATE )
     {
         for (u8 i = 0, j; i < PIPES_MAX_NUM; i++)
         {

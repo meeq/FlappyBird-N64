@@ -127,7 +127,8 @@ void background_tick(background_t *bg, const gamepad_state_t gamepad)
     }
     /* Scroll the background */
     const u64 ticks_ms = get_ticks_ms();
-    if ( ticks_ms - bg->scroll_ms >= BG_SCROLL_RATE )
+    const s64 scroll_diff_ms = ticks_ms - bg->scroll_ms;
+    if ( scroll_diff_ms >= BG_SCROLL_RATE )
     {
         bg->scroll_ms = ticks_ms;
         background_tick_scroll( &bg->cloud_top );
