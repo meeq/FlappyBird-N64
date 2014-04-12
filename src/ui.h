@@ -9,12 +9,13 @@
 
 /* UI definitions */
 
-#define UI_DEATH_FLASH_MS   64
+#define UI_DEATH_FLASH_MS   80
 #define UI_FLASH_COLOR      graphics_make_color( 0xFF, 0xFF, 0xFF, 0xFF )
 
-#define UI_DEATH_TITLE_MS   500
-#define UI_DEATH_SCORE_MS   1000
-#define UI_DEATH_POINT_MS   32
+#define UI_DEATH_HEADING_DELAY  600
+#define UI_DEATH_BOARD_DELAY    1500
+#define UI_DEATH_BOARD_DY_MS    200.0
+#define UI_DEATH_SCORE_DELAY    48
 
 #define UI_DARK_COLOR       graphics_make_color( 0x57, 0x37, 0x47, 0xFF )
 #define UI_LIGHT_COLOR      graphics_make_color( 0xFF, 0xFF, 0xFF, 0xFF )
@@ -57,20 +58,29 @@ typedef enum ui_medal_stride
 typedef struct
 {
     bird_state_t state;
-    u16 current_score;
+    /* Scoring */
+    u16 last_score;
     u16 high_score;
     bool new_high_score;
-    u16 current_score_acc;
-    u16 high_score_acc;
+    /* Titles */
     bg_time_mode_t time_mode;
     u32 text_color;
     u32 shadow_color;
     u32 clear_color;
     sprite_t *sprites[UI_NUM_SPRITES];
     /* Death */
-    bool flash;
+    bool flash_draw;
     u32 flash_color;
-    u64 gameover_ms;
+    u64 dead_ms;
+    bool heading_draw;
+    bool board_draw;
+    bool score_draw;
+    bool medal_draw;
+    /* Scoreboard animations */
+    u16 board_y;
+    u64 score_ms;
+    u16 last_score_acc;
+    u16 high_score_acc;
 } ui_t;
 
 /* UI functions */

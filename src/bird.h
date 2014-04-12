@@ -58,7 +58,7 @@ typedef struct
     bird_state_t state;
     bird_color_t color_type;
     u64 die_ms;
-    u64 splat_ms;
+    u64 dead_ms;
     bool played_die_sfx;
     u16 score;
     /* Animation */
