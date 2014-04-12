@@ -126,7 +126,7 @@ void background_tick(background_t *bg, const gamepad_state_t gamepad)
         background_set_time_mode( bg, !bg->time_mode );
     }
     /* Scroll the background */
-    const u64 ticks_ms = get_ticks_ms();
+    const u32 ticks_ms = get_ticks_ms();
     if ( ticks_ms - bg->scroll_ms >= BG_SCROLL_RATE )
     {
         bg->scroll_ms = ticks_ms;

@@ -73,7 +73,7 @@ void pipes_reset(pipes_t *pipes)
 
 void pipes_tick(pipes_t *pipes)
 {
-    const u64 ticks_ms = get_ticks_ms();
+    const u32 ticks_ms = get_ticks_ms();
     /* Start scrolling after a reset */
     if ( pipes->scroll_ms == 0 )
     {

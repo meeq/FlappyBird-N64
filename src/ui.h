@@ -72,9 +72,9 @@ typedef struct
     bool did_flash;
     bool flash_draw;
     u32 flash_color;
-    u64 die_ms;
+    u32 die_ms;
     /* Game Over */
-    u64 dead_ms;
+    u32 dead_ms;
     bool did_gameover;
     bool heading_draw;
     bool board_draw;
@@ -82,7 +82,7 @@ typedef struct
     bool medal_draw;
     /* Scoreboard animations */
     u16 board_y;
-    u64 score_ms;
+    u32 score_ms;
     u16 last_score_acc;
     u16 high_score_acc;
 } ui_t;

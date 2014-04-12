@@ -57,21 +57,21 @@ typedef struct
     u8 slice_h;
     bird_state_t state;
     bird_color_t color_type;
-    u64 die_ms;
-    u64 dead_ms;
+    u32 die_ms;
+    u32 dead_ms;
     bool played_die_sfx;
     u16 score;
     /* Animation */
-    u64 anim_ms;
+    u32 anim_ms;
     u8 anim_frame;
     /* Center point */
     float x;
     float y;
     float dx;
     float dy;
-    u64 dy_ms;
+    u32 dy_ms;
     /* Ready "floating" wave */
-    u64 sine_ms;
+    u32 sine_ms;
     float sine_x;
     float sine_y;
 } bird_t;

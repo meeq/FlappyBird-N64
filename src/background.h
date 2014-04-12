@@ -72,7 +72,7 @@ typedef struct
     sprite_t *sprites[BG_NUM_SPRITES];
     // Setup state
     bg_time_mode_t time_mode;
-    u64 scroll_ms;
+    u32 scroll_ms;
     // Color fills
     bg_fill_color_t sky_fill;
     bg_fill_color_t cloud_fill;

@@ -95,7 +95,7 @@ inline static void ui_bird_tick(ui_t *ui, const bird_t bird)
 
 inline static void ui_flash_tick(ui_t *ui)
 {
-    const u64 ticks_ms = get_ticks_ms();
+    const u32 ticks_ms = get_ticks_ms();
     /* Flash the screen for a split second after the bird dies */
     if ( ui->state == BIRD_STATE_DYING ||
          ui->state == BIRD_STATE_DEAD )
@@ -129,8 +129,8 @@ inline static void ui_gameover_tick(ui_t *ui)
         return;
     }
     /* Animate the Game Over UI */
-    const u64 ticks_ms = get_ticks_ms();
-    const u64 dead_diff_ms = ticks_ms - ui->dead_ms;
+    const u32 ticks_ms = get_ticks_ms();
+    const u32 dead_diff_ms = ticks_ms - ui->dead_ms;
     /* Only show the scores and medal after the scoreboard appears */
     ui->score_draw = FALSE;
     ui->medal_draw = FALSE;
@@ -150,7 +150,7 @@ inline static void ui_gameover_tick(ui_t *ui)
     }
     if ( ui->board_draw )
     {
-        const u64 board_diff_ms = dead_diff_ms - UI_DEATH_BOARD_DELAY;
+        const u32 board_diff_ms = dead_diff_ms - UI_DEATH_BOARD_DELAY;
         sprite_t *scoreboard = ui->sprites[UI_SPRITE_SCOREBOARD];
         const u16 max_y = g_graphics->height;
         const u16 center_y = max_y >> 1;

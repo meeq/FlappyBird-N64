@@ -37,8 +37,8 @@ typedef struct
 typedef struct
 {
     pipe_colors_t color;
-    u64 reset_ms;
-    u64 scroll_ms;
+    u32 reset_ms;
+    u32 scroll_ms;
     pipe_t n[PIPES_MAX_NUM];
     sprite_t *cap_sprite;
     sprite_t *tube_sprite;

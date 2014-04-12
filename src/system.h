@@ -9,13 +9,9 @@
 
 #define DFS_ROM_LOCATION 0xB0041000 /* 256K */
 
-typedef volatile unsigned short vu16;
-typedef volatile unsigned int vu32;
-typedef volatile uint64_t vu64;
 typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned int u32;
-typedef uint64_t u64;
 typedef signed short s16;
 typedef signed int s32;
 
