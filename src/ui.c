@@ -25,9 +25,12 @@ ui_t ui_setup(const background_t bg)
         .high_score = 0,
         .new_high_score = FALSE,
         .clear_color = UI_CLEAR_COLOR,
+        .did_flash = FALSE,
         .flash_draw = FALSE,
         .flash_color = UI_FLASH_COLOR,
+        .die_ms = 0,
         .dead_ms = 0,
+        .did_gameover = FALSE,
         .heading_draw = FALSE,
         .board_draw = FALSE,
         .score_draw = FALSE,
@@ -63,11 +66,20 @@ void ui_free(ui_t *ui)
     }
 }
 
-void ui_tick(ui_t *ui, const bird_t bird, const background_t bg)
+inline static void ui_bird_tick(ui_t *ui, const bird_t bird)
 {
-    const u64 ticks_ms = get_ticks_ms();
     /* Synchronize bird state to UI */
     ui->state = bird.state;
+    switch ( ui->state )
+    {
+        case BIRD_STATE_DEAD:
+            ui->dead_ms = bird.dead_ms;
+        case BIRD_STATE_DYING:
+            ui->die_ms = bird.die_ms;
+            break;
+        default:
+            break;
+    }
     /* High scoring */
     ui->last_score = bird.score;
     if ( bird.score == 0 )
@@ -79,87 +91,124 @@ void ui_tick(ui_t *ui, const bird_t bird, const background_t bg)
         ui->high_score = bird.score;
         ui->new_high_score = TRUE;
     }
+}
+
+inline static void ui_flash_tick(ui_t *ui)
+{
+    const u64 ticks_ms = get_ticks_ms();
     /* Flash the screen for a split second after the bird dies */
-    if ( bird.state == BIRD_STATE_DYING ||
-         bird.state == BIRD_STATE_DEAD )
+    if ( ui->state == BIRD_STATE_DYING ||
+         ui->state == BIRD_STATE_DEAD )
     {
-        ui->flash_draw = ticks_ms - bird.die_ms <= UI_DEATH_FLASH_MS;
+        if ( !ui->did_flash )
+        {
+            const bool was_flash_draw = ui->flash_draw;
+            const s64 die_diff_ms = ticks_ms - ui->die_ms;
+            ui->flash_draw = die_diff_ms <= UI_DEATH_FLASH_MS;
+            if ( was_flash_draw && !ui->flash_draw )
+            {
+                ui->did_flash = TRUE;
+            }
+        }
+    }
+    else
+    {
+        ui->did_flash = FALSE;
+    }
+}
+
+inline static void ui_gameover_tick(ui_t *ui)
+{
+    if ( ui->state != BIRD_STATE_DEAD )
+    {
+        ui->did_gameover = FALSE;
+        return;
+    }
+    if ( ui->did_gameover )
+    {
+        // TODO Medal sparkles
+        return;
     }
     /* Animate the Game Over UI */
-    if ( bird.state == BIRD_STATE_DEAD )
+    const u64 ticks_ms = get_ticks_ms();
+    const s64 dead_diff_ms = ticks_ms - ui->dead_ms;
+    /* Only show the scores and medal after the scoreboard appears */
+    ui->score_draw = FALSE;
+    ui->medal_draw = FALSE;
+    /* Show the game over heading and play a sound */
+    const bool was_heading_draw = ui->heading_draw;
+    ui->heading_draw = dead_diff_ms > UI_DEATH_HEADING_DELAY;
+    if ( !was_heading_draw && ui->heading_draw )
     {
-        ui->dead_ms = bird.dead_ms;
-        const u64 dead_diff_ms = ticks_ms - bird.dead_ms;
-        /* Only show the scores and medal after the scoreboard appears */
-        ui->score_draw = FALSE;
-        ui->medal_draw = FALSE;
-        /* Show the game over heading and play a sound */
-        const bool was_heading_draw = ui->heading_draw;
-        ui->heading_draw = dead_diff_ms > UI_DEATH_HEADING_DELAY;
-        if ( !was_heading_draw && ui->heading_draw )
+        audio_play_sfx( g_audio, SFX_SWOOSH );
+    }
+    /* Show the scoreboard and play a sound */
+    const bool was_board_draw = ui->board_draw;
+    ui->board_draw = dead_diff_ms > UI_DEATH_BOARD_DELAY;
+    if ( !was_board_draw && ui->board_draw )
+    {
+        audio_play_sfx( g_audio, SFX_SWOOSH );
+    }
+    if ( ui->board_draw )
+    {
+        const s64 board_diff_ms = dead_diff_ms - UI_DEATH_BOARD_DELAY;
+        sprite_t *scoreboard = ui->sprites[UI_SPRITE_SCOREBOARD];
+        const u16 max_y = g_graphics->height;
+        const u16 center_y = max_y >> 1;
+        const u16 min_y = center_y - (scoreboard->height >> 1);
+        ui->score_draw = board_diff_ms > UI_DEATH_BOARD_DY_MS;
+        if ( !ui->score_draw )
         {
-            audio_play_sfx( g_audio, SFX_SWOOSH );
+            /* Pop the scoreboard up from the bottom */
+            const u16 y_diff = max_y - min_y;
+            const float y_factor = board_diff_ms / UI_DEATH_BOARD_DY_MS;
+            ui->board_y = max_y - (y_diff * y_factor);
+            /* Reset the score accumulators */
+            ui->score_ms = ticks_ms;
+            ui->last_score_acc = 0;
         }
-        /* Show the scoreboard and play a sound */
-        const bool was_board_draw = ui->board_draw;
-        ui->board_draw = dead_diff_ms > UI_DEATH_BOARD_DELAY;
-        if ( !was_board_draw && ui->board_draw )
+        else
         {
-            audio_play_sfx( g_audio, SFX_SWOOSH );
-        }
-        if ( ui->board_draw )
-        {
-            const u64 board_diff_ms = dead_diff_ms - UI_DEATH_BOARD_DELAY;
-            sprite_t *scoreboard = ui->sprites[UI_SPRITE_SCOREBOARD];
-            const u16 max_y = g_graphics->height;
-            const u16 center_y = max_y >> 1;
-            const u16 min_y = center_y - (scoreboard->height >> 1);
-            ui->score_draw = board_diff_ms > UI_DEATH_BOARD_DY_MS;
-            if ( !ui->score_draw )
-            {
-                /* Pop the scoreboard up from the bottom */
-                const u16 y_diff = max_y - min_y;
-                const float y_factor = board_diff_ms / UI_DEATH_BOARD_DY_MS;
-                ui->board_y = max_y - (y_diff * y_factor);
-                /* Reset the score accumulators */
-                ui->score_ms = ticks_ms;
-                ui->last_score_acc = 0;
-            }
-            else
-            {
-                ui->board_y = min_y;
-            }
-        }
-        if ( ui->score_draw )
-        {
-            if ( ui->last_score_acc < ui->last_score ||
-                 ui->high_score_acc < ui->high_score )
-            {
-                const u64 score_diff_ms = ticks_ms - ui->score_ms;
-                if ( score_diff_ms >= UI_DEATH_SCORE_DELAY )
-                {
-                    if ( ui->last_score_acc < ui->last_score )
-                    {
-                        ui->last_score_acc++;
-                    }
-                    else if ( ui->high_score_acc < ui->high_score )
-                    {
-                        ui->high_score_acc++;
-                    }
-                    ui->score_ms = ticks_ms;
-                }
-            }
-            else
-            {
-                ui->medal_draw = TRUE;
-            }
+            ui->board_y = min_y;
         }
     }
+    if ( ui->score_draw )
+    {
+        if ( ui->last_score_acc < ui->last_score ||
+             ui->high_score_acc < ui->high_score )
+        {
+            const s64 score_diff_ms = ticks_ms - ui->score_ms;
+            if ( score_diff_ms >= UI_DEATH_SCORE_DELAY )
+            {
+                if ( ui->last_score_acc < ui->last_score )
+                {
+                    ui->last_score_acc++;
+                }
+                else if ( ui->high_score_acc < ui->high_score )
+                {
+                    ui->high_score_acc++;
+                }
+                ui->score_ms = ticks_ms;
+            }
+        }
+        else
+        {
+            ui->medal_draw = TRUE;
+            ui->did_gameover = TRUE;
+        }
+    }
+}
+
+void ui_tick(ui_t *ui, const bird_t bird, const background_t bg)
+{
     /* Synchronize background state to UI */
     if ( ui->time_mode != bg.time_mode )
     {
         ui_set_time_mode( ui, bg.time_mode );
     }
+    ui_bird_tick( ui, bird );
+    ui_flash_tick( ui );
+    ui_gameover_tick( ui );
 }
 
 /* Below this point there be magic numbers! */

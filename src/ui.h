@@ -69,9 +69,13 @@ typedef struct
     u32 clear_color;
     sprite_t *sprites[UI_NUM_SPRITES];
     /* Death */
+    bool did_flash;
     bool flash_draw;
     u32 flash_color;
+    u64 die_ms;
+    /* Game Over */
     u64 dead_ms;
+    bool did_gameover;
     bool heading_draw;
     bool board_draw;
     bool score_draw;

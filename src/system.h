@@ -18,6 +18,7 @@ typedef unsigned int u32;
 typedef uint64_t u64;
 typedef signed short s16;
 typedef signed int s32;
+typedef int64_t s64;
 
 typedef enum boolean
 {
