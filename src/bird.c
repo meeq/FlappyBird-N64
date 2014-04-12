@@ -76,7 +76,6 @@ inline static void bird_tick_animation(bird_t *bird)
 {
     const u64 ticks_ms = get_ticks_ms();
     u64 anim_ms = bird->anim_ms;
-    const s64 anim_diff_ms = ticks_ms - anim_ms;
     u8 anim_frame = bird->anim_frame;
     switch ( bird->state )
     {
@@ -89,7 +88,7 @@ inline static void bird_tick_animation(bird_t *bird)
                 : BIRD_DYING_FRAME;
             break;
         default:
-            if ( anim_diff_ms >= BIRD_ANIM_RATE )
+            if ( ticks_ms - anim_ms >= BIRD_ANIM_RATE )
             {
                 /* Update animation state */
                 if ( ++anim_frame >= BIRD_ANIM_FRAMES )
@@ -121,8 +120,7 @@ inline static void bird_tick_sine_wave(bird_t *bird)
     bird->y = 0.0;
     /* Periodically update the "floating" effect */
     const u64 ticks_ms = get_ticks_ms();
-    const s64 sine_diff_ms = ticks_ms - bird->sine_ms;
-    if ( sine_diff_ms >= BIRD_SINE_RATE )
+    if ( ticks_ms - bird->sine_ms >= BIRD_SINE_RATE )
     {
         bird_tick_dx( bird );
         /* Increment the "floating" effect sine wave */
@@ -146,8 +144,7 @@ static void bird_tick_velocity(bird_t *bird, const gamepad_state_t gamepad)
         audio_play_sfx( g_audio, SFX_WING );
     }
     const u64 ticks_ms = get_ticks_ms();
-    const s64 dy_diff_ms = ticks_ms - bird->dy_ms;
-    if ( dy_diff_ms >= BIRD_VELOCITY_RATE )
+    if ( ticks_ms - bird->dy_ms >= BIRD_VELOCITY_RATE )
     {
         bird_tick_dx( bird );
         float y = bird->y;
@@ -186,14 +183,13 @@ inline static bird_color_t bird_random_color_type(void)
 void bird_tick(bird_t *bird, const gamepad_state_t gamepad)
 {
     const u64 ticks_ms = get_ticks_ms();
-    const s64 dead_diff_ms = ticks_ms - bird->dead_ms;
     /* State transitions based on button input */
     switch (bird->state)
     {
         case BIRD_STATE_TITLE:
         case BIRD_STATE_DEAD:
             if (( gamepad.A || gamepad.start ) &&
-                ( dead_diff_ms > BIRD_RESET_DELAY ))
+                ( ticks_ms - bird->dead_ms > BIRD_RESET_DELAY ))
             {
                 /* Change the bird color after each death */
                 if ( bird->state == BIRD_STATE_DEAD )
