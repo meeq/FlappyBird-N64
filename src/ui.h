@@ -36,6 +36,8 @@ typedef enum ui_sprite
     UI_SPRITE_MEDAL,
     UI_SPRITE_FONT_LARGE,
     UI_SPRITE_FONT_MED,
+    UI_SPRITE_NEW,
+    UI_SPRITE_SPARKLE,
     UI_NUM_SPRITES
 } ui_sprite_t;
 

@@ -48,7 +48,9 @@ ui_t ui_setup(const background_t bg)
         "/gfx/scoreboard.sprite",
         "/gfx/medal.sprite",
         "/gfx/font-large.sprite",
-        "/gfx/font-medium.sprite"
+        "/gfx/font-medium.sprite",
+        "/gfx/new.sprite",
+        "/gfx/sparkle.sprite"
     };
     for (u8 i = 0; i < UI_NUM_SPRITES; i++)
     {
@@ -380,9 +382,18 @@ inline static void ui_highscores_draw(const ui_t ui)
 {
     graphics_detach_rdp( g_graphics );
 
-    int center_y = (g_graphics->height >> 1);
+    u16 center_x = (g_graphics->width >> 1);
+    u16 center_y = (g_graphics->height >> 1);
     ui_highscores_score_draw( ui, ui.last_score_acc, center_y - 11 );
     ui_highscores_score_draw( ui, ui.high_score_acc, center_y + 10);
+
+    if ( ui.new_high_score && ui.high_score_acc == ui.high_score)
+    {
+        int disp = g_graphics->disp;
+        u16 new_x = center_x + 10;
+        u16 new_y = center_y + 1;
+        graphics_draw_sprite( disp, new_x, new_y, ui.sprites[UI_SPRITE_NEW] );
+    }
 }
 
 inline static void ui_flash_draw(const ui_t ui)
