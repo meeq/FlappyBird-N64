@@ -17,7 +17,7 @@ void collision_tick(bird_t *bird, pipes_t *pipes)
                  bird_y < pipe_y - COLLISION_PIPE_HALF_GAP )
             {
                 bird->state = BIRD_STATE_DYING;
-                bird->die_ms = get_ticks_ms();
+                bird->die_ms = get_total_ms();
                 audio_play_sfx( g_audio, SFX_HIT );
             }
             else if ( bird_x > pipe_x - COLLISION_SCORE_X_TOLERANCE &&

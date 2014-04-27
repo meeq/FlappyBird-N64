@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <libdragon.h>
 
+#define TICKS_PER_MS 46875 /* (COUNTS_PER_SECOND / 1000) */
+#define TICKS_PER_OVERFLOW 91625 /* (ULONG_MAX / TICKS_PER_MS) */
 #define DFS_ROM_LOCATION 0xB0041000 /* 256K */
 
 typedef unsigned char u8;
@@ -23,5 +25,7 @@ typedef enum boolean
 
 typedef struct SI_condat gamepad_state_t;
 typedef struct controller_data controllers_state_t;
+
+volatile u32 get_total_ms(void);
 
 #endif

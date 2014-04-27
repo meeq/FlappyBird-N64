@@ -34,7 +34,7 @@ void fps_tick(fps_counter_t *fps, const gamepad_state_t gamepad)
     fps->frames_per_stat++;
 
     /* Check timing */
-    const u32 ticks_ms = get_ticks_ms();
+    const u32 ticks_ms = get_total_ms();
     const s32 frame_diff_ms = ticks_ms - fps->frame_ms;
     if ( fps->total_frames > 1 && frame_diff_ms > FPS_FRAME_PERIOD )
     {
@@ -76,7 +76,7 @@ void fps_draw(const fps_counter_t fps)
     char fps_text[48];
     graphics_set_color( FPS_TEXT_COLOR, FPS_CLEAR_COLOR );
     const u32 frames = fps.total_frames, misses = fps.total_misses;
-    const u32 ticks_ms = get_ticks_ms(), ticks = get_ticks();
+    const u32 ticks_ms = get_total_ms(), ticks = get_ticks();
 
     char *line1_fmt = "FPS: %05.2f, Frames: %u, Drops: %u";
     sprintf( fps_text, line1_fmt, fps.average_fps, frames, misses );
