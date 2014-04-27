@@ -78,10 +78,10 @@ void fps_draw(const fps_counter_t fps)
     const u32 frames = fps.total_frames, misses = fps.total_misses;
     const u32 ticks_ms = get_total_ms(), ticks = get_ticks();
 
-    char *line1_fmt = "FPS: %05.2f, Frames: %u, Drops: %u";
+    char *line1_fmt = "FPS: %05.2f, Frame: %u, Miss: %u";
     sprintf( fps_text, line1_fmt, fps.average_fps, frames, misses );
     graphics_draw_text( disp, 10, g_graphics->height - 33, fps_text );
 
-    sprintf( fps_text, "MS: %u, Ticks: %u", ticks_ms, ticks );
+    sprintf( fps_text, "Milli: %u, Tick: %u", ticks_ms, ticks );
     graphics_draw_text( disp, 10, g_graphics->height - 20, fps_text );
 }
