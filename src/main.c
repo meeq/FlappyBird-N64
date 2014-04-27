@@ -24,7 +24,7 @@ int main(void)
     controller_init();
 
     /* Initialize audio */
-    g_audio = audio_setup( FREQUENCY_44KHZ, 1 );
+    g_audio = audio_setup( FREQUENCY_44KHZ, 4 );
     audio_write_silence();
 
     /* Initialize display */
