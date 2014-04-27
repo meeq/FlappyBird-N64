@@ -129,40 +129,48 @@ inline static void ui_gameover_tick(ui_t *ui)
         return;
     }
     /* Animate the Game Over UI */
-    const u32 dead_diff_ms = ticks_ms - ui->dead_ms;
     const u32 ticks_ms = get_total_ms();
+    const s32 dead_diff_ms = ticks_ms - ui->dead_ms;
     /* Only show the scores and medal after the scoreboard appears */
     ui->score_draw = FALSE;
     ui->medal_draw = FALSE;
     /* Show the game over heading and play a sound */
     const bool was_heading_draw = ui->heading_draw;
-    ui->heading_draw = dead_diff_ms > UI_DEATH_HEADING_DELAY;
+    ui->heading_draw = dead_diff_ms >= UI_DEATH_HEADING_DELAY;
     if ( !was_heading_draw && ui->heading_draw )
     {
         audio_play_sfx( g_audio, SFX_SWOOSH );
     }
     /* Show the scoreboard and play a sound */
     const bool was_board_draw = ui->board_draw;
-    ui->board_draw = dead_diff_ms > UI_DEATH_BOARD_DELAY;
+    ui->board_draw = dead_diff_ms >= UI_DEATH_BOARD_DELAY;
     if ( !was_board_draw && ui->board_draw )
     {
         audio_play_sfx( g_audio, SFX_SWOOSH );
+        ui->board_ms = ticks_ms;
     }
     if ( ui->board_draw )
     {
-        const u32 board_diff_ms = dead_diff_ms - UI_DEATH_BOARD_DELAY;
         sprite_t *scoreboard = ui->sprites[UI_SPRITE_SCOREBOARD];
+        const s32 board_diff_ms = ticks_ms - ui->board_ms;
         const u16 max_y = g_graphics->height;
         const u16 center_y = max_y >> 1;
         const u16 min_y = center_y - (scoreboard->height >> 1);
-        ui->score_draw = board_diff_ms > UI_DEATH_BOARD_DY_MS;
+        ui->score_draw = board_diff_ms >= UI_DEATH_BOARD_DY_MS;
         if ( !ui->score_draw )
         {
             /* Pop the scoreboard up from the bottom */
             const u16 y_diff = max_y - min_y;
             const float y_factor = board_diff_ms / UI_DEATH_BOARD_DY_MS;
-            ui->board_y = max_y - (y_diff * y_factor);
-            /* Reset the score accumulators */
+            if ( y_factor >= 0.0 && y_factor < 1.0 )
+            {
+                ui->board_y = max_y - (y_diff * y_factor);
+            }
+            else
+            {
+                ui->board_y = max_y - y_diff;
+            }
+            /* Reset the score accumulator */
             ui->score_ms = ticks_ms;
             ui->last_score_acc = 0;
         }
@@ -176,7 +184,8 @@ inline static void ui_gameover_tick(ui_t *ui)
         if ( ui->last_score_acc < ui->last_score ||
              ui->high_score_acc < ui->high_score )
         {
-            if ( ticks_ms - ui->score_ms >= UI_DEATH_SCORE_DELAY )
+            const s32 score_diff_ms = ticks_ms - ui->score_ms;
+            if ( score_diff_ms >= UI_DEATH_SCORE_DELAY )
             {
                 if ( ui->last_score_acc < ui->last_score )
                 {

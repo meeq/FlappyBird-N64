@@ -81,6 +81,7 @@ typedef struct
     bool score_draw;
     bool medal_draw;
     /* Scoreboard animations */
+    u32 board_ms;
     u16 board_y;
     u32 score_ms;
     u16 last_score_acc;
