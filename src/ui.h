@@ -74,7 +74,7 @@ typedef struct
     bool did_flash;
     bool flash_draw;
     u32 flash_color;
-    u32 die_ms;
+    u32 hit_ms;
     /* Game Over */
     u32 dead_ms;
     bool did_gameover;

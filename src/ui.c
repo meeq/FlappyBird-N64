@@ -28,7 +28,7 @@ ui_t ui_setup(const background_t bg)
         .did_flash = FALSE,
         .flash_draw = FALSE,
         .flash_color = UI_FLASH_COLOR,
-        .die_ms = 0,
+        .hit_ms = 0,
         .dead_ms = 0,
         .did_gameover = FALSE,
         .heading_draw = FALSE,
@@ -77,7 +77,7 @@ inline static void ui_bird_tick(ui_t *ui, const bird_t bird)
         case BIRD_STATE_DEAD:
             ui->dead_ms = bird.dead_ms;
         case BIRD_STATE_DYING:
-            ui->die_ms = bird.die_ms;
+            ui->hit_ms = bird.hit_ms;
             break;
         default:
             break;
@@ -105,7 +105,7 @@ inline static void ui_flash_tick(ui_t *ui)
         if ( !ui->did_flash )
         {
             const bool was_flash_draw = ui->flash_draw;
-            ui->flash_draw = ticks_ms - ui->die_ms <= UI_DEATH_FLASH_MS;
+            ui->flash_draw = ticks_ms - ui->hit_ms <= UI_DEATH_FLASH_MS;
             if ( was_flash_draw && !ui->flash_draw )
             {
                 ui->did_flash = TRUE;

@@ -16,7 +16,8 @@ typedef enum bird_state
     BIRD_STATE_TITLE
 } bird_state_t;
 
-#define BIRD_RESET_DELAY     1000
+#define BIRD_RESET_DELAY    1000
+#define BIRD_RUMBLE_MS      500
 
 /* Colors */
 typedef enum bird_color
@@ -57,8 +58,9 @@ typedef struct
     u8 slice_h;
     bird_state_t state;
     bird_color_t color_type;
-    u32 die_ms;
+    u32 hit_ms;
     u32 dead_ms;
+    bool is_rumbling;
     bool played_die_sfx;
     u16 score;
     /* Animation */
@@ -83,6 +85,8 @@ bird_t bird_setup(bird_color_t color_type);
 void bird_free(bird_t *bird);
 
 void bird_draw(const bird_t bird);
+
+void bird_hit(bird_t *bird);
 
 void bird_tick(bird_t *bird, const gamepad_state_t gamepad);
 

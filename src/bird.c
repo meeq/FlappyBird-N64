@@ -17,8 +17,10 @@ bird_t bird_setup(bird_color_t color_type)
         .state = BIRD_STATE_TITLE,
         .color_type = color_type,
         .score = 0,
-        .die_ms = 0,
+        .hit_ms = 0,
         .dead_ms = 0,
+        .is_rumbling = FALSE,
+        .played_die_sfx = FALSE,
         .anim_ms = 0,
         .anim_frame = 0,
         .x = BIRD_TITLE_X,
@@ -70,6 +72,17 @@ void bird_draw(const bird_t bird)
     rdp_load_texture_stride( 0, 0, MIRROR_DISABLED, bird.sprite, stride );
     /* Draw the bird rectangle */
     rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
+}
+
+void bird_hit(bird_t *bird)
+{
+    bird->hit_ms = get_total_ms();
+    audio_play_sfx( g_audio, SFX_HIT );
+    if ( is_rumble_present() )
+    {
+        rumble_start( CONTROLLER_1 );
+        bird->is_rumbling = TRUE;
+    }
 }
 
 inline static void bird_tick_animation(bird_t *bird)
@@ -163,8 +176,7 @@ static void bird_tick_velocity(bird_t *bird, const gamepad_state_t gamepad)
             dy = 0.0;
             if ( bird->state != BIRD_STATE_DYING )
             {
-                bird->die_ms = ticks_ms;
-                audio_play_sfx( g_audio, SFX_HIT );
+                bird_hit( bird );
             }
             bird->dead_ms = ticks_ms;
             bird->state = BIRD_STATE_DEAD;
@@ -241,5 +253,12 @@ void bird_tick(bird_t *bird, const gamepad_state_t gamepad)
         default:
             break;
     }
+    /* Stop rumbling after hitting a pipe/the ground */
+    if ( bird->is_rumbling && ticks_ms - bird->hit_ms >= BIRD_RUMBLE_MS )
+    {
+        rumble_stop( CONTROLLER_1 );
+        bird->is_rumbling = FALSE;
+    }
+    /* Progress the flapping/falling animation */
     bird_tick_animation( bird );
 }

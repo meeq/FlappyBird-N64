@@ -20,3 +20,17 @@ volatile u32 get_total_ms(void)
     /* Calculate total ticks */
     return (count / TICKS_PER_MS) + overflow_ticks;
 }
+
+bool is_rumble_present(void)
+{
+    int controllers = get_controllers_present();
+    if ( controllers & CONTROLLER_1_INSERTED )
+    {
+        int accessories = get_accessories_present();
+        if ( accessories & CONTROLLER_1_INSERTED )
+        {
+            return identify_accessory( CONTROLLER_1 ) == ACCESSORY_RUMBLEPAK;
+        }
+    }
+    return FALSE;
+}
