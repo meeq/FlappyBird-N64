@@ -54,6 +54,6 @@ void pipes_reset(pipes_t *pipes);
 
 void pipes_tick(pipes_t *pipes);
 
-void pipes_draw(const pipes_t pipes);
+void pipes_draw(const pipes_t *pipes);
 
 #endif

@@ -84,10 +84,10 @@ bird_t bird_setup(bird_color_t color_type);
 
 void bird_free(bird_t *bird);
 
-void bird_draw(const bird_t bird);
+void bird_draw(const bird_t *bird);
 
 void bird_hit(bird_t *bird);
 
-void bird_tick(bird_t *bird, const gamepad_state_t gamepad);
+void bird_tick(bird_t *bird, const gamepad_state_t *gamepad);
 
 #endif

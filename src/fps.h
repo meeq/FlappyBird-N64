@@ -32,8 +32,8 @@ typedef struct
 
 fps_counter_t fps_setup(void);
 
-void fps_tick(fps_counter_t *fps, const gamepad_state_t gamepad);
+void fps_tick(fps_counter_t *fps, const gamepad_state_t *gamepad);
 
-void fps_draw(const fps_counter_t fps);
+void fps_draw(const fps_counter_t *fps);
 
 #endif

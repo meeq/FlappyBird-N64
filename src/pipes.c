@@ -98,11 +98,11 @@ void pipes_tick(pipes_t *pipes)
     }
 }
 
-void pipes_draw(const pipes_t pipes)
+void pipes_draw(const pipes_t *pipes)
 {
-    sprite_t *tube = pipes.tube_sprite;
-    sprite_t *cap = pipes.cap_sprite;
-    const u8 color = pipes.color, cap_hslices = cap->hslices;
+    sprite_t *tube = pipes->tube_sprite;
+    sprite_t *cap = pipes->cap_sprite;
+    const u8 color = pipes->color, cap_hslices = cap->hslices;
     s16 cx, cy, tx, ty, bx, by, gap_cy;
 
     graphics_rdp_texture_fill( g_graphics );
@@ -111,16 +111,16 @@ void pipes_draw(const pipes_t pipes)
 
     for (u8 i = 0; i < PIPES_MAX_NUM; i++)
     {
-        const pipe_t pipe = pipes.n[i];
+        const pipe_t *pipe = &pipes->n[i];
         /* Calculate X position */
-        cx = g_graphics->width * pipe.x;
+        cx = g_graphics->width * pipe->x;
         tx = cx - (PIPE_TUBE_WIDTH >> 1);
         bx = cx + (PIPE_TUBE_WIDTH >> 1) - 1;
         /* Don't bother drawing the pipe if it is off-screen */
         if ( bx < 0 || tx >= g_graphics->width ) continue;
         /* Calculate Y position */
         cy = (BG_GROUND_TOP_Y >> 1);
-        gap_cy = cy + pipe.y * cy;
+        gap_cy = cy + pipe->y * cy;
         /* Load tube texture */
         rdp_load_texture_stride( 0, 0, mirror, tube, color );
         /* Top tube */

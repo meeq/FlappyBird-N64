@@ -92,12 +92,12 @@ typedef struct
 
 /* UI functions */
 
-ui_t ui_setup(const background_t bg);
+ui_t ui_setup(const background_t *bg);
 
 void ui_free(ui_t *ui);
 
-void ui_tick(ui_t *ui, const bird_t bird, const background_t bg);
+void ui_tick(ui_t *ui, const bird_t *bird, const background_t *bg);
 
-void ui_draw(const ui_t ui);
+void ui_draw(const ui_t *ui);
 
 #endif

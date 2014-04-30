@@ -38,7 +38,7 @@ int main(void)
     background_t bg = background_setup( BG_DAY_TIME );
     bird_t bird = bird_setup( BIRD_COLOR_YELLOW );
     pipes_t pipes = pipes_setup();
-    ui_t ui = ui_setup( bg );
+    ui_t ui = ui_setup( &bg );
 
     /* Run the main loop */
     while ( TRUE )
@@ -49,11 +49,11 @@ int main(void)
         const gamepad_state_t gamepad = controllers.c[0];
 
         /* Calculate frame timing */
-        fps_tick( &fps, gamepad );
+        fps_tick( &fps, &gamepad );
 
         /* Update bird state before the rest of the world */
         const bird_state_t prev_state = bird.state;
-        bird_tick( &bird, gamepad );
+        bird_tick( &bird, &gamepad );
 
         /* Reset the world when the bird resets after dying */
         if ( prev_state != bird.state && prev_state == BIRD_STATE_DEAD )
@@ -67,10 +67,10 @@ int main(void)
         {
             case BIRD_STATE_TITLE:
             case BIRD_STATE_READY:
-                background_tick( &bg, gamepad );
+                background_tick( &bg, &gamepad );
                 break;
             case BIRD_STATE_PLAY:
-                background_tick( &bg, gamepad );
+                background_tick( &bg, &gamepad );
                 pipes_tick( &pipes );
                 collision_tick( &bird, &pipes );
                 break;
@@ -79,7 +79,7 @@ int main(void)
         }
 
         /* Update the UI based on the world state */
-        ui_tick( &ui, bird, bg );
+        ui_tick( &ui, &bird, &bg );
 
         /* Buffer sound effects */
         audio_tick( g_audio );
@@ -88,11 +88,11 @@ int main(void)
         graphics_display_lock( g_graphics );
         {
             /* Draw the game state */
-            background_draw( bg );
-            pipes_draw( pipes );
-            bird_draw( bird );
-            ui_draw( ui );
-            fps_draw( fps );
+            background_draw( &bg );
+            pipes_draw( &pipes );
+            bird_draw( &bird );
+            ui_draw( &ui );
+            fps_draw( &fps );
         }
         /* Finish drawing and show the framebuffer */
         graphics_display_flip( g_graphics );

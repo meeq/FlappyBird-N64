@@ -21,10 +21,10 @@ fps_counter_t fps_setup(void)
     return fps;
 }
 
-void fps_tick(fps_counter_t *fps, const gamepad_state_t gamepad)
+void fps_tick(fps_counter_t *fps, const gamepad_state_t *gamepad)
 {
     /* Toggle drawing flag on C-up */
-    if ( gamepad.C_up )
+    if ( gamepad->C_up )
     {
         fps->should_draw = !fps->should_draw;
     }
@@ -66,20 +66,20 @@ void fps_tick(fps_counter_t *fps, const gamepad_state_t gamepad)
     fps->frame_ms = ticks_ms;
 }
 
-void fps_draw(const fps_counter_t fps)
+void fps_draw(const fps_counter_t *fps)
 {
-    if ( !fps.should_draw ) return;
+    if ( !fps->should_draw ) return;
 
     graphics_detach_rdp( g_graphics );
     int disp = g_graphics->disp;
 
     char fps_text[48];
     graphics_set_color( FPS_TEXT_COLOR, FPS_CLEAR_COLOR );
-    const u32 frames = fps.total_frames, misses = fps.total_misses;
+    const u32 frames = fps->total_frames, misses = fps->total_misses;
     const u32 ticks_ms = get_total_ms(), ticks = get_ticks();
 
     char *line1_fmt = "FPS: %05.2f, Frame: %u, Miss: %u";
-    sprintf( fps_text, line1_fmt, fps.average_fps, frames, misses );
+    sprintf( fps_text, line1_fmt, fps->average_fps, frames, misses );
     graphics_draw_text( disp, 10, g_graphics->height - 33, fps_text );
 
     sprintf( fps_text, "Milli: %u, Tick: %u", ticks_ms, ticks );

@@ -41,18 +41,18 @@ void bird_free(bird_t *bird)
     bird->sprite = NULL;
 }
 
-void bird_draw(const bird_t bird)
+void bird_draw(const bird_t *bird)
 {
     /* Calculate player space center position */
-    const int cx = g_graphics->width * bird.x;
+    const int cx = g_graphics->width * bird->x;
     const int cy = BG_GROUND_TOP_Y >> 1;
     /* Calculate bird Y position */
-    float bird_y = bird.y;
-    switch ( bird.state )
+    float bird_y = bird->y;
+    switch ( bird->state )
     {
         case BIRD_STATE_READY:
         case BIRD_STATE_TITLE:
-            bird_y += bird.sine_y;
+            bird_y += bird->sine_y;
             break;
         default:
             break;
@@ -61,15 +61,15 @@ void bird_draw(const bird_t bird)
     if ( bird_y < BIRD_MIN_Y ) bird_y = BIRD_MIN_Y;
     bird_y = cy + bird_y * cy;
     /* Calculate bird corner coordinates from center point */
-    const u8 bird_half_w = bird.slice_w >> 1,
-             bird_half_h = bird.slice_h >> 1;
+    const u8 bird_half_w = bird->slice_w >> 1,
+             bird_half_h = bird->slice_h >> 1;
     const u16 tx = cx - bird_half_w,     bx = cx + bird_half_w - 1,
               ty = bird_y - bird_half_h, by = bird_y + bird_half_h - 1;
     /* Load the current animation sprite slice as a texture */
     graphics_rdp_texture_fill( g_graphics );
     rdp_sync( SYNC_PIPE );
-    u8 stride = (bird.color_type * bird.sprite->hslices) + bird.anim_frame;
-    rdp_load_texture_stride( 0, 0, MIRROR_DISABLED, bird.sprite, stride );
+    u8 stride = (bird->color_type * bird->sprite->hslices) + bird->anim_frame;
+    rdp_load_texture_stride( 0, 0, MIRROR_DISABLED, bird->sprite, stride );
     /* Draw the bird rectangle */
     rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
 }
@@ -147,10 +147,10 @@ inline static void bird_tick_sine_wave(bird_t *bird)
     }
 }
 
-static void bird_tick_velocity(bird_t *bird, const gamepad_state_t gamepad)
+static void bird_tick_velocity(bird_t *bird, const gamepad_state_t *gamepad)
 {
     /* Flap when the player presses A */
-    if ( bird->state == BIRD_STATE_PLAY && gamepad.A )
+    if ( bird->state == BIRD_STATE_PLAY && gamepad->A )
     {
         bird->dy = -BIRD_FLAP_VELOCITY;
         bird->anim_frame = BIRD_ANIM_FRAMES - 1;
@@ -192,7 +192,7 @@ inline static bird_color_t bird_random_color_type(void)
     return ((float) rand() / (float) RAND_MAX) * BIRD_NUM_COLORS;
 }
 
-void bird_tick(bird_t *bird, const gamepad_state_t gamepad)
+void bird_tick(bird_t *bird, const gamepad_state_t *gamepad)
 {
     const u32 ticks_ms = get_total_ms();
     /* State transitions based on button input */
@@ -200,7 +200,7 @@ void bird_tick(bird_t *bird, const gamepad_state_t gamepad)
     {
         case BIRD_STATE_TITLE:
         case BIRD_STATE_DEAD:
-            if (( gamepad.A || gamepad.start ) &&
+            if (( gamepad->A || gamepad->start ) &&
                 ( ticks_ms - bird->dead_ms > BIRD_RESET_DELAY ))
             {
                 /* Change the bird color after each death */
@@ -216,7 +216,7 @@ void bird_tick(bird_t *bird, const gamepad_state_t gamepad)
             }
             break;
         case BIRD_STATE_READY:
-            if ( gamepad.A )
+            if ( gamepad->A )
             {
                 bird->state = BIRD_STATE_PLAY;
             }
@@ -232,7 +232,7 @@ void bird_tick(bird_t *bird, const gamepad_state_t gamepad)
             break;
     }
     /* Cycle through bird colors with right trigger */
-    if ( gamepad.R )
+    if ( gamepad->R )
     {
         if ( ++bird->color_type >= BIRD_NUM_COLORS )
         {

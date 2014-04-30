@@ -18,7 +18,7 @@ inline static void ui_set_time_mode(ui_t *ui, bg_time_mode_t time_mode)
     }
 }
 
-ui_t ui_setup(const background_t bg)
+ui_t ui_setup(const background_t *bg)
 {
     ui_t ui = {
         .last_score = 0,
@@ -40,7 +40,7 @@ ui_t ui_setup(const background_t bg)
         .last_score_acc = 0,
         .high_score_acc = 0
     };
-    ui_set_time_mode( &ui, bg.time_mode );
+    ui_set_time_mode( &ui, bg->time_mode );
     char *sprite_files[UI_NUM_SPRITES] = {
         "/gfx/logo.sprite",
         "/gfx/headings.sprite",
@@ -68,29 +68,29 @@ void ui_free(ui_t *ui)
     }
 }
 
-inline static void ui_bird_tick(ui_t *ui, const bird_t bird)
+inline static void ui_bird_tick(ui_t *ui, const bird_t *bird)
 {
     /* Synchronize bird state to UI */
-    ui->state = bird.state;
+    ui->state = bird->state;
     switch ( ui->state )
     {
         case BIRD_STATE_DEAD:
-            ui->dead_ms = bird.dead_ms;
+            ui->dead_ms = bird->dead_ms;
         case BIRD_STATE_DYING:
-            ui->hit_ms = bird.hit_ms;
+            ui->hit_ms = bird->hit_ms;
             break;
         default:
             break;
     }
     /* High scoring */
-    ui->last_score = bird.score;
-    if ( bird.score == 0 )
+    ui->last_score = bird->score;
+    if ( bird->score == 0 )
     {
         ui->new_high_score = FALSE;
     }
-    if ( bird.score > ui->high_score )
+    if ( bird->score > ui->high_score )
     {
-        ui->high_score = bird.score;
+        ui->high_score = bird->score;
         ui->new_high_score = TRUE;
     }
 }
@@ -208,12 +208,12 @@ inline static void ui_gameover_tick(ui_t *ui)
     }
 }
 
-void ui_tick(ui_t *ui, const bird_t bird, const background_t bg)
+void ui_tick(ui_t *ui, const bird_t *bird, const background_t *bg)
 {
     /* Synchronize background state to UI */
-    if ( ui->time_mode != bg.time_mode )
+    if ( ui->time_mode != bg->time_mode )
     {
-        ui_set_time_mode( ui, bg.time_mode );
+        ui_set_time_mode( ui, bg->time_mode );
     }
     ui_bird_tick( ui, bird );
     ui_flash_tick( ui );
@@ -222,9 +222,9 @@ void ui_tick(ui_t *ui, const bird_t bird, const background_t bg)
 
 /* Below this point there be magic numbers! */
 
-inline static void ui_logo_draw(const ui_t ui)
+inline static void ui_logo_draw(const ui_t *ui)
 {
-    sprite_t *logo = ui.sprites[UI_SPRITE_LOGO];
+    sprite_t *logo = ui->sprites[UI_SPRITE_LOGO];
 
     graphics_detach_rdp( g_graphics );
     int disp = g_graphics->disp;
@@ -247,19 +247,19 @@ inline static void ui_logo_draw(const ui_t ui)
     int credit2_y = g_graphics->height - 78;
 
     /* Draw a shadow under the text */
-    graphics_set_color( ui.shadow_color, ui.clear_color );
+    graphics_set_color( ui->shadow_color, ui->clear_color );
     graphics_draw_text( disp, credit1_x--, credit1_y--, credit1_str );
     graphics_draw_text( disp, credit2_x--, credit2_y--, credit2_str );
 
     /* Draw the same text on top of the shadow */
-    graphics_set_color( ui.text_color, ui.clear_color );
+    graphics_set_color( ui->text_color, ui->clear_color );
     graphics_draw_text( disp, credit1_x, credit1_y, credit1_str );
     graphics_draw_text( disp, credit2_x, credit2_y, credit2_str );
 }
 
-inline static void ui_heading_draw(const ui_t ui, u8 stride)
+inline static void ui_heading_draw(const ui_t *ui, u8 stride)
 {
-    sprite_t *headings = ui.sprites[UI_SPRITE_HEADINGS];
+    sprite_t *headings = ui->sprites[UI_SPRITE_HEADINGS];
 
     graphics_detach_rdp( g_graphics );
     int disp = g_graphics->disp;
@@ -272,9 +272,9 @@ inline static void ui_heading_draw(const ui_t ui, u8 stride)
     graphics_draw_sprite_trans_stride( disp, x, y, headings, stride );
 }
 
-inline static void ui_howto_draw(const ui_t ui)
+inline static void ui_howto_draw(const ui_t *ui)
 {
-    sprite_t *howto = ui.sprites[UI_SPRITE_HOWTO];
+    sprite_t *howto = ui->sprites[UI_SPRITE_HOWTO];
 
     graphics_detach_rdp( g_graphics );
     int disp = g_graphics->disp;
@@ -287,10 +287,10 @@ inline static void ui_howto_draw(const ui_t ui)
     graphics_draw_sprite_trans( disp, x, y, howto );
 }
 
-inline static void ui_score_draw(const ui_t ui)
+inline static void ui_score_draw(const ui_t *ui)
 {
-    u16 score = ui.last_score;
-    sprite_t *font = ui.sprites[UI_SPRITE_FONT_LARGE];
+    u16 score = ui->last_score;
+    sprite_t *font = ui->sprites[UI_SPRITE_FONT_LARGE];
 
     graphics_detach_rdp( g_graphics );
     int disp = g_graphics->disp;
@@ -317,9 +317,9 @@ inline static void ui_score_draw(const ui_t ui)
     }
 }
 
-inline static void ui_scoreboard_draw(const ui_t ui)
+inline static void ui_scoreboard_draw(const ui_t *ui)
 {
-    sprite_t *scoreboard = ui.sprites[UI_SPRITE_SCOREBOARD];
+    sprite_t *scoreboard = ui->sprites[UI_SPRITE_SCOREBOARD];
 
     graphics_detach_rdp( g_graphics );
     int disp = g_graphics->disp;
@@ -327,20 +327,20 @@ inline static void ui_scoreboard_draw(const ui_t ui)
     int center_x = (g_graphics->width >> 1);
     int x = center_x - (scoreboard->width >> 1);
 
-    graphics_draw_sprite_trans( disp, x, ui.board_y, scoreboard );
+    graphics_draw_sprite_trans( disp, x, ui->board_y, scoreboard );
 }
 
-inline static void ui_medal_draw(const ui_t ui)
+inline static void ui_medal_draw(const ui_t *ui)
 {
     u8 stride;
-    const u16 score = ui.last_score;
+    const u16 score = ui->last_score;
     if (score >= UI_MEDAL_SCORE_PLATINUM) stride = UI_MEDAL_STRIDE_PLATINUM;
     else if (score >= UI_MEDAL_SCORE_GOLD) stride = UI_MEDAL_STRIDE_GOLD;
     else if (score >= UI_MEDAL_SCORE_SILVER) stride = UI_MEDAL_STRIDE_SILVER;
     else if (score >= UI_MEDAL_SCORE_BRONZE) stride = UI_MEDAL_STRIDE_BRONZE;
     else return;
 
-    sprite_t *medal = ui.sprites[UI_SPRITE_MEDAL];
+    sprite_t *medal = ui->sprites[UI_SPRITE_MEDAL];
 
     graphics_detach_rdp( g_graphics );
     int disp = g_graphics->disp;
@@ -353,9 +353,9 @@ inline static void ui_medal_draw(const ui_t ui)
     graphics_draw_sprite_trans_stride( disp, x, y, medal, stride );
 }
 
-inline static void ui_highscores_score_draw(const ui_t ui, u16 score, u16 y)
+inline static void ui_highscores_score_draw(const ui_t *ui, u16 score, u16 y)
 {
-    sprite_t *font = ui.sprites[UI_SPRITE_FONT_MED];
+    sprite_t *font = ui->sprites[UI_SPRITE_FONT_MED];
     int disp = g_graphics->disp;
 
     int i = 0, num_digits;
@@ -378,41 +378,41 @@ inline static void ui_highscores_score_draw(const ui_t ui, u16 score, u16 y)
     }
 }
 
-inline static void ui_highscores_draw(const ui_t ui)
+inline static void ui_highscores_draw(const ui_t *ui)
 {
     graphics_detach_rdp( g_graphics );
 
     u16 center_x = (g_graphics->width >> 1);
     u16 center_y = (g_graphics->height >> 1);
-    ui_highscores_score_draw( ui, ui.last_score_acc, center_y - 11 );
-    ui_highscores_score_draw( ui, ui.high_score_acc, center_y + 10);
+    ui_highscores_score_draw( ui, ui->last_score_acc, center_y - 11 );
+    ui_highscores_score_draw( ui, ui->high_score_acc, center_y + 10);
 
-    if ( ui.new_high_score && ui.high_score_acc == ui.high_score)
+    if ( ui->new_high_score && ui->high_score_acc == ui->high_score)
     {
         int disp = g_graphics->disp;
         u16 new_x = center_x + 10;
         u16 new_y = center_y + 1;
-        graphics_draw_sprite( disp, new_x, new_y, ui.sprites[UI_SPRITE_NEW] );
+        graphics_draw_sprite( disp, new_x, new_y, ui->sprites[UI_SPRITE_NEW] );
     }
 }
 
-inline static void ui_flash_draw(const ui_t ui)
+inline static void ui_flash_draw(const ui_t *ui)
 {
     graphics_rdp_color_fill( g_graphics );
-    rdp_set_primitive_color( ui.flash_color );
+    rdp_set_primitive_color( ui->flash_color );
     const u16 bx = g_graphics->width - 1;
     const u16 by = g_graphics->height - 1;
     rdp_draw_filled_rectangle( 0, 0, bx, by );
 }
 
-void ui_draw(const ui_t ui)
+void ui_draw(const ui_t *ui)
 {
-    if ( ui.flash_draw )
+    if ( ui->flash_draw )
     {
         ui_flash_draw( ui );
         return;
     }
-    switch (ui.state)
+    switch (ui->state)
     {
         case BIRD_STATE_TITLE:
             ui_logo_draw( ui );
@@ -427,19 +427,19 @@ void ui_draw(const ui_t ui)
             ui_score_draw( ui );
             break;
         case BIRD_STATE_DEAD:
-            if ( ui.heading_draw )
+            if ( ui->heading_draw )
             {
                 ui_heading_draw( ui, UI_HEADING_GAME_OVER );
             }
-            if ( ui.board_draw )
+            if ( ui->board_draw )
             {
                 ui_scoreboard_draw( ui );
             }
-            if ( ui.score_draw )
+            if ( ui->score_draw )
             {
                 ui_highscores_draw( ui );
             }
-            if ( ui.medal_draw )
+            if ( ui->medal_draw )
             {
                 ui_medal_draw( ui );
             }

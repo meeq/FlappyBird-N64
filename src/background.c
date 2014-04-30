@@ -118,10 +118,10 @@ inline void background_tick_scroll(bg_fill_sprite_t *fill)
     fill->scroll_x = x;
 }
 
-void background_tick(background_t *bg, const gamepad_state_t gamepad)
+void background_tick(background_t *bg, const gamepad_state_t *gamepad)
 {
      /* Switch between day and night */
-    if( gamepad.L )
+    if( gamepad->L )
     {
         background_set_time_mode( bg, !bg->time_mode );
     }
@@ -137,26 +137,27 @@ void background_tick(background_t *bg, const gamepad_state_t gamepad)
     }
 }
 
-inline static void background_draw_color(const bg_fill_color_t fill)
+inline static void background_draw_color(const bg_fill_color_t *fill)
 {
     graphics_rdp_color_fill( g_graphics );
-    rdp_set_primitive_color( fill.color );
-    const s16 tx = 0, ty = fill.y;
-    const s16 bx = g_graphics->width, by = fill.y + fill.h;
+    rdp_set_primitive_color( fill->color );
+    const s16 tx = 0, ty = fill->y;
+    const s16 bx = g_graphics->width, by = fill->y + fill->h;
     rdp_draw_filled_rectangle( tx, ty, bx, by );
 }
 
-void background_draw_sprite(const background_t bg, const bg_fill_sprite_t fill)
+void background_draw_sprite(const background_t *bg,
+                            const bg_fill_sprite_t *fill)
 {
-    sprite_t *sprite = bg.sprites[fill.sprite];
+    sprite_t *sprite = bg->sprites[fill->sprite];
     if ( sprite == NULL ) return;
 
     graphics_rdp_texture_fill( g_graphics );
     mirror_t mirror = MIRROR_DISABLED;
-    const s16 scroll_x = fill.scroll_x;
+    const s16 scroll_x = fill->scroll_x;
     const u16 slices = sprite->hslices, max_w = g_graphics->width;
     s16 tx, bx;
-    u16 ty = fill.y, by = fill.y + sprite->height - 1;
+    u16 ty = fill->y, by = fill->y + sprite->height - 1;
 
     /* Take advantage of native tiling if the sprite is only 1 slice wide */
     if ( slices > 1 )
@@ -168,9 +169,9 @@ void background_draw_sprite(const background_t bg, const bg_fill_sprite_t fill)
         tx = scroll_x;
         if ( tx < 0 )
         {
-            bx = tx + fill.scroll_w;
+            bx = tx + fill->scroll_w;
             rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
-            tx += fill.scroll_w;
+            tx += fill->scroll_w;
         }
         /* Draw full-tiles for the rest */
         bx = max_w;
@@ -198,17 +199,17 @@ void background_draw_sprite(const background_t bg, const bg_fill_sprite_t fill)
     }
 }
 
-void background_draw(const background_t bg)
+void background_draw(const background_t *bg)
 {
     /* Color fills */
-    background_draw_color( bg.sky_fill );
-    background_draw_color( bg.cloud_fill );
-    background_draw_color( bg.hill_fill );
-    background_draw_color( bg.ground_fill );
+    background_draw_color( &bg->sky_fill );
+    background_draw_color( &bg->cloud_fill );
+    background_draw_color( &bg->hill_fill );
+    background_draw_color( &bg->ground_fill );
 
     /* Texture fills */
-    background_draw_sprite( bg, bg.cloud_top );
-    background_draw_sprite( bg, bg.city );
-    background_draw_sprite( bg, bg.hill_top );
-    background_draw_sprite( bg, bg.ground_top );
+    background_draw_sprite( bg, &bg->cloud_top );
+    background_draw_sprite( bg, &bg->city );
+    background_draw_sprite( bg, &bg->hill_top );
+    background_draw_sprite( bg, &bg->ground_top );
 }
