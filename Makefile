@@ -1,77 +1,92 @@
 PROG_NAME = FlappyBird
 PROG_TITLE = "FlappyBird64"
-SRC_ARCHIVE = $(PROG_NAME)-src.tar.bz
-# OUT_SIZE = 52672B HEADER + 1M ROM
-OUT_SIZE = 1052672B
-DFS_OFFSET = 256K
-SRC_OFFSET = 622K
 
 # Paths
-DFSDIR = filesystem/
-ROOTDIR = $(N64_INST)
-GCCN64PREFIX = $(ROOTDIR)/bin/mips64-elf-
-CHKSUM64PATH = $(ROOTDIR)/bin/chksum64
-MKDFSPATH = $(ROOTDIR)/bin/mkdfs
-HEADERPATH = $(ROOTDIR)/lib
-N64TOOL = $(ROOTDIR)/bin/n64tool
-HEADERNAME = header
+DFS_DIR = filesystem
+SDK_DIR = $(N64_INST)
+ROM_HEADER = $(SDK_DIR)/lib/header
+LD_SCRIPT = $(SDK_DIR)/lib/n64ld.x
+N64_GCC_PREFIX = $(SDK_DIR)/bin/mips64-elf-
+
+# GCC Binaries
+CC = $(N64_GCC_PREFIX)gcc
+AS = $(N64_GCC_PREFIX)as
+LD = $(N64_GCC_PREFIX)ld
+OBJCOPY = $(N64_GCC_PREFIX)objcopy
+
+# LibDragon Binaries
+CHKSUM64 = $(SDK_DIR)/bin/chksum64
+MKDFS = $(SDK_DIR)/bin/mkdfs
+N64TOOL = $(SDK_DIR)/bin/n64tool
 
 # Code files
-SRCDIR = src/
-C_FILES = $(wildcard $(SRCDIR)*.c)
-H_FILES = $(wildcard $(SRCDIR)*.h)
+SRC_DIR = src
+C_FILES = $(wildcard $(SRC_DIR)/*.c)
+H_FILES = $(wildcard $(SRC_DIR)/*.h)
 OBJS := $(C_FILES:.c=.o)
 DEPS := $(OBJS:.o=.d)
 
 # Audio files
-AIFFDIR = resources/sfx/
-AIFF_FILES = $(wildcard $(AIFFDIR)*.aiff)
-PCMDIR = $(DFSDIR)sfx/
-PCM_TMP = $(subst $(AIFFDIR),$(PCMDIR),$(AIFF_FILES))
+AIFF_DIR = resources/sfx
+AIFF_FILES = $(wildcard $(AIFF_DIR)/*.aiff)
+PCM_DIR = $(DFS_DIR)/sfx
+PCM_TMP = $(subst $(AIFF_DIR),$(PCM_DIR),$(AIFF_FILES))
 PCM_FILES := $(PCM_TMP:.aiff=.raw)
 
 # Sprite files
-PNGDIR = resources/gfx/
-PNG_FILES = $(wildcard $(PNGDIR)*.png)
-SPRITEDIR = $(DFSDIR)gfx/
-SPRITE_TMP = $(subst $(PNGDIR),$(SPRITEDIR),$(PNG_FILES))
+PNG_DIR = resources/gfx
+PNG_FILES = $(wildcard $(PNG_DIR)/*.png)
+SPRITE_DIR = $(DFS_DIR)/gfx
+SPRITE_TMP = $(subst $(PNG_DIR),$(SPRITE_DIR),$(PNG_FILES))
 SPRITE_FILES := $(SPRITE_TMP:.png=.sprite)
 
-# Flags
-LINK_FLAGS = -L$(ROOTDIR)/lib -L$(ROOTDIR)/mips64-elf/lib
-LINK_FLAGS += -ldragon -lm -lc -ldragonsys
-LINK_FLAGS += -Tn64ld.x
-CFLAGS = -std=gnu99
-CFLAGS += -march=vr4300 -mtune=vr4300
-CFLAGS += -O2 -Wall -Werror
-CFLAGS += -I$(ROOTDIR)/include -I$(ROOTDIR)/mips64-elf/include
-CFLAGS += -MMD -MP
-ASFLAGS = -mtune=vr4300 -march=vr4300
+# GCC Flags
+CFLAGS = -march=vr4300 -mtune=vr4300
+CFLAGS += -std=gnu99 -O2 -Wall -Werror
+CFLAGS += -I$(SDK_DIR)/include -I$(SDK_DIR)/mips64-elf/include
+CFLAGS += -MMD -MP # Generate dependency files during compilation
+LDFLAGS = --library=dragon --library=c --library=m --library=dragonsys
+LDFLAGS += -L$(SDK_DIR)/lib -L$(SDK_DIR)/mips64-elf/lib
+LDFLAGS += --script=$(LD_SCRIPT)
 
-# Binaries
-CC = $(GCCN64PREFIX)gcc
-AS = $(GCCN64PREFIX)as
-LD = $(GCCN64PREFIX)ld
-OBJCOPY = $(GCCN64PREFIX)objcopy
+# LibDragon Flags
+OUT_SIZE = 1052672B # 52672B HEADER + 1M (minimum) ROM
+DFS_OFFSET = 256K
+SRC_OFFSET = 622K
+N64TOOLFLAGS = -l $(OUT_SIZE) -h $(ROM_HEADER) -t $(PROG_TITLE)
+N64TOOLFLAGS += $(RAW_BINARY) -s $(DFS_OFFSET) $(DFS_FILE)
+
+# Archive configuration
+SOURCE_ARCHIVE = $(PROG_NAME)-src.tar.bz
+SOURCE_PATHS = src Makefile *.sh resources
+TARFLAGS = --exclude .DS_Store --exclude *.[do]
+
+# Build products
+DFS_FILE = $(PROG_NAME).dfs
+ROM_FILE = $(PROG_NAME).z64
+RAW_BINARY = $(PROG_NAME).bin
+LINKED_OBJS = $(PROG_NAME).elf
+
+BUILD_PRODUCTS = $(ROM_FILE) $(RAW_BINARY) $(LINKED_OBJS) $(DFS_FILE)
+BUILD_PRODUCTS += $(OBJS) $(DEPS) $(DFS_DIR) $(SOURCE_ARCHIVE)
 
 # Compilation pipeline
 
-# ROM Image
-$(PROG_NAME).v64: $(PROG_NAME).elf $(PROG_NAME).dfs
-	$(OBJCOPY) $(PROG_NAME).elf $(PROG_NAME).bin -O binary
-	rm -f $(PROG_NAME).v64
-	$(N64TOOL) \
-		-b -l $(OUT_SIZE) \
-		-t $(PROG_TITLE) \
-		-h $(HEADERPATH)/$(HEADERNAME) \
-		-o $(PROG_NAME).v64  \
-		$(PROG_NAME).bin \
-		-s $(DFS_OFFSET) $(PROG_NAME).dfs
-	$(CHKSUM64PATH) $(PROG_NAME).v64
+all: $(ROM_FILE)
 
-# Linked binary
-$(PROG_NAME).elf: $(OBJS)
-	$(LD) -o $(PROG_NAME).elf $(OBJS) $(LINK_FLAGS)
+# ROM Image
+$(ROM_FILE): $(RAW_BINARY) $(DFS_FILE)
+	@rm -f $@
+	$(N64TOOL) -o $@ $(N64TOOLFLAGS)
+	$(CHKSUM64) $@
+
+# Raw stripped binary
+$(RAW_BINARY): $(LINKED_OBJS)
+	$(OBJCOPY) -O binary $^ $@
+
+# Linked object code binary
+$(LINKED_OBJS): $(OBJS)
+	$(LD) -o $@ $^ $(LDFLAGS)
 
 # Filesystem pipeline
 
@@ -84,29 +99,23 @@ $(PCM_FILES): $(AIFF_FILES)
 	sh ./convert_sfx.sh $?
 
 # DragonFS file
-$(PROG_NAME).dfs: $(SPRITE_FILES) $(PCM_FILES)
-	find $(DFSDIR) -name ".DS_Store" -depth -exec rm {} \;
-	$(MKDFSPATH) $(PROG_NAME).dfs $(DFSDIR)
+$(DFS_FILE): $(SPRITE_FILES) $(PCM_FILES)
+	@find $(DFS_DIR) -name ".DS_Store" -depth -exec rm {} \;
+	$(MKDFS) $@ $(DFS_DIR)
 
 # Source archive
-$(SRC_ARCHIVE): $(C_FILES) $(H_FILES) $(PNG_FILES) $(AIFF_FILES)
-	tar -cjf $(SRC_ARCHIVE) \
-		--exclude *.[do] \
-		--exclude .DS_Store \
-		src Makefile *.sh resources
+$(SOURCE_ARCHIVE): $(C_FILES) $(H_FILES) $(PNG_FILES) $(AIFF_FILES)
+	tar -cjf $@ $(TARFLAGS) $(SOURCE_PATHS)
 
 # Housekeeping
 
-all: $(PROG_NAME).v64
-
-emulate: $(PROG_NAME).v64
-	sh ./run_emulator.sh $(shell pwd)/$(PROG_NAME).v64
+emulate: $(ROM_FILE)
+	sh ./run_emulator.sh $(shell pwd)/$<
 
 clean:
-	rm -Rf $(DFSDIR)
-	rm -f *.v64 *.elf src/*.o src/*.d *.bin *.dfs *.tar.bz
+	rm -Rf $(BUILD_PRODUCTS)
 
-.PHONY: all clean
+.PHONY: all emulate clean
 
 # Ensure object files are regenerated after header modification
 -include $(DEPS)

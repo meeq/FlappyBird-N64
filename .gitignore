@@ -1,10 +1,18 @@
-*.bin
-*.dfs
-*.elf
-*.tar.bz
+# Compilation artifacts
 *.o
 *.d
 
+# Filesystem artifacts
 filesystem/*
+*.dfs
 
+# Linker artifacts
+*.bin
+*.elf
+
+# Rom Images
 *.v64
+*.z64
+
+# Archives
+*.tar.bz
