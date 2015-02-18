@@ -2,6 +2,8 @@ PROG_NAME = FlappyBird
 PROG_TITLE = "FlappyBird64"
 
 # Paths
+MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+PROJECT_DIR := $(notdir $(patsubst %/,%,$(dir $(MAKEFILE_PATH))))
 DFS_DIR = filesystem
 SDK_DIR = $(N64_INST)
 ROM_HEADER = $(SDK_DIR)/lib/header
@@ -107,10 +109,21 @@ $(DFS_FILE): $(SPRITE_FILES) $(PCM_FILES)
 $(SOURCE_ARCHIVE): $(C_FILES) $(H_FILES) $(PNG_FILES) $(AIFF_FILES)
 	tar -cjf $@ $(TARFLAGS) $(SOURCE_PATHS)
 
-# Housekeeping
+# Testing
 
+# Emulator settings
+MESS_DIR = $(PROJECT_DIR)/../mess0158-64bit
+MESS = cd $(MESS_DIR) && ./mess64
+MESSFLAGS = -skip_gameinfo -window -resolution 640x480
 emulate: $(ROM_FILE)
-	sh ./run_emulator.sh $(shell pwd)/$<
+	$(MESS) n64 -cartridge $< $(MESSFLAGS)
+
+# Everdrive64 Loader
+ED64_LOADER = $(SDK_DIR)/bin/ed64-loader
+everdrive: $(ROM_FILE)
+	$(ED64_LOADER) -pwf $<
+
+# Housekeeping
 
 clean:
 	rm -Rf $(BUILD_PRODUCTS)
