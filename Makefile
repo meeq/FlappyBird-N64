@@ -28,6 +28,15 @@ H_FILES = $(wildcard $(SRC_DIR)/*.h)
 OBJS := $(C_FILES:.c=.o)
 DEPS := $(OBJS:.o=.d)
 
+# GCC Flags
+CFLAGS = -march=vr4300 -mtune=vr4300
+CFLAGS += -std=gnu99 -O2 -Wall -Werror
+CFLAGS += -I$(SDK_DIR)/include -I$(SDK_DIR)/mips64-elf/include
+CFLAGS += -MMD -MP # Generate dependency files during compilation
+LDFLAGS = --library=dragon --library=c --library=m --library=dragonsys
+LDFLAGS += -L$(SDK_DIR)/lib -L$(SDK_DIR)/mips64-elf/lib
+LDFLAGS += --script=$(LD_SCRIPT)
+
 # Audio files
 AIFF_DIR = resources/sfx
 AIFF_FILES = $(wildcard $(AIFF_DIR)/*.aiff)
@@ -41,15 +50,6 @@ PNG_FILES = $(wildcard $(PNG_DIR)/*.png)
 SPRITE_DIR = $(DFS_DIR)/gfx
 SPRITE_TMP = $(subst $(PNG_DIR),$(SPRITE_DIR),$(PNG_FILES))
 SPRITE_FILES := $(SPRITE_TMP:.png=.sprite)
-
-# GCC Flags
-CFLAGS = -march=vr4300 -mtune=vr4300
-CFLAGS += -std=gnu99 -O2 -Wall -Werror
-CFLAGS += -I$(SDK_DIR)/include -I$(SDK_DIR)/mips64-elf/include
-CFLAGS += -MMD -MP # Generate dependency files during compilation
-LDFLAGS = --library=dragon --library=c --library=m --library=dragonsys
-LDFLAGS += -L$(SDK_DIR)/lib -L$(SDK_DIR)/mips64-elf/lib
-LDFLAGS += --script=$(LD_SCRIPT)
 
 # LibDragon Flags
 OUT_SIZE = 1052672B # 52672B HEADER + 1M (minimum) ROM
