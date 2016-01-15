@@ -2,13 +2,13 @@ PROG_NAME = FlappyBird
 PROG_TITLE = "FlappyBird64"
 
 # Paths
-MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-PROJECT_DIR := $(notdir $(patsubst %/,%,$(dir $(MAKEFILE_PATH))))
-DFS_DIR = filesystem
+PROJECT_DIR = $(CURDIR)
 SDK_DIR = $(N64_INST)
 ROM_HEADER = $(SDK_DIR)/lib/header
 LD_SCRIPT = $(SDK_DIR)/lib/n64ld.x
 N64_GCC_PREFIX = $(SDK_DIR)/bin/mips64-elf-
+SRC_DIR = src
+DFS_DIR = filesystem
 
 # GCC Binaries
 CC = $(N64_GCC_PREFIX)gcc
@@ -22,9 +22,8 @@ MKDFS = $(SDK_DIR)/bin/mkdfs
 N64TOOL = $(SDK_DIR)/bin/n64tool
 
 # Code files
-SRC_DIR = src
-C_FILES = $(wildcard $(SRC_DIR)/*.c)
-H_FILES = $(wildcard $(SRC_DIR)/*.h)
+C_FILES := $(wildcard $(SRC_DIR)/*.c)
+H_FILES := $(wildcard $(SRC_DIR)/*.h)
 OBJS := $(C_FILES:.c=.o)
 DEPS := $(OBJS:.o=.d)
 
@@ -39,15 +38,15 @@ LDFLAGS += --script=$(LD_SCRIPT)
 
 # Audio files
 AIFF_DIR = resources/sfx
-AIFF_FILES = $(wildcard $(AIFF_DIR)/*.aiff)
-PCM_DIR = $(DFS_DIR)/sfx
+AIFF_FILES := $(wildcard $(AIFF_DIR)/*.aiff)
+PCM_DIR := $(DFS_DIR)/sfx
 PCM_TMP = $(subst $(AIFF_DIR),$(PCM_DIR),$(AIFF_FILES))
 PCM_FILES := $(PCM_TMP:.aiff=.raw)
 
 # Sprite files
 PNG_DIR = resources/gfx
-PNG_FILES = $(wildcard $(PNG_DIR)/*.png)
-SPRITE_DIR = $(DFS_DIR)/gfx
+PNG_FILES := $(wildcard $(PNG_DIR)/*.png)
+SPRITE_DIR := $(DFS_DIR)/gfx
 SPRITE_TMP = $(subst $(PNG_DIR),$(SPRITE_DIR),$(PNG_FILES))
 SPRITE_FILES := $(SPRITE_TMP:.png=.sprite)
 
@@ -84,7 +83,7 @@ $(ROM_FILE): $(RAW_BINARY) $(DFS_FILE)
 
 # Raw stripped binary
 $(RAW_BINARY): $(LINKED_OBJS)
-	$(OBJCOPY) -O binary $^ $@
+	$(OBJCOPY) -O binary $< $@
 
 # Linked object code binary
 $(LINKED_OBJS): $(OBJS)
@@ -116,7 +115,7 @@ MESS_DIR = $(PROJECT_DIR)/../mess0158-64bit
 MESS = cd $(MESS_DIR) && ./mess64
 MESSFLAGS = -skip_gameinfo -window -resolution 640x480
 emulate: $(ROM_FILE)
-	$(MESS) n64 -cartridge $< $(MESSFLAGS)
+	$(MESS) n64 -cartridge $(PROJECT_DIR)/$< $(MESSFLAGS)
 
 # Everdrive64 Loader
 ED64_LOADER = $(SDK_DIR)/bin/ed64-loader
