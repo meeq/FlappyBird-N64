@@ -111,11 +111,11 @@ $(SOURCE_ARCHIVE): $(C_FILES) $(H_FILES) $(PNG_FILES) $(AIFF_FILES)
 # Testing
 
 # Emulator settings
-MESS_DIR = $(PROJECT_DIR)/../mess0158-64bit
-MESS = cd $(MESS_DIR) && ./mess64
-MESSFLAGS = -skip_gameinfo -window -resolution 640x480
+MAME_DIR = /usr/local/share/mame
+MAME = cd $(MAME_DIR) && mame
+MAMEFLAGS = -skip_gameinfo -window -resolution 640x480
 emulate: $(ROM_FILE)
-	$(MESS) n64 -cartridge $(PROJECT_DIR)/$< $(MESSFLAGS)
+	$(MAME) n64 -cartridge $(PROJECT_DIR)/$< $(MAMEFLAGS)
 
 # Everdrive64 Loader
 ED64_LOADER = $(SDK_DIR)/bin/ed64-loader
