@@ -1,3 +1,6 @@
+# Operating System artifacts
+.DS_Store
+
 # Compilation artifacts
 *.o
 *.d

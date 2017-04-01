@@ -4,22 +4,34 @@ PROG_TITLE = "FlappyBird64"
 # Paths
 PROJECT_DIR = $(CURDIR)
 SDK_DIR = $(N64_INST)
-ROM_HEADER = $(SDK_DIR)/lib/header
-LD_SCRIPT = $(SDK_DIR)/lib/n64ld.x
+SDK_LIB_DIR = $(SDK_DIR)/mips64-elf/lib
 N64_GCC_PREFIX = $(SDK_DIR)/bin/mips64-elf-
 SRC_DIR = src
 DFS_DIR = filesystem
 
-# GCC Binaries
+# GCC binaries
 CC = $(N64_GCC_PREFIX)gcc
 AS = $(N64_GCC_PREFIX)as
 LD = $(N64_GCC_PREFIX)ld
 OBJCOPY = $(N64_GCC_PREFIX)objcopy
 
-# LibDragon Binaries
+# LibDragon binaries
+ROM_HEADER = $(SDK_LIB_DIR)/header
+LD_SCRIPT = $(SDK_LIB_DIR)/n64ld.x
 CHKSUM64 = $(SDK_DIR)/bin/chksum64
 MKDFS = $(SDK_DIR)/bin/mkdfs
 N64TOOL = $(SDK_DIR)/bin/n64tool
+
+# Emulator settings
+MAME_DIR = /usr/local/share/mame
+MAME = cd $(MAME_DIR) && mame
+MAMEFLAGS = -skip_gameinfo -window -resolution 640x480
+
+# Project files
+README_TXT := README.txt
+MAKEFILE := Makefile
+CONVERT_GFX := convert_gfx.sh
+CONVERT_SFX := convert_sfx.sh
 
 # Code files
 C_FILES := $(wildcard $(SRC_DIR)/*.c)
@@ -33,8 +45,7 @@ CFLAGS += -std=gnu99 -O2 -Wall -Werror
 CFLAGS += -I$(SDK_DIR)/include -I$(SDK_DIR)/mips64-elf/include
 CFLAGS += -MMD -MP # Generate dependency files during compilation
 LDFLAGS = --library=dragon --library=c --library=m --library=dragonsys
-LDFLAGS += -L$(SDK_DIR)/lib -L$(SDK_DIR)/mips64-elf/lib
-LDFLAGS += --script=$(LD_SCRIPT)
+LDFLAGS += -L$(SDK_DIR)/lib -L$(SDK_LIB_DIR) --script=$(LD_SCRIPT)
 
 # Audio files
 AIFF_DIR = resources/sfx
@@ -53,14 +64,20 @@ SPRITE_FILES := $(SPRITE_TMP:.png=.sprite)
 # LibDragon Flags
 OUT_SIZE = 1052672B # 52672B HEADER + 1M (minimum) ROM
 DFS_OFFSET = 256K
-SRC_OFFSET = 622K
 N64TOOLFLAGS = -l $(OUT_SIZE) -h $(ROM_HEADER) -t $(PROG_TITLE)
 N64TOOLFLAGS += $(RAW_BINARY) -s $(DFS_OFFSET) $(DFS_FILE)
 
 # Archive configuration
-SOURCE_ARCHIVE = $(PROG_NAME)-src.tar.bz
-SOURCE_PATHS = src Makefile *.sh resources
+README_OFFSET = 620K
+README_BIN = README.bin
+# N64TOOLFLAGS += -s $(README_OFFSET) $(README_BIN)
+ARCHIVE_OFFSET = 622K
+SRC_ARCHIVE = $(PROG_NAME)-src.tar.bz
+# N64TOOLFLAGS += -s $(ARCHIVE_OFFSET) $(SRC_ARCHIVE)
 TARFLAGS = --exclude .DS_Store --exclude *.[do]
+ARCHIVE_PATHS = README.txt Makefile *.sh resources src
+ARCHIVE_FILES = $(README_TXT) $(MAKEFILE) $(CONVERT_GFX) $(CONVERT_SFX)
+ARCHIVE_FILES += $(C_FILES) $(H_FILES) $(PNG_FILES) $(AIFF_FILES)
 
 # Build products
 DFS_FILE = $(PROG_NAME).dfs
@@ -68,15 +85,15 @@ ROM_FILE = $(PROG_NAME).z64
 RAW_BINARY = $(PROG_NAME).bin
 LINKED_OBJS = $(PROG_NAME).elf
 
-BUILD_PRODUCTS = $(ROM_FILE) $(RAW_BINARY) $(LINKED_OBJS) $(DFS_FILE)
-BUILD_PRODUCTS += $(OBJS) $(DEPS) $(DFS_DIR) $(SOURCE_ARCHIVE)
+BUILD_ARTIFACTS = $(ROM_FILE) $(RAW_BINARY) $(LINKED_OBJS) $(DFS_FILE)
+BUILD_ARTIFACTS += $(OBJS) $(DEPS) $(DFS_DIR) $(SRC_ARCHIVE)
 
 # Compilation pipeline
 
 all: $(ROM_FILE)
 
 # ROM Image
-$(ROM_FILE): $(RAW_BINARY) $(DFS_FILE)
+$(ROM_FILE): $(RAW_BINARY) $(DFS_FILE) $(README_BIN) $(SRC_ARCHIVE)
 	@rm -f $@
 	$(N64TOOL) -o $@ $(N64TOOLFLAGS)
 	$(CHKSUM64) $@
@@ -104,16 +121,19 @@ $(DFS_FILE): $(SPRITE_FILES) $(PCM_FILES)
 	@find $(DFS_DIR) -name ".DS_Store" -depth -exec rm {} \;
 	$(MKDFS) $@ $(DFS_DIR)
 
+# README baked into ROM file
+$(README_BIN): $(README_TXT)
+	cp $^ $@
+	# TODO Word-align README file
+
 # Source archive
-$(SOURCE_ARCHIVE): $(C_FILES) $(H_FILES) $(PNG_FILES) $(AIFF_FILES)
-	tar -cjf $@ $(TARFLAGS) $(SOURCE_PATHS)
+$(SRC_ARCHIVE): $(ARCHIVE_FILES)
+	tar -cjf $@ $(TARFLAGS) $(ARCHIVE_PATHS)
+	# TODO Word-align archive file
 
 # Testing
 
-# Emulator settings
-MAME_DIR = /usr/local/share/mame
-MAME = cd $(MAME_DIR) && mame
-MAMEFLAGS = -skip_gameinfo -window -resolution 640x480
+# Load in MESS Emulator
 emulate: $(ROM_FILE)
 	$(MAME) n64 -cartridge $(PROJECT_DIR)/$< $(MAMEFLAGS)
 
@@ -125,7 +145,7 @@ everdrive: $(ROM_FILE)
 # Housekeeping
 
 clean:
-	rm -Rf $(BUILD_PRODUCTS)
+	rm -Rf $(BUILD_ARTIFACTS)
 
 .PHONY: all emulate clean
 
