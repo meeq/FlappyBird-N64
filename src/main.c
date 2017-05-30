@@ -41,7 +41,7 @@ int main(void)
     ui_t ui = ui_setup( &bg );
 
     /* Run the main loop */
-    while ( TRUE )
+    while ( true )
     {
         /* Update controller state */
         controller_scan();

@@ -23,18 +23,18 @@ ui_t ui_setup(const background_t *bg)
     ui_t ui = {
         .last_score = 0,
         .high_score = 0,
-        .new_high_score = FALSE,
+        .new_high_score = false,
         .clear_color = UI_CLEAR_COLOR,
-        .did_flash = FALSE,
-        .flash_draw = FALSE,
+        .did_flash = false,
+        .flash_draw = false,
         .flash_color = UI_FLASH_COLOR,
         .hit_ms = 0,
         .dead_ms = 0,
-        .did_gameover = FALSE,
-        .heading_draw = FALSE,
-        .board_draw = FALSE,
-        .score_draw = FALSE,
-        .medal_draw = FALSE,
+        .did_gameover = false,
+        .heading_draw = false,
+        .board_draw = false,
+        .score_draw = false,
+        .medal_draw = false,
         .board_y = g_graphics->height,
         .score_ms = 0,
         .last_score_acc = 0,
@@ -86,12 +86,12 @@ inline static void ui_bird_tick(ui_t *ui, const bird_t *bird)
     ui->last_score = bird->score;
     if ( bird->score == 0 )
     {
-        ui->new_high_score = FALSE;
+        ui->new_high_score = false;
     }
     if ( bird->score > ui->high_score )
     {
         ui->high_score = bird->score;
-        ui->new_high_score = TRUE;
+        ui->new_high_score = true;
     }
 }
 
@@ -108,13 +108,13 @@ inline static void ui_flash_tick(ui_t *ui)
             ui->flash_draw = ticks_ms - ui->hit_ms <= UI_DEATH_FLASH_MS;
             if ( was_flash_draw && !ui->flash_draw )
             {
-                ui->did_flash = TRUE;
+                ui->did_flash = true;
             }
         }
     }
     else
     {
-        ui->did_flash = FALSE;
+        ui->did_flash = false;
     }
 }
 
@@ -122,7 +122,7 @@ inline static void ui_gameover_tick(ui_t *ui)
 {
     if ( ui->state != BIRD_STATE_DEAD )
     {
-        ui->did_gameover = FALSE;
+        ui->did_gameover = false;
         return;
     }
     if ( ui->did_gameover )
@@ -134,8 +134,8 @@ inline static void ui_gameover_tick(ui_t *ui)
     const u32 ticks_ms = get_total_ms();
     const s32 dead_diff_ms = ticks_ms - ui->dead_ms;
     /* Only show the scores and medal after the scoreboard appears */
-    ui->score_draw = FALSE;
-    ui->medal_draw = FALSE;
+    ui->score_draw = false;
+    ui->medal_draw = false;
     /* Show the game over heading and play a sound */
     const bool was_heading_draw = ui->heading_draw;
     ui->heading_draw = dead_diff_ms >= UI_DEATH_HEADING_DELAY;
@@ -202,8 +202,8 @@ inline static void ui_gameover_tick(ui_t *ui)
         }
         else
         {
-            ui->medal_draw = TRUE;
-            ui->did_gameover = TRUE;
+            ui->medal_draw = true;
+            ui->did_gameover = true;
         }
     }
 }

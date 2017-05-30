@@ -5,7 +5,7 @@
 fps_counter_t fps_setup(void)
 {
     fps_counter_t fps = {
-        .should_draw = FALSE,
+        .should_draw = false,
         .frame_ms = 0,
         .total_frames = 0,
         .total_misses = 0,

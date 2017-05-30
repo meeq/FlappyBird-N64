@@ -24,7 +24,7 @@ void collision_tick(bird_t *bird, pipes_t *pipes)
                       !pipe.has_scored )
             {
                 bird->score += 1;
-                pipes->n[i].has_scored = TRUE;
+                pipes->n[i].has_scored = true;
                 audio_play_sfx( g_audio, SFX_POINT );
             }
         }

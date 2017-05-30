@@ -61,7 +61,7 @@ void pipes_reset(pipes_t *pipes)
         pipe_t pipe = {
             .x = PIPE_START_X + (i * PIPE_GAP_X),
             .y = y,
-            .has_scored = FALSE
+            .has_scored = false
         };
         pipes->n[i] = pipe;
         /* Pipes are positioned relative to the previous pipe */
@@ -91,7 +91,7 @@ void pipes_tick(pipes_t *pipes)
                 j = pipe_prev_index( i );
                 pipes->n[i].x = pipes->n[j].x + PIPE_GAP_X;
                 pipes->n[i].y = pipe_random_bias_y( pipes->n[j].y );
-                pipes->n[i].has_scored = FALSE;
+                pipes->n[i].has_scored = false;
             }
         }
         pipes->scroll_ms = ticks_ms;

@@ -19,8 +19,8 @@ bird_t bird_setup(bird_color_t color_type)
         .score = 0,
         .hit_ms = 0,
         .dead_ms = 0,
-        .is_rumbling = FALSE,
-        .played_die_sfx = FALSE,
+        .is_rumbling = false,
+        .played_die_sfx = false,
         .anim_ms = 0,
         .anim_frame = 0,
         .x = BIRD_TITLE_X,
@@ -81,7 +81,7 @@ void bird_hit(bird_t *bird)
     if ( is_rumble_present() )
     {
         rumble_start( CONTROLLER_1 );
-        bird->is_rumbling = TRUE;
+        bird->is_rumbling = true;
     }
 }
 
@@ -211,7 +211,7 @@ void bird_tick(bird_t *bird, const gamepad_state_t *gamepad)
                 bird->state = BIRD_STATE_READY;
                 bird->score = 0;
                 bird->anim_frame = 0;
-                bird->played_die_sfx = FALSE;
+                bird->played_die_sfx = false;
                 audio_play_sfx( g_audio, SFX_SWOOSH );
             }
             break;
@@ -224,7 +224,7 @@ void bird_tick(bird_t *bird, const gamepad_state_t *gamepad)
         case BIRD_STATE_DYING:
             if ( bird->dy > 0 && !bird->played_die_sfx )
             {
-                bird->played_die_sfx = TRUE;
+                bird->played_die_sfx = true;
                 audio_play_sfx( g_audio, SFX_DIE );
             }
             break;
@@ -257,7 +257,7 @@ void bird_tick(bird_t *bird, const gamepad_state_t *gamepad)
     if ( bird->is_rumbling && ticks_ms - bird->hit_ms >= BIRD_RUMBLE_MS )
     {
         rumble_stop( CONTROLLER_1 );
-        bird->is_rumbling = FALSE;
+        bird->is_rumbling = false;
     }
     /* Progress the flapping/falling animation */
     bird_tick_animation( bird );
