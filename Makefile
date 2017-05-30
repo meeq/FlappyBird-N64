@@ -23,8 +23,11 @@ MKDFS = $(SDK_DIR)/bin/mkdfs
 N64TOOL = $(SDK_DIR)/bin/n64tool
 
 # Emulator settings
-MAME_DIR = /usr/local/share/mame
-MAME = cd $(MAME_DIR) && mame
+CEN64_DIR = $(N64_INST)/../cen64
+CEN64 = $(CEN64_DIR)/cen64
+CEN64FLAGS = $(CEN64_DIR)/pifdata.bin
+MAME_DIR = $(N64_INST)/../mame
+MAME = cd $(MAME_DIR) && ./mame64
 MAMEFLAGS = -skip_gameinfo -window -resolution 640x480
 
 # Project files
@@ -70,14 +73,18 @@ N64TOOLFLAGS += $(RAW_BINARY) -s $(DFS_OFFSET) $(DFS_FILE)
 # Archive configuration
 README_OFFSET = 620K
 README_BIN = README.bin
-# N64TOOLFLAGS += -s $(README_OFFSET) $(README_BIN)
+N64TOOLFLAGS += -s $(README_OFFSET) $(README_BIN)
 ARCHIVE_OFFSET = 622K
 SRC_ARCHIVE = $(PROG_NAME)-src.tar.bz
-# N64TOOLFLAGS += -s $(ARCHIVE_OFFSET) $(SRC_ARCHIVE)
+N64TOOLFLAGS += -s $(ARCHIVE_OFFSET) $(SRC_ARCHIVE)
 TARFLAGS = --exclude .DS_Store --exclude *.[do]
 ARCHIVE_PATHS = README.txt Makefile *.sh resources src
 ARCHIVE_FILES = $(README_TXT) $(MAKEFILE) $(CONVERT_GFX) $(CONVERT_SFX)
 ARCHIVE_FILES += $(C_FILES) $(H_FILES) $(PNG_FILES) $(AIFF_FILES)
+
+# Testing products
+CLONE_DIR = clone
+CLONE_SKIP_OFFSET = 641024
 
 # Build products
 DFS_FILE = $(PROG_NAME).dfs
@@ -85,8 +92,9 @@ ROM_FILE = $(PROG_NAME).z64
 RAW_BINARY = $(PROG_NAME).bin
 LINKED_OBJS = $(PROG_NAME).elf
 
-BUILD_ARTIFACTS = $(ROM_FILE) $(RAW_BINARY) $(LINKED_OBJS) $(DFS_FILE)
-BUILD_ARTIFACTS += $(OBJS) $(DEPS) $(DFS_DIR) $(SRC_ARCHIVE)
+BUILD_ARTIFACTS = $(ROM_FILE) $(RAW_BINARY) $(LINKED_OBJS)
+BUILD_ARTIFACTS += $(OBJS) $(DEPS) $(DFS_FILE) $(DFS_DIR)
+BUILD_ARTIFACTS += $(README_BIN) $(SRC_ARCHIVE) $(CLONE_DIR)
 
 # Compilation pipeline
 
@@ -118,36 +126,49 @@ $(PCM_FILES): $(AIFF_FILES)
 
 # DragonFS file
 $(DFS_FILE): $(SPRITE_FILES) $(PCM_FILES)
-	@find $(DFS_DIR) -name ".DS_Store" -depth -exec rm {} \;
+	@find $(DFS_DIR) -depth -name ".DS_Store" -exec rm {} \;
 	$(MKDFS) $@ $(DFS_DIR)
 
 # README baked into ROM file
 $(README_BIN): $(README_TXT)
 	cp $^ $@
-	# TODO Word-align README file
+	truncate --size=%4 $@ # Word-align
 
 # Source archive
 $(SRC_ARCHIVE): $(ARCHIVE_FILES)
 	tar -cjf $@ $(TARFLAGS) $(ARCHIVE_PATHS)
-	# TODO Word-align archive file
+	truncate --size=%4 $@ # Word-align
 
 # Testing
 
-# Load in MESS Emulator
-emulate: $(ROM_FILE)
+# Load ROM in cen64 emulator
+emulate-cen64: $(ROM_FILE)
+	$(CEN64) $(CEN64FLAGS) $(PROJECT_DIR)/$<
+
+# Load ROM in MAME emulator
+emulate-mame: $(ROM_FILE)
 	$(MAME) n64 -cartridge $(PROJECT_DIR)/$< $(MAMEFLAGS)
 
-# Everdrive64 Loader
+# Load ROM over USB to Everdrive64
 ED64_LOADER = $(SDK_DIR)/bin/ed64-loader
 everdrive: $(ROM_FILE)
 	$(ED64_LOADER) -pwf $<
 
 # Housekeeping
 
+# Ensure that it is possible to build from source with the packaged ROM
+test-clone: $(ROM_FILE)
+	mkdir $(CLONE_DIR) && \
+	cd $(CLONE_DIR) && \
+	dd bs=1 skip=$(CLONE_SKIP_OFFSET) \
+	   if=$(PROJECT_DIR)/$(ROM_FILE) of=source.tar.bz && \
+	tar -xf source.tar.bz && \
+	make
+
 clean:
 	rm -Rf $(BUILD_ARTIFACTS)
 
-.PHONY: all emulate clean
+.PHONY: all emulate-cen64 emulate-mame test-clone clean
 
 # Ensure object files are regenerated after header modification
 -include $(DEPS)
