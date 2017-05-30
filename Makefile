@@ -7,6 +7,7 @@ SDK_DIR = $(N64_INST)
 SDK_LIB_DIR = $(SDK_DIR)/mips64-elf/lib
 N64_GCC_PREFIX = $(SDK_DIR)/bin/mips64-elf-
 SRC_DIR = src
+RES_DIR = resources
 DFS_DIR = filesystem
 
 # GCC binaries
@@ -22,16 +23,19 @@ CHKSUM64 = $(SDK_DIR)/bin/chksum64
 MKDFS = $(SDK_DIR)/bin/mkdfs
 N64TOOL = $(SDK_DIR)/bin/n64tool
 
-# Emulator settings
+# Testing settings
 CEN64_DIR = $(N64_INST)/../cen64
 CEN64 = $(CEN64_DIR)/cen64
 CEN64FLAGS = $(CEN64_DIR)/pifdata.bin
 MAME_DIR = $(N64_INST)/../mame
 MAME = cd $(MAME_DIR) && ./mame64
 MAMEFLAGS = -skip_gameinfo -window -resolution 640x480
+ED64_LOADER = $(SDK_DIR)/bin/ed64-loader
 
 # Project files
-README_TXT := README.txt
+README_TXT := README.md
+LICENSE_TXT := LICENSE
+SCREENSHOTS_PNG := Screenshots.png
 MAKEFILE := Makefile
 CONVERT_GFX := convert_gfx.sh
 CONVERT_SFX := convert_sfx.sh
@@ -51,14 +55,14 @@ LDFLAGS = --library=dragon --library=c --library=m --library=dragonsys
 LDFLAGS += -L$(SDK_DIR)/lib -L$(SDK_LIB_DIR) --script=$(LD_SCRIPT)
 
 # Audio files
-AIFF_DIR = resources/sfx
+AIFF_DIR = $(RES_DIR)/sfx
 AIFF_FILES := $(wildcard $(AIFF_DIR)/*.aiff)
 PCM_DIR := $(DFS_DIR)/sfx
 PCM_TMP = $(subst $(AIFF_DIR),$(PCM_DIR),$(AIFF_FILES))
 PCM_FILES := $(PCM_TMP:.aiff=.raw)
 
 # Sprite files
-PNG_DIR = resources/gfx
+PNG_DIR = $(RES_DIR)/gfx
 PNG_FILES := $(wildcard $(PNG_DIR)/*.png)
 SPRITE_DIR := $(DFS_DIR)/gfx
 SPRITE_TMP = $(subst $(PNG_DIR),$(SPRITE_DIR),$(PNG_FILES))
@@ -78,9 +82,11 @@ ARCHIVE_OFFSET = 622K
 SRC_ARCHIVE = $(PROG_NAME)-src.tar.bz
 N64TOOLFLAGS += -s $(ARCHIVE_OFFSET) $(SRC_ARCHIVE)
 TARFLAGS = --exclude .DS_Store --exclude *.[do]
-ARCHIVE_PATHS = README.txt Makefile *.sh resources src
-ARCHIVE_FILES = $(README_TXT) $(MAKEFILE) $(CONVERT_GFX) $(CONVERT_SFX)
-ARCHIVE_FILES += $(C_FILES) $(H_FILES) $(PNG_FILES) $(AIFF_FILES)
+ARCHIVE_ROOT_FILES = $(README_TXT) $(LICENSE_TXT) $(SCREENSHOTS_PNG) \
+										 $(MAKEFILE) $(CONVERT_GFX) $(CONVERT_SFX)
+ARCHIVE_FILES = $(ARCHIVE_ROOT_FILES) $(C_FILES) $(H_FILES) \
+																			$(PNG_FILES) $(AIFF_FILES)
+ARCHIVE_PATHS = $(ARCHIVE_ROOT_FILES) $(SRC_DIR) $(RES_DIR)
 
 # Testing products
 CLONE_DIR = clone
@@ -131,13 +137,13 @@ $(DFS_FILE): $(SPRITE_FILES) $(PCM_FILES)
 
 # README baked into ROM file
 $(README_BIN): $(README_TXT)
-	cp $^ $@
-	truncate --size=%4 $@ # Word-align
+	@cp $^ $@
+	@truncate --size=%4 $@ # Word-align
 
 # Source archive
 $(SRC_ARCHIVE): $(ARCHIVE_FILES)
 	tar -cjf $@ $(TARFLAGS) $(ARCHIVE_PATHS)
-	truncate --size=%4 $@ # Word-align
+	@truncate --size=%4 $@ # Word-align
 
 # Testing
 
@@ -150,11 +156,8 @@ emulate-mame: $(ROM_FILE)
 	$(MAME) n64 -cartridge $(PROJECT_DIR)/$< $(MAMEFLAGS)
 
 # Load ROM over USB to Everdrive64
-ED64_LOADER = $(SDK_DIR)/bin/ed64-loader
 everdrive: $(ROM_FILE)
 	$(ED64_LOADER) -pwf $<
-
-# Housekeeping
 
 # Ensure that it is possible to build from source with the packaged ROM
 test-clone: $(ROM_FILE)
@@ -164,6 +167,8 @@ test-clone: $(ROM_FILE)
 	   if=$(PROJECT_DIR)/$(ROM_FILE) of=source.tar.bz && \
 	tar -xf source.tar.bz && \
 	make
+
+# Housekeeping
 
 clean:
 	rm -Rf $(BUILD_ARTIFACTS)
