@@ -1,3 +1,12 @@
+/**
+ * FlappyBird-N64 - fps.h
+ *
+ * Copyright 2017, Christopher Bonhage
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #ifndef __FLAPPY_FPS_H
 #define __FLAPPY_FPS_H
 

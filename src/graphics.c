@@ -1,3 +1,12 @@
+/**
+ * FlappyBird-N64 - graphics.c
+ *
+ * Copyright 2017, Christopher Bonhage
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #include "graphics.h"
 
 graphics_t *graphics_setup(resolution_t res, bitdepth_t depth,
