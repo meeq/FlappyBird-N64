@@ -64,6 +64,7 @@ PCM_FILES := $(PCM_TMP:.aiff=.raw)
 # Sprite files
 PNG_DIR = $(RES_DIR)/gfx
 PNG_FILES := $(wildcard $(PNG_DIR)/*.png)
+SPRITE_MANIFEST_TXT := $(PNG_DIR)/manifest.txt
 SPRITE_DIR := $(DFS_DIR)/gfx
 SPRITE_TMP = $(subst $(PNG_DIR),$(SPRITE_DIR),$(PNG_FILES))
 SPRITE_FILES := $(SPRITE_TMP:.png=.sprite)
@@ -123,12 +124,12 @@ $(LINKED_OBJS): $(OBJS)
 # Filesystem pipeline
 
 # Sprites
-$(SPRITE_FILES): $(PNG_FILES)
-	sh ./convert_gfx.sh $?
+$(SPRITE_DIR)/%.sprite: $(PNG_DIR)/%.png $(SPRITE_MANIFEST_TXT)
+	sh ./convert_gfx.sh $<
 
 # PCM Audio
-$(PCM_FILES): $(AIFF_FILES)
-	sh ./convert_sfx.sh $?
+$(PCM_DIR)/%.raw: $(AIFF_DIR)/%.aiff
+	sh ./convert_sfx.sh $<
 
 # DragonFS file
 $(DFS_FILE): $(SPRITE_FILES) $(PCM_FILES)
