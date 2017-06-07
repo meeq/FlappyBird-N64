@@ -38,7 +38,6 @@ LICENSE_TXT := LICENSE
 SCREENSHOTS_PNG := Screenshots.png
 MAKEFILE := Makefile
 CONVERT_GFX := convert_gfx.sh
-CONVERT_SFX := convert_sfx.sh
 
 # Code files
 C_FILES := $(wildcard $(SRC_DIR)/*.c)
@@ -55,6 +54,8 @@ LDFLAGS = --library=dragon --library=c --library=m --library=dragonsys
 LDFLAGS += -L$(SDK_DIR)/lib -L$(SDK_LIB_DIR) --script=$(LD_SCRIPT)
 
 # Audio files
+SOX = sox
+SOXFLAGS = -b 16 -e signed-integer -B -r 44100
 AIFF_DIR = $(RES_DIR)/sfx
 AIFF_FILES := $(wildcard $(AIFF_DIR)/*.aiff)
 PCM_DIR := $(DFS_DIR)/sfx
@@ -129,7 +130,13 @@ $(SPRITE_DIR)/%.sprite: $(PNG_DIR)/%.png $(SPRITE_MANIFEST_TXT)
 
 # PCM Audio
 $(PCM_DIR)/%.raw: $(AIFF_DIR)/%.aiff
-	sh ./convert_sfx.sh $<
+	@mkdir -p $(PCM_DIR)
+	@command -v $(SOX) >/dev/null 2>&1 || { \
+	    echo >&2 'This Makefile requires the `sox` command.'; \
+	    echo >&2 'Get it from http://sox.sourceforge.net/sox.html'; \
+	    exit 1; \
+	}
+	$(SOX) $< $(SOXFLAGS) $@ remix -
 
 # DragonFS file
 $(DFS_FILE): $(SPRITE_FILES) $(PCM_FILES)
