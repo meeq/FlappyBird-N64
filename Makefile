@@ -38,6 +38,7 @@ LICENSE_TXT := LICENSE
 SCREENSHOTS_PNG := Screenshots.png
 MAKEFILE := Makefile
 CONVERT_GFX := convert_gfx.sh
+WORD_ALIGN := word_align.sh
 
 # Code files
 C_FILES := $(wildcard $(SRC_DIR)/*.c)
@@ -85,7 +86,7 @@ SRC_ARCHIVE = $(PROG_NAME)-src.tar.bz
 N64TOOLFLAGS += -s $(ARCHIVE_OFFSET) $(SRC_ARCHIVE)
 TARFLAGS = --exclude .DS_Store --exclude *.[do]
 ARCHIVE_ROOT_FILES = $(README_TXT) $(LICENSE_TXT) $(SCREENSHOTS_PNG) \
-										 $(MAKEFILE) $(CONVERT_GFX) $(CONVERT_SFX)
+										 $(MAKEFILE) $(CONVERT_GFX) $(WORD_ALIGN)
 ARCHIVE_FILES = $(ARCHIVE_ROOT_FILES) $(C_FILES) $(H_FILES) \
 																			$(PNG_FILES) $(AIFF_FILES)
 ARCHIVE_PATHS = $(ARCHIVE_ROOT_FILES) $(SRC_DIR) $(RES_DIR)
@@ -126,7 +127,7 @@ $(LINKED_OBJS): $(OBJS)
 
 # Sprites
 $(SPRITE_DIR)/%.sprite: $(PNG_DIR)/%.png $(SPRITE_MANIFEST_TXT)
-	sh ./convert_gfx.sh $<
+	@bash $(CONVERT_GFX) $<
 
 # PCM Audio
 $(PCM_DIR)/%.raw: $(AIFF_DIR)/%.aiff
@@ -146,12 +147,13 @@ $(DFS_FILE): $(SPRITE_FILES) $(PCM_FILES)
 # README baked into ROM file
 $(README_BIN): $(README_TXT)
 	@cp $^ $@
-	@truncate --size=%4 $@ # Word-align
+	@bash $(WORD_ALIGN) $@
+
 
 # Source archive
 $(SRC_ARCHIVE): $(ARCHIVE_FILES)
 	tar -cjf $@ $(TARFLAGS) $(ARCHIVE_PATHS)
-	@truncate --size=%4 $@ # Word-align
+	@bash $(WORD_ALIGN) $@
 
 # Testing
 

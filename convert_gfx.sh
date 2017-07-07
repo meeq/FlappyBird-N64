@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Convert pngs into 16-bit libdragon sprites
+set -eu
 
 MKSPRITE=${N64_INST}/bin/mksprite
 
@@ -33,7 +34,7 @@ convert_png_to_sprite() {
 convert_manifest_line_to_sprite() {
     local META_LINE=$1
     # Convert META_LINE into an array
-    eval META=($META_LINE)
+    read -a META <<<$META_LINE
     # Get metadata from META array
     FILE_BASENAME=${META[0]}
     H_SLICES=${META[1]}
