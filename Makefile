@@ -18,6 +18,7 @@ OBJCOPY = $(N64_GCC_PREFIX)objcopy
 
 # LibDragon binaries
 ROM_HEADER = $(SDK_LIB_DIR)/header
+AUDIOCONV64 = $(SDK_DIR)/bin/audioconv64
 CHKSUM64 = $(SDK_DIR)/bin/chksum64
 MKDFS = $(SDK_DIR)/bin/mkdfs
 N64TOOL = $(SDK_DIR)/bin/n64tool
@@ -41,13 +42,11 @@ LDFLAGS += --library-path=$(SDK_LIB_DIR)
 LDFLAGS += --script=n64.ld --gc-sections
 
 # Audio files
-SOX = sox
-SOXFLAGS = -b 16 -e signed-integer -B -r 44100
-AIFF_DIR = $(RES_DIR)/sfx
-AIFF_FILES := $(wildcard $(AIFF_DIR)/*.aiff)
-PCM_DIR := $(DFS_DIR)/sfx
-PCM_TMP = $(subst $(AIFF_DIR),$(PCM_DIR),$(AIFF_FILES))
-PCM_FILES := $(PCM_TMP:.aiff=.raw)
+WAV_DIR = $(RES_DIR)/sfx
+WAV_FILES := $(wildcard $(WAV_DIR)/*.wav)
+WAV64_DIR := $(DFS_DIR)/sfx
+WAV64_TMP = $(subst $(WAV_DIR),$(WAV64_DIR),$(WAV_FILES))
+WAV64_FILES := $(WAV64_TMP:.wav=.wav64)
 
 # Sprite files
 PNG_DIR = $(RES_DIR)/gfx
@@ -92,17 +91,12 @@ $(SPRITE_DIR)/%.sprite: $(PNG_DIR)/%.png $(SPRITE_MANIFEST_TXT)
 	@bash $(CONVERT_GFX) $<
 
 # Converted audio
-$(PCM_DIR)/%.raw: $(AIFF_DIR)/%.aiff
-	@mkdir -p $(PCM_DIR)
-	@command -v $(SOX) >/dev/null 2>&1 || { \
-	    echo >&2 'This Makefile requires the `sox` command.'; \
-	    echo >&2 'Get it from http://sox.sourceforge.net/sox.html'; \
-	    exit 1; \
-	}
-	$(SOX) $< $(SOXFLAGS) $@ remix -
+$(WAV64_DIR)/%.wav64: $(WAV_DIR)/%.wav
+	@mkdir -p $(WAV64_DIR)
+	$(AUDIOCONV64) -o $(WAV64_DIR) $<
 
 # Converted filesystem
-$(DFS_FILE): $(SPRITE_FILES) $(PCM_FILES)
+$(DFS_FILE): $(SPRITE_FILES) $(WAV64_FILES)
 	@find $(DFS_DIR) -depth -name ".DS_Store" -exec rm {} \;
 	$(MKDFS) $@ $(DFS_DIR)
 

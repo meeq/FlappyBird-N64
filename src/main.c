@@ -8,6 +8,7 @@
  */
 
 #include "system.h"
+#include "sfx.h"
 #include "gfx.h"
 
 #include "ui.h"
@@ -18,8 +19,6 @@
 
 #include "fps.h"
 #include "global.h"
-
-audio_t *g_audio = NULL;
 
 int main(void)
 {
@@ -32,8 +31,9 @@ int main(void)
     controller_init();
 
     /* Initialize audio */
-    g_audio = audio_setup( FREQUENCY_44KHZ, 4 );
+    audio_init( FREQUENCY_44KHZ, 4 );
     audio_write_silence();
+    sfx_init();
 
     /* Initialize display */
     gfx_init(
@@ -90,7 +90,12 @@ int main(void)
         ui_tick( &ui, &bird, &bg );
 
         /* Buffer sound effects */
-        audio_tick( g_audio );
+        if ( audio_can_write() )
+        {
+            short *buf = audio_write_begin();
+            mixer_poll(buf, audio_get_buffer_length());
+            audio_write_end();
+        }
 
         /* Grab a display buffer and start drawing */
         gfx_display_lock();
@@ -114,8 +119,8 @@ int main(void)
 
     /* Clean up the initialized subsystems */
     gfx_close();
-    audio_free( g_audio );
-    g_audio = NULL;
+    sfx_close();
+    audio_close();
 
     return 0;
 }

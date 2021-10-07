@@ -12,7 +12,7 @@
 
 #include "bird.h"
 
-#include "audio.h"
+#include "sfx.h"
 #include "background.h"
 #include "global.h"
 
@@ -87,7 +87,7 @@ void bird_draw(const bird_t *bird)
 void bird_hit(bird_t *bird)
 {
     bird->hit_ms = get_total_ms();
-    audio_play_sfx( g_audio, SFX_HIT );
+    sfx_play( SFX_HIT );
     if ( is_rumble_present() )
     {
         rumble_start( CONTROLLER_1 );
@@ -164,7 +164,7 @@ static void bird_tick_velocity(bird_t *bird, const gamepad_state_t *gamepad)
     {
         bird->dy = -BIRD_FLAP_VELOCITY;
         bird->anim_frame = BIRD_ANIM_FRAMES - 1;
-        audio_play_sfx( g_audio, SFX_WING );
+        sfx_play( SFX_WING );
     }
     const u32 ticks_ms = get_total_ms();
     if ( ticks_ms - bird->dy_ms >= BIRD_VELOCITY_RATE )
@@ -222,7 +222,7 @@ void bird_tick(bird_t *bird, const gamepad_state_t *gamepad)
                 bird->score = 0;
                 bird->anim_frame = 0;
                 bird->played_die_sfx = false;
-                audio_play_sfx( g_audio, SFX_SWOOSH );
+                sfx_play( SFX_SWOOSH );
             }
             break;
         case BIRD_STATE_READY:
@@ -235,7 +235,7 @@ void bird_tick(bird_t *bird, const gamepad_state_t *gamepad)
             if ( bird->dy > 0 && !bird->played_die_sfx )
             {
                 bird->played_die_sfx = true;
-                audio_play_sfx( g_audio, SFX_DIE );
+                sfx_play( SFX_DIE );
             }
             break;
         default:

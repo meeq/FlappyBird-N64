@@ -11,10 +11,7 @@
 #define __FLAPPY_GLOBAL_H
 
 #include "system.h"
-#include "audio.h"
+#include "sfx.h"
 #include "gfx.h"
-
-/* Audio */
-extern audio_t *g_audio;
 
 #endif

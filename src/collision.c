@@ -9,7 +9,7 @@
 
 #include "collision.h"
 
-#include "audio.h"
+#include "sfx.h"
 #include "global.h"
 
 void collision_tick(bird_t *bird, pipes_t *pipes)
@@ -34,7 +34,7 @@ void collision_tick(bird_t *bird, pipes_t *pipes)
             {
                 bird->score += 1;
                 pipes->n[i].has_scored = true;
-                audio_play_sfx( g_audio, SFX_POINT );
+                sfx_play( SFX_POINT );
             }
         }
     }

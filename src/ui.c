@@ -150,14 +150,14 @@ inline static void ui_gameover_tick(ui_t *ui)
     ui->heading_draw = dead_diff_ms >= UI_DEATH_HEADING_DELAY;
     if ( !was_heading_draw && ui->heading_draw )
     {
-        audio_play_sfx( g_audio, SFX_SWOOSH );
+        sfx_play( SFX_SWOOSH );
     }
     /* Show the scoreboard and play a sound */
     const bool was_board_draw = ui->board_draw;
     ui->board_draw = dead_diff_ms >= UI_DEATH_BOARD_DELAY;
     if ( !was_board_draw && ui->board_draw )
     {
-        audio_play_sfx( g_audio, SFX_SWOOSH );
+        sfx_play( SFX_SWOOSH );
         ui->board_ms = ticks_ms;
     }
     if ( ui->board_draw )
