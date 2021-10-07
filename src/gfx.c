@@ -20,7 +20,7 @@ void gfx_init(
     display_init(res, depth, num_buffers, gamma, aa);
     rdp_init();
     /* Figure out the screen resolution */
-    u16 width = 0, height = 0;
+    int width = 0, height = 0;
     switch( res )
     {
         case RESOLUTION_320x240:
@@ -64,13 +64,13 @@ void gfx_init(
     gfx->rdp_fill_mode = RDP_FILL_NONE;
 }
 
-void gfx_free(void)
+void gfx_close(void)
 {
-    free( gfx );
     rdp_close();
     display_close();
+    free(gfx);
+    gfx = NULL;
 }
-
 
 void gfx_display_lock(void)
 {
@@ -149,10 +149,10 @@ void gfx_rdp_texture_fill(void)
     }
 }
 
-sprite_t *read_dfs_sprite(char *file)
+sprite_t * read_dfs_sprite(const char * const file)
 {
     int fp = dfs_open( file );
-    sprite_t *sprite = malloc( dfs_size( fp ) );
+    sprite_t * sprite = malloc( dfs_size( fp ) );
     dfs_read( sprite, 1, dfs_size( fp ), fp );
     dfs_close( fp );
     return sprite;

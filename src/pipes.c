@@ -12,27 +12,44 @@
 
 #include "pipes.h"
 
+#include "system.h"
+#include "gfx.h"
 #include "background.h"
-#include "global.h"
 
-pipes_t pipes_setup(void)
+/* Pipes definitions */
+
+#define PIPES_SCROLL_RATE   ((int) 16)
+#define PIPES_SCROLL_DX     ((double) -0.00312)
+
+#define PIPE_TUBE_WIDTH     ((int) 26)
+#define PIPE_CAP_HEIGHT     ((int) 13)
+#define PIPE_GAP_Y          ((int) 80)
+#define PIPE_GAP_X          ((float) 0.3)
+#define PIPE_START_X        ((float) 1.1)
+#define PIPE_MIN_X          ((float) -0.1)
+#define PIPE_MAX_Y          ((float) 0.5)
+#define PIPE_MAX_BIAS_Y     ((float) 0.4)
+
+/* Pipes implementation */
+
+pipes_t * pipes_init(void)
 {
-    pipes_t pipes = {
-        .color = PIPE_COLOR_GREEN,
-        .scroll_ms = 0,
-        .cap_sprite = read_dfs_sprite( "/gfx/pipe-cap.sprite" ),
-        .tube_sprite = read_dfs_sprite( "/gfx/pipe-tube.sprite" )
-    };
-    pipes_reset( &pipes );
+    pipes_t * const pipes = malloc( sizeof(pipes_t) );
+    pipes->color = PIPE_COLOR_GREEN;
+    pipes->scroll_ms = 0;
+    pipes->cap_sprite = read_dfs_sprite( "/gfx/pipe-cap.sprite" );
+    pipes->tube_sprite = read_dfs_sprite( "/gfx/pipe-tube.sprite" );
+    pipes_reset( pipes );
     return pipes;
 }
 
-void pipes_free(pipes_t *pipes)
+void pipes_free(pipes_t * pipes)
 {
     free( pipes->cap_sprite );
     pipes->cap_sprite = NULL;
     free( pipes->tube_sprite );
     pipes->tube_sprite = NULL;
+    free(pipes);
 }
 
 inline static pipe_colors_t pipes_random_color(void)
@@ -40,9 +57,9 @@ inline static pipe_colors_t pipes_random_color(void)
     return ((float) rand() / (float) RAND_MAX) * PIPE_NUM_COLORS;
 }
 
-inline static u8 pipe_prev_index(u8 i)
+inline static size_t pipe_prev_index(size_t current_index)
 {
-    return (i > 0) ? i - 1 : PIPES_MAX_NUM - 1;
+    return (current_index > 0) ? current_index - 1 : PIPES_MAX_NUM - 1;
 }
 
 inline static float pipe_random_y(void)
@@ -52,7 +69,7 @@ inline static float pipe_random_y(void)
     return y;
 }
 
-inline static float pipe_random_bias_y(const float prev_y)
+inline static float pipe_random_bias_y(float prev_y)
 {
     float bias_y = ((float) rand() / (float) RAND_MAX) * PIPE_MAX_BIAS_Y;
     if ( roundf( (float) rand() / (float) RAND_MAX ) ) bias_y = -bias_y;
@@ -62,17 +79,16 @@ inline static float pipe_random_bias_y(const float prev_y)
     return y;
 }
 
-void pipes_reset(pipes_t *pipes)
+void pipes_reset(pipes_t * pipes)
 {
+    pipe_t * pipe;
     float y = pipe_random_y();
-    for (u8 i = 0; i < PIPES_MAX_NUM; i++)
+    for (size_t i = 0; i < PIPES_MAX_NUM; i++)
     {
-        pipe_t pipe = {
-            .x = PIPE_START_X + (i * PIPE_GAP_X),
-            .y = y,
-            .has_scored = false
-        };
-        pipes->n[i] = pipe;
+        pipe = &pipes->n[i];
+        pipe->x = PIPE_START_X + (i * PIPE_GAP_X);
+        pipe->y = y;
+        pipe->has_scored = false;
         /* Pipes are positioned relative to the previous pipe */
         y = pipe_random_bias_y( y );
     }
@@ -80,9 +96,9 @@ void pipes_reset(pipes_t *pipes)
     pipes->scroll_ms = 0;
 }
 
-void pipes_tick(pipes_t *pipes)
+void pipes_tick(pipes_t * pipes)
 {
-    const u32 ticks_ms = get_total_ms();
+    const ticks_t ticks_ms = get_total_ms();
     /* Start scrolling after a reset */
     if ( pipes->scroll_ms == 0 )
     {
@@ -91,36 +107,40 @@ void pipes_tick(pipes_t *pipes)
     /* Scroll the pipes and reset them as they go off-screen */
     if ( ticks_ms - pipes->scroll_ms >= PIPES_SCROLL_RATE )
     {
-        for (u8 i = 0, j; i < PIPES_MAX_NUM; i++)
+        pipe_t * pipe;
+        for (size_t i = 0, j; i < PIPES_MAX_NUM; i++)
         {
-            pipes->n[i].x += PIPES_SCROLL_DX;
+            pipe = &pipes->n[i];
+            pipe->x += PIPES_SCROLL_DX;
             /* Has the pipe gone off the left of the screen? */
-            if (pipes->n[i].x < PIPE_MIN_X)
+            if (pipe->x < PIPE_MIN_X)
             {
                 j = pipe_prev_index( i );
-                pipes->n[i].x = pipes->n[j].x + PIPE_GAP_X;
-                pipes->n[i].y = pipe_random_bias_y( pipes->n[j].y );
-                pipes->n[i].has_scored = false;
+                pipe->x = pipes->n[j].x + PIPE_GAP_X;
+                pipe->y = pipe_random_bias_y( pipes->n[j].y );
+                pipe->has_scored = false;
             }
         }
         pipes->scroll_ms = ticks_ms;
     }
 }
 
-void pipes_draw(const pipes_t *pipes)
+void pipes_draw(const pipes_t * pipes)
 {
-    sprite_t *tube = pipes->tube_sprite;
-    sprite_t *cap = pipes->cap_sprite;
-    const u8 color = pipes->color, cap_hslices = cap->hslices;
+    sprite_t * const tube = pipes->tube_sprite;
+    sprite_t * const cap = pipes->cap_sprite;
+    const int color = pipes->color;
+    const int cap_hslices = cap->hslices;
     const mirror_t mirror = MIRROR_DISABLED;
-    s16 cx, cy, tx, ty, bx, by, gap_cy;
+    int16_t cx, cy, tx, ty, bx, by, gap_cy;
 
     gfx_rdp_texture_fill();
     rdp_sync( SYNC_PIPE );
 
-    for (u8 i = 0; i < PIPES_MAX_NUM; i++)
+    const pipe_t * pipe;
+    for (size_t i = 0; i < PIPES_MAX_NUM; i++)
     {
-        const pipe_t *pipe = &pipes->n[i];
+        pipe = &pipes->n[i];
         /* Calculate X position */
         cx = gfx->width * pipe->x;
         tx = cx - (PIPE_TUBE_WIDTH >> 1);

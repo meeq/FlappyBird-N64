@@ -15,25 +15,23 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
+
 #include <libdragon.h>
 
-#define TICKS_PER_MS 46875 /* (COUNTS_PER_SECOND / 1000) */
+typedef uint32_t gfx_color_t;
+typedef int64_t ticks_t;
 
-#define CONTROLLER_1 0
+#define TICKS_PER_MS ((ticks_t) (TICKS_PER_SECOND / 1000))
 
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned int u32;
-typedef signed short s16;
-typedef signed int s32;
-
-typedef struct SI_condat gamepad_state_t;
-typedef struct controller_data controllers_state_t;
-
-inline u32 get_total_ms(void)
+static inline ticks_t get_total_ms(void)
 {
     return (timer_ticks() / TICKS_PER_MS);
 }
+
+#define CONTROLLER_1 0
+
+typedef struct SI_condat gamepad_state_t;
+typedef struct controller_data controllers_state_t;
 
 bool is_rumble_present(void);
 

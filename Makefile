@@ -1,5 +1,8 @@
 PROG_NAME = FlappyBird
 PROG_TITLE = "FlappyBird64"
+ifndef PROG_VERSION
+PROG_VERSION := $(shell git describe --always --abbrev=8 --dirty --match "v[0-9]*")
+endif
 
 # Paths
 PROJECT_DIR = $(CURDIR)
@@ -71,6 +74,7 @@ BUILD_ARTIFACTS += $(OBJS) $(DEPS) $(DFS_FILE) $(DFS_DIR)
 # Compilation pipeline
 
 # ROM Image
+$(ROM_FILE): CFLAGS+=-DPROG_VERSION='"$(PROG_VERSION)"'
 $(ROM_FILE): $(RAW_BINARY) $(DFS_FILE)
 	@rm -f $@
 	$(N64TOOL) -o $@ $(N64TOOLFLAGS) $(RAW_BINARY) --offset 1M $(DFS_FILE)

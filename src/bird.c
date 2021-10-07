@@ -12,45 +12,78 @@
 
 #include "bird.h"
 
+#include "gfx.h"
 #include "sfx.h"
 #include "background.h"
-#include "global.h"
 
-bird_t bird_setup(bird_color_t color_type)
+/* Bird definitions */
+
+/* States */
+
+
+#define BIRD_RESET_DELAY    ((int) 1000)
+#define BIRD_RUMBLE_MS      ((int) 500)
+
+/* Animation */
+#define BIRD_ANIM_RATE      ((int) 120)
+#define BIRD_ANIM_FRAMES    ((int) 3)
+#define BIRD_DYING_FRAME    ((int) 3)
+
+/* Center point */
+#define BIRD_TITLE_X        ((double) 0.5)
+#define BIRD_PLAY_X         ((double) 0.35)
+#define BIRD_ACCEL_X        ((double) 0.001)
+#define BIRD_MIN_Y          ((double) -0.90)
+#define BIRD_MAX_Y          ((double) 0.95)
+
+/* Flap */
+#define BIRD_VELOCITY_RATE  ((int) 16)
+#define BIRD_FLAP_VELOCITY  ((double) 0.0270)
+#define BIRD_GRAVITY_ACCEL  ((double) 0.0013)
+
+/* Sine "floating" effect */
+#define BIRD_SINE_RATE      ((int) 20)
+#define BIRD_SINE_INCREMENT ((double) 0.1)
+#define BIRD_SINE_CYCLE     ((double) (M_PI * 2.0))
+#define BIRD_SINE_DAMPEN    ((double) 0.02)
+
+/* Bird implementation */
+
+bird_t * bird_init(bird_color_t color_type)
 {
-    sprite_t *bird_sprite = read_dfs_sprite( "/gfx/bird.sprite" );
-    bird_t bird = {
-        .sprite = bird_sprite,
-        .slice_w = bird_sprite->width / bird_sprite->hslices,
-        .slice_h = bird_sprite->height / bird_sprite->vslices,
-        .state = BIRD_STATE_TITLE,
-        .color_type = color_type,
-        .score = 0,
-        .hit_ms = 0,
-        .dead_ms = 0,
-        .is_rumbling = false,
-        .played_die_sfx = false,
-        .anim_ms = 0,
-        .anim_frame = 0,
-        .x = BIRD_TITLE_X,
-        .y = 0.0,
-        .dx = 0.0,
-        .dy = 0.0,
-        .dy_ms = 0,
-        .sine_ms = 0,
-        .sine_x = 0.0,
-        .sine_y = 0.0
-    };
+    sprite_t * const sprite = read_dfs_sprite( "/gfx/bird.sprite" );
+    bird_t * const bird = malloc( sizeof(bird_t) );
+    bird->sprite = sprite;
+    bird->slice_w = sprite->width / sprite->hslices;
+    bird->slice_h = sprite->height / sprite->vslices;
+    bird->state = BIRD_STATE_TITLE;
+    bird->color_type = color_type;
+    bird->score = 0;
+    bird->hit_ms = 0;
+    bird->dead_ms = 0;
+    bird->is_rumbling = false;
+    bird->played_die_sfx = false;
+    bird->anim_ms = 0;
+    bird->anim_frame = 0;
+    bird->x = BIRD_TITLE_X;
+    bird->y = 0.0;
+    bird->dx = 0.0;
+    bird->dy = 0.0;
+    bird->dy_ms = 0;
+    bird->sine_ms = 0;
+    bird->sine_x = 0.0;
+    bird->sine_y = 0.0;
     return bird;
 }
 
-void bird_free(bird_t *bird)
+void bird_free(bird_t * bird)
 {
     free( bird->sprite );
     bird->sprite = NULL;
+    free(bird);
 }
 
-void bird_draw(const bird_t *bird)
+void bird_draw(const bird_t * bird)
 {
     /* Calculate player space center position */
     const int cx = gfx->width * bird->x;
@@ -71,20 +104,20 @@ void bird_draw(const bird_t *bird)
     if ( bird_y < BIRD_MIN_Y ) bird_y = BIRD_MIN_Y;
     bird_y = cy + bird_y * cy;
     /* Calculate bird corner coordinates from center point */
-    const u8 bird_half_w = bird->slice_w >> 1,
-             bird_half_h = bird->slice_h >> 1;
-    const u16 tx = cx - bird_half_w,     bx = cx + bird_half_w - 1,
+    const int bird_half_w = bird->slice_w >> 1,
+              bird_half_h = bird->slice_h >> 1;
+    const int tx = cx - bird_half_w,     bx = cx + bird_half_w - 1,
               ty = bird_y - bird_half_h, by = bird_y + bird_half_h - 1;
     /* Load the current animation sprite slice as a texture */
     gfx_rdp_texture_fill();
     rdp_sync( SYNC_PIPE );
-    u8 stride = (bird->color_type * bird->sprite->hslices) + bird->anim_frame;
+    int stride = (bird->color_type * bird->sprite->hslices) + bird->anim_frame;
     rdp_load_texture_stride( 0, 0, mirror, bird->sprite, stride );
     /* Draw the bird rectangle */
     rdp_draw_textured_rectangle( 0, tx, ty, bx, by, mirror );
 }
 
-void bird_hit(bird_t *bird)
+void bird_hit(bird_t * bird)
 {
     bird->hit_ms = get_total_ms();
     sfx_play( SFX_HIT );
@@ -95,11 +128,11 @@ void bird_hit(bird_t *bird)
     }
 }
 
-inline static void bird_tick_animation(bird_t *bird)
+inline static void bird_tick_animation(bird_t * bird)
 {
-    const u32 ticks_ms = get_total_ms();
-    u32 anim_ms = bird->anim_ms;
-    u8 anim_frame = bird->anim_frame;
+    const ticks_t ticks_ms = get_total_ms();
+    ticks_t anim_ms = bird->anim_ms;
+    int anim_frame = bird->anim_frame;
     switch ( bird->state )
     {
         case BIRD_STATE_DYING:
@@ -126,7 +159,7 @@ inline static void bird_tick_animation(bird_t *bird)
     bird->anim_frame = anim_frame;
 }
 
-inline static void bird_tick_dx(bird_t *bird)
+inline static void bird_tick_dx(bird_t * bird)
 {
     /* Move the bird over if needed */
     if (bird->state != BIRD_STATE_TITLE && bird->x > BIRD_PLAY_X)
@@ -134,15 +167,15 @@ inline static void bird_tick_dx(bird_t *bird)
         bird->dx += BIRD_ACCEL_X;
         bird->x -= bird->dx;
         if ( bird->x < BIRD_PLAY_X ) bird->x = BIRD_PLAY_X;
-    }
+    } 
 }
 
-inline static void bird_tick_sine_wave(bird_t *bird)
+inline static void bird_tick_sine_wave(bird_t * bird)
 {
     /* Center the bird in the sky */
     bird->y = 0.0;
     /* Periodically update the "floating" effect */
-    const u32 ticks_ms = get_total_ms();
+    const ticks_t ticks_ms = get_total_ms();
     if ( ticks_ms - bird->sine_ms >= BIRD_SINE_RATE )
     {
         bird_tick_dx( bird );
@@ -157,7 +190,7 @@ inline static void bird_tick_sine_wave(bird_t *bird)
     }
 }
 
-static void bird_tick_velocity(bird_t *bird, const gamepad_state_t *gamepad)
+static void bird_tick_velocity(bird_t * bird, const gamepad_state_t * const gamepad)
 {
     /* Flap when the player presses A */
     if ( bird->state == BIRD_STATE_PLAY && gamepad->A )
@@ -166,7 +199,7 @@ static void bird_tick_velocity(bird_t *bird, const gamepad_state_t *gamepad)
         bird->anim_frame = BIRD_ANIM_FRAMES - 1;
         sfx_play( SFX_WING );
     }
-    const u32 ticks_ms = get_total_ms();
+    const ticks_t ticks_ms = get_total_ms();
     if ( ticks_ms - bird->dy_ms >= BIRD_VELOCITY_RATE )
     {
         bird_tick_dx( bird );
@@ -202,9 +235,9 @@ inline static bird_color_t bird_random_color_type(void)
     return ((float) rand() / (float) RAND_MAX) * BIRD_NUM_COLORS;
 }
 
-void bird_tick(bird_t *bird, const gamepad_state_t *gamepad)
+void bird_tick(bird_t * bird, const gamepad_state_t * const gamepad)
 {
-    const u32 ticks_ms = get_total_ms();
+    const ticks_t ticks_ms = get_total_ms();
     /* State transitions based on button input */
     switch (bird->state)
     {

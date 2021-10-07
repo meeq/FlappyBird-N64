@@ -10,15 +10,21 @@
 #include "collision.h"
 
 #include "sfx.h"
-#include "global.h"
+#include "bird.h"
+#include "pipes.h"
 
-void collision_tick(bird_t *bird, pipes_t *pipes)
+#define COLLISION_PIPE_HALF_WIDTH   0.052
+#define COLLISION_PIPE_HALF_GAP     0.23
+#define COLLISION_SCORE_X_TOLERANCE 0.01
+
+void collision_tick(bird_t * bird, pipes_t * pipes)
 {
+    pipe_t * pipe;
     const float bird_x = bird->x, bird_y = bird->y;
-    for (int i = 0; i < PIPES_MAX_NUM; i++)
+    for (size_t i = 0; i < PIPES_MAX_NUM; i++)
     {
-        const pipe_t pipe = pipes->n[i];
-        const float pipe_x = pipe.x, pipe_y = pipe.y;
+        pipe = &pipes->n[i];
+        const float pipe_x = pipe->x, pipe_y = pipe->y;
         if ( bird_x > pipe_x - COLLISION_PIPE_HALF_WIDTH &&
              bird_x < pipe_x + COLLISION_PIPE_HALF_WIDTH )
         {
@@ -30,10 +36,10 @@ void collision_tick(bird_t *bird, pipes_t *pipes)
             }
             else if ( bird_x > pipe_x - COLLISION_SCORE_X_TOLERANCE &&
                       bird_x < pipe_x + COLLISION_SCORE_X_TOLERANCE &&
-                      !pipe.has_scored )
+                      !pipe->has_scored )
             {
                 bird->score += 1;
-                pipes->n[i].has_scored = true;
+                pipe->has_scored = true;
                 sfx_play( SFX_POINT );
             }
         }

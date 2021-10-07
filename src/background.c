@@ -11,70 +11,129 @@
 
 #include "background.h"
 
-#include "global.h"
+#include "gfx.h"
 
-background_t background_setup(bg_time_mode_t time_mode)
+/* Background definitions */
+
+#define BG_SCROLL_RATE          ((int) 16)
+
+#define BG_SKY_SCROLL_DX        ((double) -0.008)
+#define BG_CITY_SCROLL_DX       ((double) -0.04)
+#define BG_HILL_SCROLL_DX       ((double) -0.2)
+#define BG_GROUND_SCROLL_DX     ((double) -1.0)
+
+#define BG_COLOR_DAY_SKY        graphics_make_color( 0x4E, 0xC0, 0xCA, 0xFF )
+#define BG_COLOR_NIGHT_SKY      graphics_make_color( 0x00, 0x87, 0x93, 0xFF )
+#define BG_COLOR_DAY_CLOUD      graphics_make_color( 0xE4, 0xFD, 0xD0, 0xFF )
+#define BG_COLOR_NIGHT_CLOUD    graphics_make_color( 0x15, 0xA5, 0xB5, 0xFF )
+#define BG_COLOR_DAY_HILL       graphics_make_color( 0x52, 0xE0, 0x5D, 0xFF )
+#define BG_COLOR_NIGHT_HILL     graphics_make_color( 0x14, 0x96, 0x02, 0xFF )
+#define BG_COLOR_GROUND         graphics_make_color( 0xDF, 0xD8, 0x93, 0xFF )
+
+typedef enum
 {
-    /* Load the sprite files from the cartridge */
-    char *sprite_files[BG_NUM_SPRITES] = {
-        "/gfx/bg-cloud-day.sprite", "/gfx/bg-cloud-night.sprite",
-        "/gfx/bg-city-day.sprite",  "/gfx/bg-city-night.sprite",
-        "/gfx/bg-hill-day.sprite",  "/gfx/bg-hill-night.sprite",
-        "/gfx/ground.sprite"
-    };
-    sprite_t *sprites[BG_NUM_SPRITES];
-    for (u8 i = 0; i < BG_NUM_SPRITES; i++)
+    BG_CLOUD_DAY_SPRITE, BG_CLOUD_NIGHT_SPRITE,
+    BG_CITY_DAY_SPRITE,  BG_CITY_NIGHT_SPRITE,
+    BG_HILL_DAY_SPRITE,  BG_HILL_NIGHT_SPRITE,
+    BG_GROUND_SPRITE,
+    BG_NUM_SPRITES,
+} bg_sprite_index_t;
+
+static const char * const BG_SPRITE_FILES[BG_NUM_SPRITES] = {
+    "/gfx/bg-cloud-day.sprite", "/gfx/bg-cloud-night.sprite",
+    "/gfx/bg-city-day.sprite",  "/gfx/bg-city-night.sprite",
+    "/gfx/bg-hill-day.sprite",  "/gfx/bg-hill-night.sprite",
+    "/gfx/ground.sprite"
+};
+
+typedef struct bg_fill_color_s
+{
+    gfx_color_t color;
+    int y;
+    int h;
+} bg_fill_color_t;
+
+typedef struct bg_fill_sprite_s
+{
+    bg_sprite_index_t sprite;
+    int y;
+    double scroll_x;
+    int scroll_w;
+    double scroll_dx;
+} bg_fill_sprite_t;
+
+typedef struct background_s
+{
+    sprite_t * sprites[BG_NUM_SPRITES];
+    // Setup state
+    bg_time_mode_t time_mode;
+    ticks_t scroll_ms;
+    // Color fills
+    bg_fill_color_t sky_fill;
+    bg_fill_color_t cloud_fill;
+    bg_fill_color_t hill_fill;
+    bg_fill_color_t ground_fill;
+    // Texture fills
+    bg_fill_sprite_t cloud_top;
+    bg_fill_sprite_t city;
+    bg_fill_sprite_t hill_top;
+    bg_fill_sprite_t ground_top;
+} background_t;
+
+/* Background implementation */
+
+background_t * background_init(bg_time_mode_t time_mode)
+{
+    background_t * const bg = malloc( sizeof(background_t) );
+    for (size_t i = 0; i < BG_NUM_SPRITES; i++)
     {
-        sprites[i] = read_dfs_sprite( sprite_files[i] );
+        bg->sprites[i] = read_dfs_sprite( BG_SPRITE_FILES[i] );
     }
-    /* Set up the background fills from top-to-bottom */
-    background_t bg = {
-        .scroll_ms = 0,
-        .sky_fill = {
-            .y = BG_SKY_FILL_Y, .h = BG_SKY_FILL_H
-        },
-        .cloud_top = {
-            .y = BG_CLOUD_TOP_Y,
-            .scroll_x = 0, .scroll_dx = BG_SKY_SCROLL_DX,
-            .scroll_w = sprites[BG_CLOUD_DAY_SPRITE]->width
-        },
-        .cloud_fill = {
-            .y = BG_CLOUD_FILL_Y, .h = BG_CLOUD_FILL_H
-        },
-        .city = {
-            .y = BG_CITY_TOP_Y,
-            .scroll_x = 0, .scroll_dx = BG_CITY_SCROLL_DX,
-            .scroll_w = sprites[BG_CITY_DAY_SPRITE]->width
-        },
-        .hill_top = {
-            .y = BG_HILL_TOP_Y,
-            .scroll_x = 0, .scroll_dx = BG_HILL_SCROLL_DX,
-            .scroll_w = sprites[BG_HILL_DAY_SPRITE]->width
-        },
-        .hill_fill = {
-            .y = BG_HILL_FILL_Y, .h = BG_HILL_FILL_H
-        },
-        .ground_top = {
-            .sprite = BG_GROUND_SPRITE,
-            .y = BG_GROUND_TOP_Y,
-            .scroll_x = 0, .scroll_dx = BG_GROUND_SCROLL_DX,
-            .scroll_w = sprites[BG_GROUND_SPRITE]->width
-        },
-        .ground_fill = {
-            .color = BG_COLOR_GROUND,
-            .y = BG_GROUND_FILL_Y, .h = BG_GROUND_FILL_H
-        }
+    bg->scroll_ms = 0;
+    bg->sky_fill = (bg_fill_color_t){
+        .y = BG_SKY_FILL_Y, .h = BG_SKY_FILL_H,
     };
-    background_set_time_mode( &bg, time_mode );
-    /* Set the sprites on the background struct */
-    for (u8 i = 0; i < BG_NUM_SPRITES; i++)
-    {
-        bg.sprites[i] = sprites[i];
-    }
+    bg->cloud_top = (bg_fill_sprite_t){
+        .y = BG_CLOUD_TOP_Y,
+        .scroll_x = 0, .scroll_dx = BG_SKY_SCROLL_DX,
+        .scroll_w = bg->sprites[BG_CLOUD_DAY_SPRITE]->width,
+    };
+    bg->cloud_fill = (bg_fill_color_t){
+        .y = BG_CLOUD_FILL_Y, .h = BG_CLOUD_FILL_H,
+    };
+    bg->city = (bg_fill_sprite_t){
+        .y = BG_CITY_TOP_Y,
+        .scroll_x = 0, .scroll_dx = BG_CITY_SCROLL_DX,
+        .scroll_w = bg->sprites[BG_CITY_DAY_SPRITE]->width,
+    };
+    bg->hill_top = (bg_fill_sprite_t){
+        .y = BG_HILL_TOP_Y,
+        .scroll_x = 0, .scroll_dx = BG_HILL_SCROLL_DX,
+        .scroll_w = bg->sprites[BG_HILL_DAY_SPRITE]->width,
+    };
+    bg->hill_fill = (bg_fill_color_t){
+        .y = BG_HILL_FILL_Y, .h = BG_HILL_FILL_H
+    };
+    bg->ground_top = (bg_fill_sprite_t){
+        .sprite = BG_GROUND_SPRITE,
+        .y = BG_GROUND_TOP_Y,
+        .scroll_x = 0, .scroll_dx = BG_GROUND_SCROLL_DX,
+        .scroll_w = bg->sprites[BG_GROUND_SPRITE]->width,
+    };
+    bg->ground_fill = (bg_fill_color_t){
+        .color = BG_COLOR_GROUND,
+        .y = BG_GROUND_FILL_Y, .h = BG_GROUND_FILL_H,
+    };
+    background_set_time_mode( bg, time_mode );
     return bg;
 }
 
-void background_set_time_mode(background_t *bg, bg_time_mode_t time_mode)
+bg_time_mode_t background_get_time_mode(const background_t * bg)
+{
+    return bg->time_mode;
+}
+
+void background_set_time_mode(background_t * bg, bg_time_mode_t time_mode)
 {
     bg->time_mode = time_mode;
     if ( time_mode == BG_DAY_TIME )
@@ -102,32 +161,33 @@ inline static bg_time_mode_t background_random_time_mode(void)
     return ((float) rand() / (float) RAND_MAX) * BG_NUM_TIME_MODES;
 }
 
-void background_randomize_time_mode(background_t *bg)
+void background_randomize_time_mode(background_t * bg)
 {
     background_set_time_mode( bg, background_random_time_mode() );
 }
 
-void background_free(background_t *bg)
+void background_free(background_t * bg)
 {
     /* Deallocate the sprites */
-    for (u8 i = 0; i < BG_NUM_SPRITES; i++)
+    for (size_t i = 0; i < BG_NUM_SPRITES; i++)
     {
         free( bg->sprites[i] );
         bg->sprites[i] = NULL;
     }
+    free(bg);
 }
 
-inline void background_tick_scroll(bg_fill_sprite_t *fill)
+inline void background_tick_scroll(bg_fill_sprite_t * fill)
 {
     double x = fill->scroll_x;
-    const u16 w = fill->scroll_w;
+    const int w = fill->scroll_w;
     x += fill->scroll_dx;
     while ( x > w ) x -= w;
     while ( x < -w ) x += w;
     fill->scroll_x = x;
 }
 
-void background_tick(background_t *bg, const gamepad_state_t *gamepad)
+void background_tick(background_t * bg, const gamepad_state_t * gamepad)
 {
      /* Switch between day and night */
     if( gamepad->L )
@@ -135,7 +195,7 @@ void background_tick(background_t *bg, const gamepad_state_t *gamepad)
         background_set_time_mode( bg, !bg->time_mode );
     }
     /* Scroll the background */
-    const u32 ticks_ms = get_total_ms();
+    const ticks_t ticks_ms = get_total_ms();
     if ( ticks_ms - bg->scroll_ms >= BG_SCROLL_RATE )
     {
         bg->scroll_ms = ticks_ms;
@@ -146,26 +206,26 @@ void background_tick(background_t *bg, const gamepad_state_t *gamepad)
     }
 }
 
-inline static void background_draw_color(const bg_fill_color_t *fill)
+inline static void background_draw_color(const bg_fill_color_t * const fill)
 {
     gfx_rdp_color_fill();
     rdp_set_primitive_color( fill->color );
-    const s16 tx = 0, ty = fill->y;
-    const s16 bx = gfx->width, by = fill->y + fill->h;
+    const int tx = 0, ty = fill->y;
+    const int bx = gfx->width, by = fill->y + fill->h;
     rdp_draw_filled_rectangle( tx, ty, bx, by );
 }
 
-void background_draw_sprite(const background_t *bg,
-                            const bg_fill_sprite_t *fill)
+void background_draw_sprite(const background_t * const bg,
+                            const bg_fill_sprite_t * const fill)
 {
-    sprite_t *sprite = bg->sprites[fill->sprite];
+    sprite_t * sprite = bg->sprites[fill->sprite];
     if ( sprite == NULL ) return;
 
-    const s16 scroll_x = fill->scroll_x;
-    const u16 slices = sprite->hslices, max_w = gfx->width;
+    const int scroll_x = fill->scroll_x;
+    const int slices = sprite->hslices, max_w = gfx->width;
     const mirror_t mirror = MIRROR_DISABLED;
-    s16 tx, bx;
-    u16 ty = fill->y, by = fill->y + sprite->height - 1;
+    int tx, bx;
+    int ty = fill->y, by = fill->y + sprite->height - 1;
 
     gfx_rdp_texture_fill();
 
@@ -190,9 +250,9 @@ void background_draw_sprite(const background_t *bg,
     else
     {
         /* Manually tile horizontally-sliced repeating fills */
-        u8 slice;
-        s16 repeat_x = scroll_x;
-        const u16 repeat_w = sprite->width / slices;
+        int slice;
+        int repeat_x = scroll_x;
+        const int repeat_w = sprite->width / slices;
         while ( repeat_x < max_w )
         {
             for (slice = 0;

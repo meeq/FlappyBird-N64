@@ -19,22 +19,11 @@ emulators such as [CEN64](https://cen64.com/) or [MAME](http://mamedev.org/)
 due to the use of [libdragon](https://dragonminded.com/n64dev/libdragon/)
 instead of the proprietary SDK used by official licensed Nintendo software.
 
-## Redistributable Source Materials
-
-The source code and resources to build this ROM file are included in the ROM
-as a bzipped tarball starting at offset 9C800 (641024 decimal).
-
-On Unix systems this can be extracted using the following commands:
-
-    dd bs=1 skip=641024 if=FlappyBird.z64 of=FlappyBird-src.tar.bz
-    tar -xf FlappyBird-src.tar.bz
-
 ## Building
 
 In order to build you will need the following open-source software installed:
 
- * [libdragon development toolchain](https://github.com/DragonMinded/libdragon)
- * [`sox` command line audio conversion tool](http://sox.sourceforge.net/)
+* [libdragon development toolchain](https://github.com/DragonMinded/libdragon)
 
 Run `make` to produce the `FlappyBird.z64` ROM file from this source tree.
 
