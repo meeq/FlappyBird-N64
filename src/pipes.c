@@ -112,11 +112,11 @@ void pipes_draw(const pipes_t *pipes)
     sprite_t *tube = pipes->tube_sprite;
     sprite_t *cap = pipes->cap_sprite;
     const u8 color = pipes->color, cap_hslices = cap->hslices;
+    const mirror_t mirror = MIRROR_DISABLED;
     s16 cx, cy, tx, ty, bx, by, gap_cy;
 
     graphics_rdp_texture_fill( g_graphics );
     rdp_sync( SYNC_PIPE );
-    mirror_t mirror = MIRROR_DISABLED;
 
     for (u8 i = 0; i < PIPES_MAX_NUM; i++)
     {
@@ -135,22 +135,22 @@ void pipes_draw(const pipes_t *pipes)
         /* Top tube */
         ty = 0;
         by = gap_cy - (PIPE_GAP_Y >> 1);
-        rdp_draw_textured_rectangle( 0, tx, ty, bx, by, MIRROR_DISABLED );
+        rdp_draw_textured_rectangle( 0, tx, ty, bx, by, mirror );
         /* Bottom tube */
         ty = gap_cy + (PIPE_GAP_Y >> 1);
         by = BG_GROUND_TOP_Y - 1;
-        rdp_draw_textured_rectangle( 0, tx, ty, bx, by, MIRROR_DISABLED );
+        rdp_draw_textured_rectangle( 0, tx, ty, bx, by, mirror );
         /* Load top cap texture */
         rdp_load_texture_stride( 0, 0, mirror, cap, color + cap_hslices );
         /* Top cap */
         ty = gap_cy - (PIPE_GAP_Y >> 1);
         by = ty + PIPE_CAP_HEIGHT - 1;
-        rdp_draw_textured_rectangle( 0, tx, ty, bx, by, MIRROR_DISABLED );
+        rdp_draw_textured_rectangle( 0, tx, ty, bx, by, mirror );
         /* Load bottom cap texture */
         rdp_load_texture_stride( 0, 0, mirror, cap, color );
         /* Bottom cap */
         ty = gap_cy + (PIPE_GAP_Y >> 1) - PIPE_CAP_HEIGHT;
         by = ty + PIPE_CAP_HEIGHT - 1;
-        rdp_draw_textured_rectangle( 0, tx, ty, bx, by, MIRROR_DISABLED );
+        rdp_draw_textured_rectangle( 0, tx, ty, bx, by, mirror );
     }
 }

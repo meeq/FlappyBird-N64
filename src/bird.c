@@ -55,6 +55,7 @@ void bird_draw(const bird_t *bird)
     /* Calculate player space center position */
     const int cx = g_graphics->width * bird->x;
     const int cy = BG_GROUND_TOP_Y >> 1;
+    const mirror_t mirror = MIRROR_DISABLED;
     /* Calculate bird Y position */
     float bird_y = bird->y;
     switch ( bird->state )
@@ -78,9 +79,9 @@ void bird_draw(const bird_t *bird)
     graphics_rdp_texture_fill( g_graphics );
     rdp_sync( SYNC_PIPE );
     u8 stride = (bird->color_type * bird->sprite->hslices) + bird->anim_frame;
-    rdp_load_texture_stride( 0, 0, MIRROR_DISABLED, bird->sprite, stride );
+    rdp_load_texture_stride( 0, 0, mirror, bird->sprite, stride );
     /* Draw the bird rectangle */
-    rdp_draw_textured_rectangle( 0, tx, ty, bx, by, MIRROR_DISABLED );
+    rdp_draw_textured_rectangle( 0, tx, ty, bx, by, mirror );
 }
 
 void bird_hit(bird_t *bird)
