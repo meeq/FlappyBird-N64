@@ -25,6 +25,7 @@ int main(void)
 {
     /* Enable interrupts (on the CPU) */
     init_interrupts();
+    timer_init();
 
     /* Initialize peripherals */
     dfs_init( DFS_ROM_LOCATION );
