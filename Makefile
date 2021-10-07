@@ -48,10 +48,10 @@ DEPS := $(OBJS:.o=.d)
 # GCC Flags
 CFLAGS = -march=vr4300 -mtune=vr4300
 CFLAGS += -std=gnu99 -O2 -Wall -Werror
-CFLAGS += -I$(SDK_DIR)/include -I$(SDK_DIR)/mips64-elf/include
+CFLAGS += -I$(SDK_DIR)/mips64-elf/include
 CFLAGS += -MMD -MP # Generate dependency files during compilation
 LDFLAGS = --library=dragon --library=c --library=m --library=dragonsys
-LDFLAGS += --library-path=$(SDK_DIR)/lib --library-path=$(SDK_LIB_DIR)
+LDFLAGS += --library-path=$(SDK_LIB_DIR)
 LDFLAGS += --script=n64.ld --gc-sections
 
 # Audio files
