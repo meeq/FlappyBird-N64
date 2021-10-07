@@ -22,22 +22,8 @@ CHKSUM64 = $(SDK_DIR)/bin/chksum64
 MKDFS = $(SDK_DIR)/bin/mkdfs
 N64TOOL = $(SDK_DIR)/bin/n64tool
 
-# Testing settings
-CEN64_DIR = $(N64_INST)/../cen64
-CEN64 = $(CEN64_DIR)/cen64
-CEN64FLAGS = $(CEN64_DIR)/pifdata.bin
-MAME_DIR = $(N64_INST)/../mame
-MAME = cd $(MAME_DIR) && ./mame64
-MAMEFLAGS = -skip_gameinfo -window -resolution 640x480
-ED64_LOADER = $(SDK_DIR)/bin/ed64-loader
-
-# Project files
-README_TXT := README.md
-LICENSE_TXT := LICENSE
-SCREENSHOTS_PNG := Screenshots.png
-MAKEFILE := Makefile
+# Project scripts
 CONVERT_GFX := convert_gfx.sh
-WORD_ALIGN := word_align.sh
 
 # Code files
 C_FILES := $(wildcard $(SRC_DIR)/*.c)
@@ -72,47 +58,23 @@ SPRITE_TMP = $(subst $(PNG_DIR),$(SPRITE_DIR),$(PNG_FILES))
 SPRITE_FILES := $(SPRITE_TMP:.png=.sprite)
 
 # LibDragon Flags
-OUT_SIZE = 1052672B # 52672B HEADER + 1M (minimum) ROM
-DFS_OFFSET = 256K
-N64TOOLFLAGS = -l $(OUT_SIZE) -h $(ROM_HEADER) -t $(PROG_TITLE)
-N64TOOLFLAGS += $(RAW_BINARY) -s $(DFS_OFFSET) $(DFS_FILE)
-
-# Archive configuration
-README_OFFSET = 620K
-README_BIN = README.bin
-N64TOOLFLAGS += -s $(README_OFFSET) $(README_BIN)
-ARCHIVE_OFFSET = 622K
-SRC_ARCHIVE = $(PROG_NAME)-src.tar.bz
-N64TOOLFLAGS += -s $(ARCHIVE_OFFSET) $(SRC_ARCHIVE)
-TARFLAGS = --exclude .DS_Store --exclude *.[do]
-ARCHIVE_ROOT_FILES = $(README_TXT) $(LICENSE_TXT) $(SCREENSHOTS_PNG) \
-										 $(MAKEFILE) $(CONVERT_GFX) $(WORD_ALIGN)
-ARCHIVE_FILES = $(ARCHIVE_ROOT_FILES) $(C_FILES) $(H_FILES) \
-																			$(PNG_FILES) $(AIFF_FILES)
-ARCHIVE_PATHS = $(ARCHIVE_ROOT_FILES) $(SRC_DIR) $(RES_DIR)
-
-# Testing products
-CLONE_DIR = clone
-CLONE_SKIP_OFFSET = 641024
+N64TOOLFLAGS = --header $(ROM_HEADER) --title $(PROG_TITLE)
 
 # Build products
-DFS_FILE = $(PROG_NAME).dfs
 ROM_FILE = $(PROG_NAME).z64
+DFS_FILE = $(PROG_NAME).dfs
 RAW_BINARY = $(PROG_NAME).bin
 LINKED_OBJS = $(PROG_NAME).elf
 
 BUILD_ARTIFACTS = $(ROM_FILE) $(RAW_BINARY) $(LINKED_OBJS)
 BUILD_ARTIFACTS += $(OBJS) $(DEPS) $(DFS_FILE) $(DFS_DIR)
-BUILD_ARTIFACTS += $(README_BIN) $(SRC_ARCHIVE) $(CLONE_DIR)
 
 # Compilation pipeline
 
-all: $(ROM_FILE)
-
 # ROM Image
-$(ROM_FILE): $(RAW_BINARY) $(DFS_FILE) $(README_BIN) $(SRC_ARCHIVE)
+$(ROM_FILE): $(RAW_BINARY) $(DFS_FILE)
 	@rm -f $@
-	$(N64TOOL) -o $@ $(N64TOOLFLAGS)
+	$(N64TOOL) -o $@ $(N64TOOLFLAGS) $(RAW_BINARY) --offset 1M $(DFS_FILE)
 	$(CHKSUM64) $@
 
 # Raw stripped binary
@@ -125,11 +87,11 @@ $(LINKED_OBJS): $(OBJS)
 
 # Filesystem pipeline
 
-# Sprites
+# Converted graphics
 $(SPRITE_DIR)/%.sprite: $(PNG_DIR)/%.png $(SPRITE_MANIFEST_TXT)
 	@bash $(CONVERT_GFX) $<
 
-# PCM Audio
+# Converted audio
 $(PCM_DIR)/%.raw: $(AIFF_DIR)/%.aiff
 	@mkdir -p $(PCM_DIR)
 	@command -v $(SOX) >/dev/null 2>&1 || { \
@@ -139,51 +101,38 @@ $(PCM_DIR)/%.raw: $(AIFF_DIR)/%.aiff
 	}
 	$(SOX) $< $(SOXFLAGS) $@ remix -
 
-# DragonFS file
+# Converted filesystem
 $(DFS_FILE): $(SPRITE_FILES) $(PCM_FILES)
 	@find $(DFS_DIR) -depth -name ".DS_Store" -exec rm {} \;
 	$(MKDFS) $@ $(DFS_DIR)
 
-# README baked into ROM file
-$(README_BIN): $(README_TXT)
-	@cp $^ $@
-	@bash $(WORD_ALIGN) $@
-
-
-# Source archive
-$(SRC_ARCHIVE): $(ARCHIVE_FILES)
-	tar -cjf $@ $(TARFLAGS) $(ARCHIVE_PATHS)
-	@bash $(WORD_ALIGN) $@
-
 # Testing
 
 # Load ROM in cen64 emulator
+ifdef CEN64_DIR
+CEN64 = $(CEN64_DIR)/cen64
+CEN64FLAGS = $(CEN64_DIR)/pifdata.bin
+
 emulate-cen64: $(ROM_FILE)
 	$(CEN64) $(CEN64FLAGS) $(PROJECT_DIR)/$<
+.PHONY: emulate-cen64
+endif
 
 # Load ROM in MAME emulator
+ifdef MAME_DIR
+MAME = cd $(MAME_DIR) && ./mame64
+MAMEFLAGS = -skip_gameinfo -window -resolution 640x480
+
 emulate-mame: $(ROM_FILE)
 	$(MAME) n64 -cartridge $(PROJECT_DIR)/$< $(MAMEFLAGS)
-
-# Load ROM over USB to Everdrive64
-everdrive: $(ROM_FILE)
-	$(ED64_LOADER) -pwf $<
-
-# Ensure that it is possible to build from source with the packaged ROM
-test-clone: $(ROM_FILE)
-	mkdir $(CLONE_DIR) && \
-	cd $(CLONE_DIR) && \
-	dd bs=1 skip=$(CLONE_SKIP_OFFSET) \
-	   if=$(PROJECT_DIR)/$(ROM_FILE) of=source.tar.bz && \
-	tar -xf source.tar.bz && \
-	make
+.PHONY: emulate-mame
+endif
 
 # Housekeeping
 
 clean:
 	rm -Rf $(BUILD_ARTIFACTS)
-
-.PHONY: all emulate-cen64 emulate-mame test-clone clean
+.PHONY: clean
 
 # Ensure object files are regenerated after header modification
 -include $(DEPS)

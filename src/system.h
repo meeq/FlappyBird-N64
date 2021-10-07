@@ -18,7 +18,6 @@
 #include <libdragon.h>
 
 #define TICKS_PER_MS 46875 /* (COUNTS_PER_SECOND / 1000) */
-#define DFS_ROM_LOCATION 0xB0041000 /* 256K (DFS_OFFSET in Makefile) */
 
 #define CONTROLLER_1 0
 

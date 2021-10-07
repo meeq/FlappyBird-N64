@@ -28,7 +28,7 @@ int main(void)
     timer_init();
 
     /* Initialize peripherals */
-    dfs_init( DFS_ROM_LOCATION );
+    dfs_init( DFS_DEFAULT_LOCATION );
     controller_init();
 
     /* Initialize audio */
