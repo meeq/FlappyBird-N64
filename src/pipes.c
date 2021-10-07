@@ -135,22 +135,22 @@ void pipes_draw(const pipes_t *pipes)
         /* Top tube */
         ty = 0;
         by = gap_cy - (PIPE_GAP_Y >> 1);
-        rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
+        rdp_draw_textured_rectangle( 0, tx, ty, bx, by, MIRROR_DISABLED );
         /* Bottom tube */
         ty = gap_cy + (PIPE_GAP_Y >> 1);
         by = BG_GROUND_TOP_Y - 1;
-        rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
+        rdp_draw_textured_rectangle( 0, tx, ty, bx, by, MIRROR_DISABLED );
         /* Load top cap texture */
         rdp_load_texture_stride( 0, 0, mirror, cap, color + cap_hslices );
         /* Top cap */
         ty = gap_cy - (PIPE_GAP_Y >> 1);
         by = ty + PIPE_CAP_HEIGHT - 1;
-        rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
+        rdp_draw_textured_rectangle( 0, tx, ty, bx, by, MIRROR_DISABLED );
         /* Load bottom cap texture */
         rdp_load_texture_stride( 0, 0, mirror, cap, color );
         /* Bottom cap */
         ty = gap_cy + (PIPE_GAP_Y >> 1) - PIPE_CAP_HEIGHT;
         by = ty + PIPE_CAP_HEIGHT - 1;
-        rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
+        rdp_draw_textured_rectangle( 0, tx, ty, bx, by, MIRROR_DISABLED );
     }
 }

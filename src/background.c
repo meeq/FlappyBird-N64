@@ -179,12 +179,12 @@ void background_draw_sprite(const background_t *bg,
         if ( tx < 0 )
         {
             bx = tx + fill->scroll_w;
-            rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
+            rdp_draw_textured_rectangle( 0, tx, ty, bx, by, MIRROR_DISABLED );
             tx += fill->scroll_w;
         }
         /* Draw full-tiles for the rest */
         bx = max_w;
-        rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
+        rdp_draw_textured_rectangle( 0, tx, ty, bx, by, MIRROR_DISABLED );
     }
     else
     {
@@ -202,7 +202,7 @@ void background_draw_sprite(const background_t *bg,
                 bx = repeat_x + repeat_w;
                 rdp_sync( SYNC_PIPE );
                 rdp_load_texture_stride( 0, 0, mirror, sprite, slice );
-                rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
+                rdp_draw_textured_rectangle( 0, tx, ty, bx, by, MIRROR_DISABLED );
             }
         }
     }

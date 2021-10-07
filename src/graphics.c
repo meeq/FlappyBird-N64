@@ -36,6 +36,14 @@ graphics_t *graphics_setup(resolution_t res, bitdepth_t depth,
             width = 512;
             height = 480;
             break;
+        case RESOLUTION_512x240:
+            width = 512;
+            height = 240;
+            break;
+        case RESOLUTION_640x240:
+            width = 640;
+            height = 240;
+            break;
     }
     graphics_t *graphics = malloc( sizeof( graphics_t ) );
     /* Setup state */

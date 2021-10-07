@@ -18,7 +18,6 @@ OBJCOPY = $(N64_GCC_PREFIX)objcopy
 
 # LibDragon binaries
 ROM_HEADER = $(SDK_LIB_DIR)/header
-LD_SCRIPT = $(SDK_LIB_DIR)/n64ld.x
 CHKSUM64 = $(SDK_DIR)/bin/chksum64
 MKDFS = $(SDK_DIR)/bin/mkdfs
 N64TOOL = $(SDK_DIR)/bin/n64tool
@@ -52,7 +51,8 @@ CFLAGS += -std=gnu99 -O2 -Wall -Werror
 CFLAGS += -I$(SDK_DIR)/include -I$(SDK_DIR)/mips64-elf/include
 CFLAGS += -MMD -MP # Generate dependency files during compilation
 LDFLAGS = --library=dragon --library=c --library=m --library=dragonsys
-LDFLAGS += -L$(SDK_DIR)/lib -L$(SDK_LIB_DIR) --script=$(LD_SCRIPT)
+LDFLAGS += --library-path=$(SDK_DIR)/lib --library-path=$(SDK_LIB_DIR)
+LDFLAGS += --script=n64.ld --gc-sections
 
 # Audio files
 SOX = sox

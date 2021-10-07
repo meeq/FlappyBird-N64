@@ -80,7 +80,7 @@ void bird_draw(const bird_t *bird)
     u8 stride = (bird->color_type * bird->sprite->hslices) + bird->anim_frame;
     rdp_load_texture_stride( 0, 0, MIRROR_DISABLED, bird->sprite, stride );
     /* Draw the bird rectangle */
-    rdp_draw_textured_rectangle( 0, tx, ty, bx, by );
+    rdp_draw_textured_rectangle( 0, tx, ty, bx, by, MIRROR_DISABLED );
 }
 
 void bird_hit(bird_t *bird)
