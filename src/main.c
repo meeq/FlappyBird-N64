@@ -8,8 +8,7 @@
  */
 
 #include "system.h"
-#include "audio.h"
-#include "graphics.h"
+#include "gfx.h"
 
 #include "ui.h"
 #include "background.h"
@@ -21,7 +20,6 @@
 #include "global.h"
 
 audio_t *g_audio = NULL;
-graphics_t *g_graphics = NULL;
 
 int main(void)
 {
@@ -37,9 +35,9 @@ int main(void)
     audio_write_silence();
 
     /* Initialize display */
-    g_graphics = graphics_setup(
-        RESOLUTION_320x240, DEPTH_16_BPP,
-        BUFFERING_DOUBLE, GAMMA_NONE, ANTIALIAS_RESAMPLE
+    gfx_init(
+        RESOLUTION_320x240, DEPTH_16_BPP, BUFFERING_DOUBLE,
+        GAMMA_NONE, ANTIALIAS_RESAMPLE_FETCH_ALWAYS
     );
     fps_counter_t fps = fps_setup();
 
@@ -94,7 +92,7 @@ int main(void)
         audio_tick( g_audio );
 
         /* Grab a display buffer and start drawing */
-        graphics_display_lock( g_graphics );
+        gfx_display_lock();
         {
             /* Draw the game state */
             background_draw( &bg );
@@ -104,7 +102,7 @@ int main(void)
             fps_draw( &fps );
         }
         /* Finish drawing and show the framebuffer */
-        graphics_display_flip( g_graphics );
+        gfx_display_flip();
     }
 
     /* Clean up game state */
@@ -114,10 +112,9 @@ int main(void)
     background_free( &bg );
 
     /* Clean up the initialized subsystems */
+    gfx_close();
     audio_free( g_audio );
     g_audio = NULL;
-    graphics_free( g_graphics );
-    g_graphics = NULL;
 
     return 0;
 }

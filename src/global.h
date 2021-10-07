@@ -12,12 +12,9 @@
 
 #include "system.h"
 #include "audio.h"
-#include "graphics.h"
+#include "gfx.h"
 
 /* Audio */
 extern audio_t *g_audio;
-
-/* Graphics */
-extern graphics_t *g_graphics;
 
 #endif

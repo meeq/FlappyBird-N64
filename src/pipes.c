@@ -115,18 +115,18 @@ void pipes_draw(const pipes_t *pipes)
     const mirror_t mirror = MIRROR_DISABLED;
     s16 cx, cy, tx, ty, bx, by, gap_cy;
 
-    graphics_rdp_texture_fill( g_graphics );
+    gfx_rdp_texture_fill();
     rdp_sync( SYNC_PIPE );
 
     for (u8 i = 0; i < PIPES_MAX_NUM; i++)
     {
         const pipe_t *pipe = &pipes->n[i];
         /* Calculate X position */
-        cx = g_graphics->width * pipe->x;
+        cx = gfx->width * pipe->x;
         tx = cx - (PIPE_TUBE_WIDTH >> 1);
         bx = cx + (PIPE_TUBE_WIDTH >> 1) - 1;
         /* Don't bother drawing the pipe if it is off-screen */
-        if ( bx < 0 || tx >= g_graphics->width ) continue;
+        if ( bx < 0 || tx >= gfx->width ) continue;
         /* Calculate Y position */
         cy = (BG_GROUND_TOP_Y >> 1);
         gap_cy = cy + pipe->y * cy;

@@ -1,5 +1,5 @@
 /**
- * FlappyBird-N64 - graphics.c
+ * FlappyBird-N64 - gfx.c
  *
  * Copyright 2017, Christopher Bonhage
  *
@@ -7,11 +7,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "graphics.h"
+#include "gfx.h"
 
-graphics_t *graphics_setup(resolution_t res, bitdepth_t depth,
-                           buffer_mode_t num_buffers, gamma_t gamma,
-                           antialias_t aa)
+gfx_t * gfx;
+
+void gfx_init(
+    resolution_t res, bitdepth_t depth, buffer_mode_t num_buffers,
+    gamma_t gamma, antialias_t aa
+)
 {
     /* Set up the display and RDP subsystems */
     display_init(res, depth, num_buffers, gamma, aa);
@@ -45,60 +48,59 @@ graphics_t *graphics_setup(resolution_t res, bitdepth_t depth,
             height = 240;
             break;
     }
-    graphics_t *graphics = malloc( sizeof( graphics_t ) );
+    gfx = malloc( sizeof( gfx_t ) );
     /* Setup state */
-    graphics->res = res;
-    graphics->width = width;
-    graphics->height = height;
-    graphics->color_depth = depth;
-    graphics->num_buffers = num_buffers;
-    graphics->gamma = gamma;
-    graphics->antialias = aa;
+    gfx->res = res;
+    gfx->width = width;
+    gfx->height = height;
+    gfx->color_depth = depth;
+    gfx->num_buffers = num_buffers;
+    gfx->gamma = gamma;
+    gfx->antialias = aa;
     /* Drawing state */
-    graphics->disp = 0;
+    gfx->disp = 0;
     /* RDP state */
-    graphics->rdp_attached = RDP_DETACHED;
-    graphics->rdp_fill_mode = RDP_FILL_NONE;
-    return graphics;
+    gfx->rdp_attached = RDP_DETACHED;
+    gfx->rdp_fill_mode = RDP_FILL_NONE;
 }
 
-void graphics_free(graphics_t *graphics)
+void gfx_free(void)
 {
-    free( graphics );
+    free( gfx );
     rdp_close();
     display_close();
 }
 
 
-void graphics_display_lock(graphics_t *graphics)
+void gfx_display_lock(void)
 {
     /* Grab a render buffer */
     static display_context_t disp = 0;
     while( !(disp = display_lock()) );
-    graphics->disp = disp;
+    gfx->disp = disp;
     /* Reset RDP state */
-    graphics->rdp_attached = RDP_DETACHED;
-    graphics->rdp_fill_mode = RDP_FILL_NONE;
+    gfx->rdp_attached = RDP_DETACHED;
+    gfx->rdp_fill_mode = RDP_FILL_NONE;
 }
 
-void graphics_display_flip(graphics_t *graphics)
+void gfx_display_flip(void)
 {
-    if( graphics->disp )
+    if( gfx->disp )
     {
         /* Detach the RDP and sync before flipping the display buffer */
-        if (graphics->rdp_attached == RDP_ATTACHED)
+        if (gfx->rdp_attached == RDP_ATTACHED)
         {
-            graphics_detach_rdp(graphics);
+            gfx_detach_rdp();
         }
         /* Force backbuffer flip and reset the display handle */
-        display_show( graphics->disp );
-        graphics->disp = 0;
+        display_show( gfx->disp );
+        gfx->disp = 0;
     }
 }
 
-void graphics_attach_rdp(graphics_t *graphics)
+void gfx_attach_rdp(void)
 {
-    if (graphics->rdp_attached == RDP_DETACHED && graphics->disp)
+    if (gfx->rdp_attached == RDP_DETACHED && gfx->disp)
     {
         /* Ensure the RDP is ready for new commands */
         rdp_sync( SYNC_PIPE );
@@ -107,43 +109,43 @@ void graphics_attach_rdp(graphics_t *graphics)
         rdp_set_default_clipping();
 
         /* Attach RDP to display */
-        rdp_attach_display( graphics->disp );
-        graphics->rdp_attached = RDP_ATTACHED;
+        rdp_attach_display( gfx->disp );
+        gfx->rdp_attached = RDP_ATTACHED;
     }
 }
 
-void graphics_detach_rdp(graphics_t *graphics)
+void gfx_detach_rdp(void)
 {
-    if (graphics->rdp_attached == RDP_ATTACHED)
+    if (gfx->rdp_attached == RDP_ATTACHED)
     {
         /* Inform the RDP drawing is finished; flush pending operations */
         rdp_detach_display();
-        graphics->rdp_attached = RDP_DETACHED;
-        graphics->rdp_fill_mode = RDP_FILL_NONE;
+        gfx->rdp_attached = RDP_DETACHED;
+        gfx->rdp_fill_mode = RDP_FILL_NONE;
     }
 }
 
-void graphics_rdp_color_fill(graphics_t *graphics)
+void gfx_rdp_color_fill(void)
 {
-    graphics_attach_rdp(graphics);
+    gfx_attach_rdp();
     /* Setup the RDP for color fills if it isn't already */
-    if (graphics->rdp_fill_mode != RDP_FILL_COLOR)
+    if (gfx->rdp_fill_mode != RDP_FILL_COLOR)
     {
         /* Enable solid colors instead of texture fills */
         rdp_enable_primitive_fill();
-        graphics->rdp_fill_mode = RDP_FILL_COLOR;
+        gfx->rdp_fill_mode = RDP_FILL_COLOR;
     }
 }
 
-void graphics_rdp_texture_fill(graphics_t *graphics)
+void gfx_rdp_texture_fill(void)
 {
-    graphics_attach_rdp(graphics);
+    gfx_attach_rdp();
     /* Setup the RDP for textured fills if it isn't already */
-    if (graphics->rdp_fill_mode != RDP_FILL_TEXTURE)
+    if (gfx->rdp_fill_mode != RDP_FILL_TEXTURE)
     {
         /* Enable textures instead of solid color fill */
         rdp_enable_texture_copy();
-        graphics->rdp_fill_mode = RDP_FILL_TEXTURE;
+        gfx->rdp_fill_mode = RDP_FILL_TEXTURE;
     }
 }
 

@@ -44,7 +44,7 @@ ui_t ui_setup(const background_t *bg)
         .board_draw = false,
         .score_draw = false,
         .medal_draw = false,
-        .board_y = g_graphics->height,
+        .board_y = gfx->height,
         .score_ms = 0,
         .last_score_acc = 0,
         .high_score_acc = 0
@@ -164,7 +164,7 @@ inline static void ui_gameover_tick(ui_t *ui)
     {
         sprite_t *scoreboard = ui->sprites[UI_SPRITE_SCOREBOARD];
         const s32 board_diff_ms = ticks_ms - ui->board_ms;
-        const u16 max_y = g_graphics->height;
+        const u16 max_y = gfx->height;
         const u16 center_y = max_y >> 1;
         const u16 min_y = center_y - (scoreboard->height >> 1);
         ui->score_draw = board_diff_ms >= UI_DEATH_BOARD_DY_MS;
@@ -235,11 +235,11 @@ inline static void ui_logo_draw(const ui_t *ui)
 {
     sprite_t *logo = ui->sprites[UI_SPRITE_LOGO];
 
-    graphics_detach_rdp( g_graphics );
-    int disp = g_graphics->disp;
+    gfx_detach_rdp();
+    int disp = gfx->disp;
 
-    int center_x = (g_graphics->width >> 1);
-    int center_y = (g_graphics->height >> 1);
+    int center_x = (gfx->width >> 1);
+    int center_y = (gfx->height >> 1);
     int logo_x = center_x - (logo->width >> 1);
     int logo_y = center_y - (logo->height * 3.5);
 
@@ -248,12 +248,12 @@ inline static void ui_logo_draw(const ui_t *ui)
     char *credit1_str = "Game by .GEARS";
     int credit1_w = 110;
     int credit1_x = center_x - (credit1_w >> 1);
-    int credit1_y = g_graphics->height - 92;
+    int credit1_y = gfx->height - 92;
 
     char *credit2_str = "N64 Port by Bonhage";
     int credit2_w = 150;
     int credit2_x = center_x - (credit2_w >> 1);
-    int credit2_y = g_graphics->height - 78;
+    int credit2_y = gfx->height - 78;
 
     /* Draw a shadow under the text */
     graphics_set_color( ui->shadow_color, ui->clear_color );
@@ -270,11 +270,11 @@ inline static void ui_heading_draw(const ui_t *ui, u8 stride)
 {
     sprite_t *headings = ui->sprites[UI_SPRITE_HEADINGS];
 
-    graphics_detach_rdp( g_graphics );
-    int disp = g_graphics->disp;
+    gfx_detach_rdp();
+    int disp = gfx->disp;
 
-    int center_x = (g_graphics->width >> 1);
-    int center_y = (g_graphics->height >> 1);
+    int center_x = (gfx->width >> 1);
+    int center_y = (gfx->height >> 1);
     int x = center_x - (headings->width >> 1);
     int y = center_y - 70;
 
@@ -285,11 +285,11 @@ inline static void ui_howto_draw(const ui_t *ui)
 {
     sprite_t *howto = ui->sprites[UI_SPRITE_HOWTO];
 
-    graphics_detach_rdp( g_graphics );
-    int disp = g_graphics->disp;
+    gfx_detach_rdp();
+    int disp = gfx->disp;
 
-    int center_x = (g_graphics->width >> 1);
-    int center_y = (g_graphics->height >> 1);
+    int center_x = (gfx->width >> 1);
+    int center_y = (gfx->height >> 1);
     int x = center_x - (howto->width >> 1);
     int y = center_y - (howto->height / 1.45);
 
@@ -301,8 +301,8 @@ inline static void ui_score_draw(const ui_t *ui)
     u16 score = ui->last_score;
     sprite_t *font = ui->sprites[UI_SPRITE_FONT_LARGE];
 
-    graphics_detach_rdp( g_graphics );
-    int disp = g_graphics->disp;
+    gfx_detach_rdp();
+    int disp = gfx->disp;
 
     int i = 0, num_digits;
     int digits[5];
@@ -316,7 +316,7 @@ inline static void ui_score_draw(const ui_t *ui)
 
     int digit_w = font->width / font->hslices;
     int score_w = digit_w * num_digits;
-    int center_x = g_graphics->width >> 1;
+    int center_x = gfx->width >> 1;
     int x = center_x + (score_w >> 1) - digit_w;
     int y = 20;
     for (i = 0; i < num_digits; i++)
@@ -330,10 +330,10 @@ inline static void ui_scoreboard_draw(const ui_t *ui)
 {
     sprite_t *scoreboard = ui->sprites[UI_SPRITE_SCOREBOARD];
 
-    graphics_detach_rdp( g_graphics );
-    int disp = g_graphics->disp;
+    gfx_detach_rdp();
+    int disp = gfx->disp;
 
-    int center_x = (g_graphics->width >> 1);
+    int center_x = (gfx->width >> 1);
     int x = center_x - (scoreboard->width >> 1);
 
     graphics_draw_sprite_trans( disp, x, ui->board_y, scoreboard );
@@ -351,11 +351,11 @@ inline static void ui_medal_draw(const ui_t *ui)
 
     sprite_t *medal = ui->sprites[UI_SPRITE_MEDAL];
 
-    graphics_detach_rdp( g_graphics );
-    int disp = g_graphics->disp;
+    gfx_detach_rdp();
+    int disp = gfx->disp;
 
-    int center_x = (g_graphics->width >> 1);
-    int center_y = (g_graphics->height >> 1);
+    int center_x = (gfx->width >> 1);
+    int center_y = (gfx->height >> 1);
     int x = center_x - ((medal->width / medal->hslices) >> 1) - 32;
     int y = center_y - ((medal->height / medal->vslices) >> 1) + 4;
 
@@ -365,7 +365,7 @@ inline static void ui_medal_draw(const ui_t *ui)
 inline static void ui_highscores_score_draw(const ui_t *ui, u16 score, u16 y)
 {
     sprite_t *font = ui->sprites[UI_SPRITE_FONT_MED];
-    int disp = g_graphics->disp;
+    int disp = gfx->disp;
 
     int i = 0, num_digits;
     int digits[5];
@@ -378,7 +378,7 @@ inline static void ui_highscores_score_draw(const ui_t *ui, u16 score, u16 y)
     while (score != 0);
 
     int digit_w = font->width / font->hslices;
-    int center_x = g_graphics->width >> 1;
+    int center_x = gfx->width >> 1;
     int x = center_x + 38;
     for (i = 0; i < num_digits; i++)
     {
@@ -389,16 +389,16 @@ inline static void ui_highscores_score_draw(const ui_t *ui, u16 score, u16 y)
 
 inline static void ui_highscores_draw(const ui_t *ui)
 {
-    graphics_detach_rdp( g_graphics );
+    gfx_detach_rdp();
 
-    u16 center_x = (g_graphics->width >> 1);
-    u16 center_y = (g_graphics->height >> 1);
+    u16 center_x = (gfx->width >> 1);
+    u16 center_y = (gfx->height >> 1);
     ui_highscores_score_draw( ui, ui->last_score_acc, center_y - 11 );
     ui_highscores_score_draw( ui, ui->high_score_acc, center_y + 10);
 
     if ( ui->new_high_score && ui->high_score_acc == ui->high_score)
     {
-        int disp = g_graphics->disp;
+        int disp = gfx->disp;
         u16 new_x = center_x + 10;
         u16 new_y = center_y + 1;
         graphics_draw_sprite( disp, new_x, new_y, ui->sprites[UI_SPRITE_NEW] );
@@ -407,10 +407,10 @@ inline static void ui_highscores_draw(const ui_t *ui)
 
 inline static void ui_flash_draw(const ui_t *ui)
 {
-    graphics_rdp_color_fill( g_graphics );
+    gfx_rdp_color_fill();
     rdp_set_primitive_color( ui->flash_color );
-    const u16 bx = g_graphics->width - 1;
-    const u16 by = g_graphics->height - 1;
+    const u16 bx = gfx->width - 1;
+    const u16 by = gfx->height - 1;
     rdp_draw_filled_rectangle( 0, 0, bx, by );
 }
 

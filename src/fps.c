@@ -79,8 +79,7 @@ void fps_draw(const fps_counter_t *fps)
 {
     if ( !fps->should_draw ) return;
 
-    graphics_detach_rdp( g_graphics );
-    int disp = g_graphics->disp;
+    gfx_detach_rdp();
 
     char fps_text[48];
     graphics_set_color( FPS_TEXT_COLOR, FPS_CLEAR_COLOR );
@@ -89,8 +88,8 @@ void fps_draw(const fps_counter_t *fps)
 
     char *line1_fmt = "FPS: %05.2f, Frame: %u, Miss: %u";
     sprintf( fps_text, line1_fmt, fps->average_fps, frames, misses );
-    graphics_draw_text( disp, 10, g_graphics->height - 33, fps_text );
+    graphics_draw_text( gfx->disp, 10, gfx->height - 33, fps_text );
 
     sprintf( fps_text, "Milli: %u, Tick: %u", ticks_ms, ticks );
-    graphics_draw_text( disp, 10, g_graphics->height - 20, fps_text );
+    graphics_draw_text( gfx->disp, 10, gfx->height - 20, fps_text );
 }

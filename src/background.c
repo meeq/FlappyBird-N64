@@ -148,10 +148,10 @@ void background_tick(background_t *bg, const gamepad_state_t *gamepad)
 
 inline static void background_draw_color(const bg_fill_color_t *fill)
 {
-    graphics_rdp_color_fill( g_graphics );
+    gfx_rdp_color_fill();
     rdp_set_primitive_color( fill->color );
     const s16 tx = 0, ty = fill->y;
-    const s16 bx = g_graphics->width, by = fill->y + fill->h;
+    const s16 bx = gfx->width, by = fill->y + fill->h;
     rdp_draw_filled_rectangle( tx, ty, bx, by );
 }
 
@@ -162,12 +162,12 @@ void background_draw_sprite(const background_t *bg,
     if ( sprite == NULL ) return;
 
     const s16 scroll_x = fill->scroll_x;
-    const u16 slices = sprite->hslices, max_w = g_graphics->width;
+    const u16 slices = sprite->hslices, max_w = gfx->width;
     const mirror_t mirror = MIRROR_DISABLED;
     s16 tx, bx;
     u16 ty = fill->y, by = fill->y + sprite->height - 1;
 
-    graphics_rdp_texture_fill( g_graphics );
+    gfx_rdp_texture_fill();
 
     /* Take advantage of native tiling if the sprite is only 1 slice wide */
     if ( slices > 1 )

@@ -7,33 +7,33 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#ifndef __FLAPPY_GRAPHICS_H
-#define __FLAPPY_GRAPHICS_H
+#ifndef __FLAPPY_GFX_H
+#define __FLAPPY_GFX_H
 
 #include "system.h"
 
 /* Graphics definitions */
 
-typedef enum graphics_buffering_mode
+typedef enum buffer_mode
 {
     BUFFERING_DOUBLE = 2,
     BUFFERING_TRIPLE = 3
 } buffer_mode_t;
 
-typedef enum graphics_rdp_attached_state
+typedef enum rdp_attached
 {
     RDP_DETACHED,
     RDP_ATTACHED
 } rdp_attached_t;
 
-typedef enum graphics_rdp_fill_state
+typedef enum rdp_fill_mode
 {
     RDP_FILL_NONE,
     RDP_FILL_COLOR,
     RDP_FILL_TEXTURE
 } rdp_fill_mode_t;
 
-typedef struct
+typedef struct gfx
 {
     // Setup state
     resolution_t res;
@@ -48,24 +48,27 @@ typedef struct
     // RDP state
     rdp_attached_t rdp_attached;
     rdp_fill_mode_t rdp_fill_mode;
-} graphics_t;
+} gfx_t;
+
+extern gfx_t *gfx;
 
 /* Graphics functions */
 
-graphics_t *graphics_setup(resolution_t res, bitdepth_t bit,
-                           buffer_mode_t num_buffers, gamma_t gamma,
-                           antialias_t aa);
+void gfx_init(
+    resolution_t res, bitdepth_t bit, buffer_mode_t num_buffers,
+    gamma_t gamma, antialias_t aa
+);
 
-void graphics_free(graphics_t *graphics);
+void gfx_close(void);
 
-void graphics_display_lock(graphics_t *graphics);
-void graphics_display_flip(graphics_t *graphics);
+void gfx_display_lock(void);
+void gfx_display_flip(void);
 
-void graphics_attach_rdp(graphics_t *graphics);
-void graphics_detach_rdp(graphics_t *graphics);
+void gfx_attach_rdp(void);
+void gfx_detach_rdp(void);
 
-void graphics_rdp_color_fill(graphics_t *graphics);
-void graphics_rdp_texture_fill(graphics_t *graphics);
+void gfx_rdp_color_fill(void);
+void gfx_rdp_texture_fill(void);
 
 sprite_t *read_dfs_sprite(char *file);
 
