@@ -53,7 +53,7 @@ SPRITE_FILES := $(patsubst $(PNG_DIR)/%.png,$(SPRITE_DIR)/%.sprite,$(PNG_FILES))
 SPRITE_MANIFEST_TXT := $(PNG_DIR)/manifest.txt
 
 # Build products
-ROM_FILE := $(ROM_NAME).z64
+ROM_FILE := $(ROM_NAME)-$(ROM_VERSION).z64
 DFS_FILE := $(BUILD_DIR)/$(ROM_NAME).dfs
 RAW_BINARY := $(BUILD_DIR)/$(ROM_NAME).bin
 LINKED_OBJS := $(BUILD_DIR)/$(ROM_NAME).elf
@@ -72,6 +72,8 @@ LDFLAGS += --library-path=$(SDK_LIB_DIR) --library-path=$(LIBDRAGON_DIR)
 LDFLAGS += --script=$(LIBDRAGON_DIR)/n64.ld --gc-sections
 
 # Compilation pipeline
+rom: $(ROM_FILE)
+.PHONY: rom
 
 # Final N64 ROM file in big-endian format
 $(ROM_FILE): $(RAW_BINARY) $(DFS_FILE) $(N64TOOL) $(CHKSUM64)
@@ -170,7 +172,7 @@ endif
 # Housekeeping
 
 clean:
-	rm -Rf $(BUILD_DIR)
+	rm -Rf $(BUILD_DIR) *.z64
 .PHONY: clean
 
 # Ensure submodules are up-to-date; set GITMODULES=0 to skip.
