@@ -17,8 +17,9 @@
 
 /* UI definitions */
 
-#ifndef PROG_VERSION
-#define PROG_VERSION         ""
+// This should be set by the project Makefile
+#ifndef ROM_VERSION
+#define ROM_VERSION         ""
 #endif
 
 #define UI_SCORE_MAX_DIGITS     ((size_t) 5)
@@ -336,7 +337,7 @@ inline static void ui_logo_draw(const ui_t * ui)
     const int credit2_x = center_x - (credit2_w >> 1);
     const int credit2_y = gfx->height - 82;
 
-    const char * const version_str = PROG_VERSION;
+    const char * const version_str = ROM_VERSION;
     const int version_w = strlen(version_str) * 8;
     const int version_x = gfx->width - 32 - version_w;
     const int version_y = gfx->height - 32;

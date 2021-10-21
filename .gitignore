@@ -3,19 +3,4 @@
 .directory
 
 # Compilation artifacts
-*.o
-*.d
-
-# Filesystem artifacts
-filesystem/*
-*.dfs
-
-# Linker artifacts
-*.bin
-*.elf
-
-# Testing artifacts
-clone/*
-
-# Archives
-*.tar.bz
+build/

@@ -1,108 +1,149 @@
-PROG_NAME = FlappyBird
-PROG_TITLE = "FlappyBird64"
-ifndef PROG_VERSION
-PROG_VERSION := $(shell git describe --always --abbrev=8 --dirty --match "v[0-9]*")
+ROM_NAME := FlappyBird
+ROM_TITLE := "FlappyBird64"
+ifndef ROM_VERSION
+# Derive the ROM version from the commit hash or tag
+ROM_VERSION := $(shell git describe --always --abbrev=8 --dirty --match "v[0-9]*")
 endif
 
-# Paths
-PROJECT_DIR = $(CURDIR)
-SDK_DIR = $(N64_INST)
-SDK_LIB_DIR = $(SDK_DIR)/mips64-elf/lib
-N64_GCC_PREFIX = $(SDK_DIR)/bin/mips64-elf-
-SRC_DIR = src
-RES_DIR = resources
-DFS_DIR = filesystem
+# Directories
+PROJECT_DIR := $(CURDIR)
+SDK_DIR := $(N64_INST)
+SDK_LIB_DIR := $(SDK_DIR)/mips64-elf/lib
+N64_GCC_PREFIX := $(SDK_DIR)/bin/mips64-elf-
+LIBDRAGON_DIR := libdragon
+TOOLS_DIR := $(LIBDRAGON_DIR)/tools
+SRC_DIR := src
+RES_DIR := resources
+BUILD_DIR := build
+DFS_DIR := $(BUILD_DIR)/filesystem
 
 # GCC binaries
-CC = $(N64_GCC_PREFIX)gcc
-AS = $(N64_GCC_PREFIX)as
-LD = $(N64_GCC_PREFIX)ld
-OBJCOPY = $(N64_GCC_PREFIX)objcopy
+N64_CC := $(N64_GCC_PREFIX)gcc
+N64_LD := $(N64_GCC_PREFIX)ld
+N64_OBJCOPY := $(N64_GCC_PREFIX)objcopy
 
-# LibDragon binaries
-ROM_HEADER = $(SDK_LIB_DIR)/header
-AUDIOCONV64 = $(SDK_DIR)/bin/audioconv64
-CHKSUM64 = $(SDK_DIR)/bin/chksum64
-MKDFS = $(SDK_DIR)/bin/mkdfs
-N64TOOL = $(SDK_DIR)/bin/n64tool
+# LibDragon tools
+AUDIOCONV64 := $(TOOLS_DIR)/audioconv64/audioconv64
+CHKSUM64 := $(TOOLS_DIR)/chksum64
+MKDFS := $(TOOLS_DIR)/mkdfs/mkdfs
+MKSPRITE := $(TOOLS_DIR)/mksprite/mksprite
+N64TOOL := $(TOOLS_DIR)/n64tool
 
-# Project scripts
-CONVERT_GFX := convert_gfx.sh
+# LibDragon linkage
+LIBDRAGON_LIBS := $(LIBDRAGON_DIR)/libdragon.a $(LIBDRAGON_DIR)/libdragonsys.a
+ROM_HEADER := $(LIBDRAGON_DIR)/header
 
-# Code files
+# Code artifacts
 C_FILES := $(wildcard $(SRC_DIR)/*.c)
 H_FILES := $(wildcard $(SRC_DIR)/*.h)
-OBJS := $(C_FILES:.c=.o)
+OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/$(SRC_DIR)/%.o,$(C_FILES))
 DEPS := $(OBJS:.o=.d)
 
-# GCC Flags
-CFLAGS = -march=vr4300 -mtune=vr4300
-CFLAGS += -std=gnu99 -O2 -Wall -Werror
-CFLAGS += -I$(SDK_DIR)/mips64-elf/include
-CFLAGS += -MMD -MP # Generate dependency files during compilation
-LDFLAGS = --library=dragon --library=c --library=m --library=dragonsys
-LDFLAGS += --library-path=$(SDK_LIB_DIR)
-LDFLAGS += --script=n64.ld --gc-sections
-
 # Audio files
-WAV_DIR = $(RES_DIR)/sfx
-WAV_FILES := $(wildcard $(WAV_DIR)/*.wav)
+WAV_DIR := $(RES_DIR)/sfx
 WAV64_DIR := $(DFS_DIR)/sfx
-WAV64_TMP = $(subst $(WAV_DIR),$(WAV64_DIR),$(WAV_FILES))
-WAV64_FILES := $(WAV64_TMP:.wav=.wav64)
+WAV_FILES := $(wildcard $(WAV_DIR)/*.wav)
+WAV64_FILES := $(patsubst $(WAV_DIR)/%.wav,$(WAV64_DIR)/%.wav64,$(WAV_FILES))
 
 # Sprite files
-PNG_DIR = $(RES_DIR)/gfx
-PNG_FILES := $(wildcard $(PNG_DIR)/*.png)
-SPRITE_MANIFEST_TXT := $(PNG_DIR)/manifest.txt
+PNG_DIR := $(RES_DIR)/gfx
 SPRITE_DIR := $(DFS_DIR)/gfx
-SPRITE_TMP = $(subst $(PNG_DIR),$(SPRITE_DIR),$(PNG_FILES))
-SPRITE_FILES := $(SPRITE_TMP:.png=.sprite)
-
-# LibDragon Flags
-N64TOOLFLAGS = --header $(ROM_HEADER) --title $(PROG_TITLE)
+PNG_FILES := $(wildcard $(PNG_DIR)/*.png)
+SPRITE_FILES := $(patsubst $(PNG_DIR)/%.png,$(SPRITE_DIR)/%.sprite,$(PNG_FILES))
+SPRITE_MANIFEST_TXT := $(PNG_DIR)/manifest.txt
 
 # Build products
-ROM_FILE = $(PROG_NAME).z64
-DFS_FILE = $(PROG_NAME).dfs
-RAW_BINARY = $(PROG_NAME).bin
-LINKED_OBJS = $(PROG_NAME).elf
+ROM_FILE := $(ROM_NAME).z64
+DFS_FILE := $(BUILD_DIR)/$(ROM_NAME).dfs
+RAW_BINARY := $(BUILD_DIR)/$(ROM_NAME).bin
+LINKED_OBJS := $(BUILD_DIR)/$(ROM_NAME).elf
 
-BUILD_ARTIFACTS = $(ROM_FILE) $(RAW_BINARY) $(LINKED_OBJS)
-BUILD_ARTIFACTS += $(OBJS) $(DEPS) $(DFS_FILE) $(DFS_DIR)
+# Compiler flags
+CFLAGS += -MMD -MP # Generate dependency files during compilation
+CFLAGS += -DN64 -std=gnu99 -march=vr4300 -mtune=vr4300 -O2
+CFLAGS += -Wall -Werror -Wa,--fatal-warnings -fdiagnostics-color=always
+CFLAGS += -falign-functions=32 -ffunction-sections -fdata-sections
+CFLAGS += -I$(SDK_DIR)/mips64-elf/include -I$(LIBDRAGON_DIR)/include
+CFLAGS += -DROM_VERSION='"$(ROM_VERSION)"'
+
+# Linker flags
+LDFLAGS += --library=dragon --library=c --library=m --library=dragonsys
+LDFLAGS += --library-path=$(SDK_LIB_DIR) --library-path=$(LIBDRAGON_DIR)
+LDFLAGS += --script=$(LIBDRAGON_DIR)/n64.ld --gc-sections
 
 # Compilation pipeline
 
-# ROM Image
-$(ROM_FILE): CFLAGS+=-DPROG_VERSION='"$(PROG_VERSION)"'
-$(ROM_FILE): $(RAW_BINARY) $(DFS_FILE)
+# Final N64 ROM file in big-endian format
+$(ROM_FILE): $(RAW_BINARY) $(DFS_FILE) $(N64TOOL) $(CHKSUM64)
+	@mkdir -p $(dir $@)
+	@echo "    [Z64] $@"
 	@rm -f $@
-	$(N64TOOL) -o $@ $(N64TOOLFLAGS) $(RAW_BINARY) --offset 1M $(DFS_FILE)
-	$(CHKSUM64) $@
+	$(N64TOOL) -o $@ --header $(ROM_HEADER) --title $(ROM_TITLE) \
+		$(RAW_BINARY) \
+		--offset 1M $(DFS_FILE)
+	$(CHKSUM64) $@ $(REDIRECT_STDOUT)
 
 # Raw stripped binary
 $(RAW_BINARY): $(LINKED_OBJS)
-	$(OBJCOPY) -O binary $< $@
+	@mkdir -p $(dir $@)
+	@echo "    [OBJCOPY] $(notdir $@)"
+	$(N64_OBJCOPY) -O binary $< $@
 
 # Linked object code binary
-$(LINKED_OBJS): $(OBJS)
-	$(LD) -o $@ $^ $(LDFLAGS)
+$(LINKED_OBJS): $(OBJS) $(LIBDRAGON_LIBS)
+	@mkdir -p $(dir $@)
+	@echo "    [LD] $(notdir $@)"
+	$(N64_LD) -o $@ $^ $(LDFLAGS)
+
+# Compiled C objects
+$(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.c 
+	@mkdir -p $(dir $@)
+	@echo "    [CC] $<"
+	$(N64_CC) -c $(CFLAGS) -o $@ $<
 
 # Filesystem pipeline
 
 # Converted graphics
-$(SPRITE_DIR)/%.sprite: $(PNG_DIR)/%.png $(SPRITE_MANIFEST_TXT)
-	@bash $(CONVERT_GFX) $<
+$(SPRITE_DIR)/%.sprite: export MKSPRITE
+$(SPRITE_DIR)/%.sprite: export PNG_DIR
+$(SPRITE_DIR)/%.sprite: export SPRITE_DIR
+$(SPRITE_DIR)/%.sprite: $(PNG_DIR)/%.png $(SPRITE_MANIFEST_TXT) $(MKSPRITE)
+	@mkdir -p $(dir $@)
+	@echo "    [GFX] $<"
+	bash convert_gfx.sh $<
 
 # Converted audio
-$(WAV64_DIR)/%.wav64: $(WAV_DIR)/%.wav
-	@mkdir -p $(WAV64_DIR)
+$(WAV64_DIR)/%.wav64: $(WAV_DIR)/%.wav $(AUDIOCONV64)
+	@mkdir -p $(dir $@)
+	@echo "    [SFX] $<"
 	$(AUDIOCONV64) -o $(WAV64_DIR) $<
 
 # Converted filesystem
-$(DFS_FILE): $(SPRITE_FILES) $(WAV64_FILES)
+$(DFS_FILE): $(SPRITE_FILES) $(WAV64_FILES) $(MKDFS)
+	@mkdir -p $(dir $@)
+	@echo "    [DFS] $(notdir $@)"
 	@find $(DFS_DIR) -depth -name ".DS_Store" -exec rm {} \;
-	$(MKDFS) $@ $(DFS_DIR)
+	$(MKDFS) $@ $(DFS_DIR) $(REDIRECT_STDOUT)
+
+# LibDragon submodule
+
+$(LIBDRAGON_LIBS): libdragon ;
+
+$(AUDIOCONV64) $(CHKSUM64) $(MKDFS) $(MKSPRITE) $(N64TOOL): libdragon-tools ;
+
+libdragon: gitmodules
+	@echo "    [MAKE] libdragon"
+	$(MAKE) -C libdragon $(REDIRECT_STDOUT)
+.PHONY: libdragon
+
+libdragon-tools: gitmodules
+	@echo "    [MAKE] libdragon-tools"
+	$(MAKE) -C libdragon tools $(REDIRECT_STDOUT)
+.PHONY: libdragon-tools
+
+libdragon-clean:
+	$(MAKE) -C libdragon clean tools-clean $(REDIRECT_STDOUT)
+.PHONY: libdragon-clean
 
 # Testing
 
@@ -129,8 +170,33 @@ endif
 # Housekeeping
 
 clean:
-	rm -Rf $(BUILD_ARTIFACTS)
+	rm -Rf $(BUILD_DIR)
 .PHONY: clean
+
+# Ensure submodules are up-to-date; set GITMODULES=0 to skip.
+GITMODULES ?= 1
+ifeq ($(GITMODULES),1)
+gitmodules:
+	@if git submodule status | egrep -q '^[-]|^[+]' ; then \
+		echo "    [GIT] submodules"; \
+		git submodule update --init; \
+		$(MAKE) libdragon-clean; \
+    fi
+else
+gitmodules: ;
+endif
+.PHONY: gitmodules
 
 # Ensure object files are regenerated after header modification
 -include $(DEPS)
+
+# Silence Make sub-command directory traversal messages 
+export GNUMAKEFLAGS=--no-print-directory
+
+# Silent by default; set V=1 to enable verbose Make output
+ifneq ($(V),1)
+REDIRECT_STDOUT := >/dev/null
+.SILENT:
+else
+REDIRECT_STDOUT :=
+endif

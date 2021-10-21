@@ -20,11 +20,8 @@
 
 int main(void)
 {
-    /* Enable interrupts on the CPU */
-    init_interrupts();
+    /* Initialize libdragon subsystems */
     timer_init();
-
-    /* Initialize peripherals */
     dfs_init( DFS_DEFAULT_LOCATION );
     controller_init();
 
