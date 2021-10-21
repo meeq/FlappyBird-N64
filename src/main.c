@@ -21,6 +21,7 @@
 int main(void)
 {
     /* Initialize libdragon subsystems */
+    init_interrupts();
     timer_init();
     dfs_init( DFS_DEFAULT_LOCATION );
     controller_init();
