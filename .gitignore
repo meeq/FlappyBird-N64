@@ -3,4 +3,8 @@
 .directory
 
 # Compilation artifacts
-build/
+/build/
+
+# Only commit clean, tagged versions of ROMs
+/FlappyBird.z64
+/FlappyBird-v*-*.z64

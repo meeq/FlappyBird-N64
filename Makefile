@@ -53,7 +53,7 @@ SPRITE_FILES := $(patsubst $(PNG_DIR)/%.png,$(SPRITE_DIR)/%.sprite,$(PNG_FILES))
 SPRITE_MANIFEST_TXT := $(PNG_DIR)/manifest.txt
 
 # Build products
-ROM_FILE := $(ROM_NAME)-$(ROM_VERSION).z64
+ROM_FILE := $(if $(ROM_VERSION),$(ROM_NAME)-$(ROM_VERSION).z64,$(ROM_NAME).z64)
 DFS_FILE := $(BUILD_DIR)/$(ROM_NAME).dfs
 RAW_BINARY := $(BUILD_DIR)/$(ROM_NAME).bin
 LINKED_OBJS := $(BUILD_DIR)/$(ROM_NAME).elf
@@ -72,8 +72,8 @@ LDFLAGS += --library-path=$(SDK_LIB_DIR) --library-path=$(LIBDRAGON_DIR)
 LDFLAGS += --script=$(LIBDRAGON_DIR)/n64.ld --gc-sections
 
 # Compilation pipeline
-rom: $(ROM_FILE)
-.PHONY: rom
+all: $(ROM_FILE)
+.PHONY: all
 
 # Final N64 ROM file in big-endian format
 $(ROM_FILE): $(RAW_BINARY) $(DFS_FILE) $(N64TOOL) $(CHKSUM64)
@@ -124,7 +124,7 @@ $(WAV64_DIR)/%.wav64: $(WAV_DIR)/%.wav $(AUDIOCONV64)
 $(DFS_FILE): $(SPRITE_FILES) $(WAV64_FILES) $(MKDFS)
 	@mkdir -p $(dir $@)
 	@echo "    [DFS] $(notdir $@)"
-	@find $(DFS_DIR) -depth -name ".DS_Store" -exec rm {} \;
+	@find $(DFS_DIR) -depth -name ".DS_Store" -delete
 	$(MKDFS) $@ $(DFS_DIR) $(REDIRECT_STDOUT)
 
 # LibDragon submodule
@@ -172,7 +172,7 @@ endif
 # Housekeeping
 
 clean:
-	rm -Rf $(BUILD_DIR) *.z64
+	rm -Rf $(BUILD_DIR) $(ROM_NAME)-v*-*.z64 $(ROM_NAME).z64
 .PHONY: clean
 
 # Ensure submodules are up-to-date; set GITMODULES=0 to skip.
@@ -197,8 +197,8 @@ export GNUMAKEFLAGS=--no-print-directory
 
 # Silent by default; set V=1 to enable verbose Make output
 ifneq ($(V),1)
-REDIRECT_STDOUT := >/dev/null
 .SILENT:
+REDIRECT_STDOUT := >/dev/null
 else
 REDIRECT_STDOUT :=
 endif
