@@ -6,5 +6,5 @@
 /build/
 
 # Only commit clean, tagged versions of ROMs
-/FlappyBird.z64
-/FlappyBird-v*-*.z64
+*.z64
+!/FlappyBird-v*.z64

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/user/bin/env bash
 #
 # Convert pngs into 16-bit libdragon sprites
 set -eu

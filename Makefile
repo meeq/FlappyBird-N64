@@ -1,8 +1,9 @@
+# ROM details
 ROM_NAME := FlappyBird
 ROM_TITLE := "FlappyBird64"
+# Allow ROM_VERSION to be specified; default to current git branch/tag/commit
 ifndef ROM_VERSION
-# Derive the ROM version from the commit hash or tag
-ROM_VERSION := $(shell git describe --always --abbrev=8 --dirty --match "v[0-9]*")
+ROM_VERSION := $(shell bash git_rom_version.bash)
 endif
 
 # Directories
@@ -60,7 +61,7 @@ LINKED_OBJS := $(BUILD_DIR)/$(ROM_NAME).elf
 
 # Compiler flags
 CFLAGS += -MMD -MP # Generate dependency files during compilation
-CFLAGS += -DN64 -std=gnu99 -march=vr4300 -mtune=vr4300 -O2
+CFLAGS += -DN64 -march=vr4300 -mtune=vr4300 -std=gnu99 -Og -ggdb3
 CFLAGS += -Wall -Werror -Wa,--fatal-warnings -fdiagnostics-color=always
 CFLAGS += -falign-functions=32 -ffunction-sections -fdata-sections
 CFLAGS += -I$(SDK_DIR)/mips64-elf/include -I$(LIBDRAGON_DIR)/include
@@ -88,39 +89,39 @@ $(ROM_FILE): $(RAW_BINARY) $(DFS_FILE) $(N64TOOL) $(CHKSUM64)
 # Raw stripped binary
 $(RAW_BINARY): $(LINKED_OBJS)
 	@mkdir -p $(dir $@)
-	@echo "    [OBJCOPY] $(notdir $@)"
+	@echo "    [BIN] $(notdir $@)"
 	$(N64_OBJCOPY) -O binary $< $@
 
 # Linked object code binary
 $(LINKED_OBJS): $(OBJS) $(LIBDRAGON_LIBS)
 	@mkdir -p $(dir $@)
-	@echo "    [LD] $(notdir $@)"
+	@echo "    [LD]  $(notdir $@)"
 	$(N64_LD) -o $@ $^ $(LDFLAGS)
 
 # Compiled C objects
 $(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.c 
 	@mkdir -p $(dir $@)
-	@echo "    [CC] $<"
+	@echo "    [CC]  $<"
 	$(N64_CC) -c $(CFLAGS) -o $@ $<
 
 # Filesystem pipeline
 
-# Converted graphics
+# Graphics
 $(SPRITE_DIR)/%.sprite: export MKSPRITE
 $(SPRITE_DIR)/%.sprite: export PNG_DIR
 $(SPRITE_DIR)/%.sprite: export SPRITE_DIR
 $(SPRITE_DIR)/%.sprite: $(PNG_DIR)/%.png $(SPRITE_MANIFEST_TXT) $(MKSPRITE)
 	@mkdir -p $(dir $@)
 	@echo "    [GFX] $<"
-	bash convert_gfx.sh $<
+	bash convert_gfx.bash $<
 
-# Converted audio
+# Sound Effects
 $(WAV64_DIR)/%.wav64: $(WAV_DIR)/%.wav $(AUDIOCONV64)
 	@mkdir -p $(dir $@)
 	@echo "    [SFX] $<"
 	$(AUDIOCONV64) -o $(WAV64_DIR) $<
 
-# Converted filesystem
+# Filesystem
 $(DFS_FILE): $(SPRITE_FILES) $(WAV64_FILES) $(MKDFS)
 	@mkdir -p $(dir $@)
 	@echo "    [DFS] $(notdir $@)"
@@ -134,12 +135,12 @@ $(LIBDRAGON_LIBS): libdragon ;
 $(AUDIOCONV64) $(CHKSUM64) $(MKDFS) $(MKSPRITE) $(N64TOOL): libdragon-tools ;
 
 libdragon: gitmodules
-	@echo "    [MAKE] libdragon"
-	$(MAKE) -C libdragon $(REDIRECT_STDOUT)
+	@echo "    [DEP] libdragon"
+	$(MAKE) -C libdragon D=1 $(REDIRECT_STDOUT)
 .PHONY: libdragon
 
 libdragon-tools: gitmodules
-	@echo "    [MAKE] libdragon-tools"
+	@echo "    [DEP] libdragon-tools"
 	$(MAKE) -C libdragon tools $(REDIRECT_STDOUT)
 .PHONY: libdragon-tools
 
@@ -172,8 +173,13 @@ endif
 # Housekeeping
 
 clean:
-	rm -Rf $(BUILD_DIR) $(ROM_NAME)-v*-*.z64 $(ROM_NAME).z64
+	rm -Rf $(BUILD_DIR)
 .PHONY: clean
+
+distclean:
+	rm -Rf $(BUILD_DIR) $(LIBDRAGON_DIR) *.z64
+	git restore $(LIBDRAGON_DIR) '*.z64'
+.PHONY: distclean
 
 # Ensure submodules are up-to-date; set GITMODULES=0 to skip.
 GITMODULES ?= 1
@@ -189,10 +195,10 @@ gitmodules: ;
 endif
 .PHONY: gitmodules
 
-# Ensure object files are regenerated after header modification
+# Include compiler-generated dependency files
 -include $(DEPS)
 
-# Silence Make sub-command directory traversal messages 
+# Silence Make directory traversal messages 
 export GNUMAKEFLAGS=--no-print-directory
 
 # Silent by default; set V=1 to enable verbose Make output
