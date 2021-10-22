@@ -20,8 +20,16 @@
 
 int main(void)
 {
-    /* Initialize libdragon subsystems */
+    /**
+     * init_interrupts has been deprecated as of October 13, 2021
+     * @see https://github.com/DragonMinded/libdragon/pull/195
+     */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     init_interrupts();
+#pragma GCC diagnostic pop
+
+    /* Initialize libdragon subsystems */
     timer_init();
     dfs_init( DFS_DEFAULT_LOCATION );
     controller_init();
