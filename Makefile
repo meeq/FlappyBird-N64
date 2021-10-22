@@ -1,3 +1,14 @@
+# FlappyBird-N64 - Makefile
+#
+# Copyright 2021, Christopher Bonhage
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+#
+# Variables
+#
+
 # ROM details
 ROM_NAME ?= FlappyBird
 ROM_TITLE ?= "Flappy Bird for N64"
@@ -11,19 +22,15 @@ ROM_VERSION_GUARD := .guard-ROM_VERSION-$(ROM_VERSION)
 # Expose ROM_VERSION as a string constant to the compiler
 CFLAGS += -DROM_VERSION='"$(ROM_VERSION)"'
 
-ifndef ROM_FILE
-ifeq ($(shell echo "$(ROM_VERSION)" | egrep -e "-dirty$$"),)
-# Set the version in the filename for clean builds
-ROM_FILE := $(ROM_NAME)-$(ROM_VERSION).z64
-else
 ROM_FILE := $(ROM_NAME).z64
+ifneq ($(ROM_VERSION),)
+# Include ROM_VERSION in ROM_FILE if the version is clean 
+ifeq ($(shell echo "$(ROM_VERSION)" | egrep -e "-dirty$$"),)
+ROM_FILE := $(ROM_NAME)-$(ROM_VERSION).z64
 endif
 endif
 
-# Keep git submodules up-to-date; set GITMODULES=0 to skip
-GITMODULES ?= 1
-
-# Silent by default; set V=1 to enable verbose Make output
+# Set V=1 to enable verbose Make output
 ifneq ($(V),1)
 .SILENT:
 REDIRECT_STDOUT := >/dev/null
@@ -31,8 +38,10 @@ else
 REDIRECT_STDOUT :=
 endif
 
+# Set GITMODULES=0 to skip git submodule updates
+GITMODULES ?= 1
+
 # Directories
-PROJECT_DIR := $(CURDIR)
 SDK_DIR := $(N64_INST)
 SDK_LIB_DIR := $(SDK_DIR)/mips64-elf/lib
 N64_GCC_PREFIX := $(SDK_DIR)/bin/mips64-elf-
@@ -94,7 +103,10 @@ LDFLAGS += --library=dragon --library=c --library=m --library=dragonsys
 LDFLAGS += --library-path=$(SDK_LIB_DIR) --library-path=$(LIBDRAGON_DIR)
 LDFLAGS += --script=$(LIBDRAGON_DIR)/n64.ld --gc-sections
 
+#
 # Compilation pipeline
+#
+
 all: $(ROM_FILE)
 .PHONY: all
 
@@ -126,7 +138,9 @@ $(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
 	@echo "    [CC]  $<"
 	$(N64_CC) -c $(CFLAGS) -o $@ $<
 
+#
 # Filesystem pipeline
+#
 
 # Graphics
 $(SPRITE_DIR)/%.sprite: export MKSPRITE := $(MKSPRITE)
@@ -150,7 +164,9 @@ $(DFS_FILE): $(SPRITE_FILES) $(WAV64_FILES) $(MKDFS)
 	@find $(DFS_DIR) -depth -name ".DS_Store" -delete
 	$(MKDFS) $@ $(DFS_DIR) $(REDIRECT_STDOUT)
 
+#
 # LibDragon submodule
+#
 
 $(LIBDRAGON_LIBS): libdragon ;
 
@@ -170,7 +186,9 @@ libdragon-clean:
 	$(MAKE) -C libdragon clean tools-clean $(REDIRECT_STDOUT)
 .PHONY: libdragon-clean
 
+#
 # Testing
+#
 
 # Load ROM in cen64 emulator
 ifdef CEN64_DIR
@@ -178,7 +196,7 @@ CEN64 = $(CEN64_DIR)/cen64
 CEN64FLAGS = $(CEN64_DIR)/pifdata.bin
 
 emulate-cen64: $(ROM_FILE)
-	$(CEN64) $(CEN64FLAGS) $(PROJECT_DIR)/$<
+	$(CEN64) $(CEN64FLAGS) $(CURDIR)/$<
 .PHONY: emulate-cen64
 endif
 
@@ -188,11 +206,13 @@ MAME = cd $(MAME_DIR) && ./mame64
 MAMEFLAGS = -skip_gameinfo -window -resolution 640x480
 
 emulate-mame: $(ROM_FILE)
-	$(MAME) n64 -cartridge $(PROJECT_DIR)/$< $(MAMEFLAGS)
+	$(MAME) n64 -cartridge $(CURDIR)/$< $(MAMEFLAGS)
 .PHONY: emulate-mame
 endif
 
+#
 # Housekeeping
+#
 
 clean:
 	rm -Rf $(BUILD_DIR) $(ROM_NAME).z64
