@@ -1,7 +1,7 @@
 /**
  * FlappyBird-N64 - ui.c
  *
- * Copyright 2017, Christopher Bonhage
+ * Copyright 2021, Christopher Bonhage
  *
  * This source code is licensed under the BSD-style license found in the
  * LICENSE file in the root directory of this source tree.
@@ -136,6 +136,7 @@ inline static void ui_set_time_mode(ui_t * ui, bg_time_mode_t time_mode)
 ui_t * ui_init(const background_t * bg)
 {
     ui_t * ui = malloc( sizeof(ui_t) );
+    if (ui == NULL) return NULL;
     memset( ui, 0, sizeof(ui_t) );
     ui->flash_color = UI_FLASH_COLOR;
     ui->board_y = gfx->height;
