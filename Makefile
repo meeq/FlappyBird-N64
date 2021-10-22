@@ -22,11 +22,17 @@ ROM_VERSION_GUARD := .guard-ROM_VERSION-$(ROM_VERSION)
 # Expose ROM_VERSION as a string constant to the compiler
 CFLAGS += -DROM_VERSION='"$(ROM_VERSION)"'
 
+# Derive the final ROM_FILE name based on the ROM_VERSION
 ROM_FILE := $(ROM_NAME).z64
-ifneq ($(ROM_VERSION),)
-# Include ROM_VERSION in ROM_FILE if the version is clean 
+ifeq ($(ROM_VERSION),)
+$(error ROM_VERSION is not set. See `git_rom_version.bash`)
+else
 ifeq ($(shell echo "$(ROM_VERSION)" | egrep -e "-dirty$$"),)
+# Include ROM_VERSION in ROM_FILE if the version is clean 
 ROM_FILE := $(ROM_NAME)-$(ROM_VERSION).z64
+else
+# Otherwise, tag ROM_FILE as "dirty" to discourage distribution
+ROM_FILE := $(ROM_NAME)-dirty.z64
 endif
 endif
 
@@ -216,7 +222,7 @@ endif
 #
 
 clean:
-	rm -Rf $(BUILD_DIR) $(ROM_NAME).z64
+	rm -Rf $(BUILD_DIR) $(ROM_NAME)-dirty.z64
 .PHONY: clean
 
 distclean:
