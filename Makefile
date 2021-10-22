@@ -31,6 +31,7 @@ endif
 endif
 
 # Set V=1 to enable verbose Make output
+V ?= 0
 ifneq ($(V),1)
 .SILENT:
 REDIRECT_STDOUT := >/dev/null
@@ -143,19 +144,19 @@ $(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
 #
 
 # Graphics
-$(SPRITE_DIR)/%.sprite: export MKSPRITE := $(MKSPRITE)
-$(SPRITE_DIR)/%.sprite: export PNG_DIR := $(PNG_DIR)
+$(SPRITE_DIR)/%.sprite: export MKSPRITE   := $(MKSPRITE)
+$(SPRITE_DIR)/%.sprite: export PNG_DIR    := $(PNG_DIR)
 $(SPRITE_DIR)/%.sprite: export SPRITE_DIR := $(SPRITE_DIR)
 $(SPRITE_DIR)/%.sprite: $(PNG_DIR)/%.png $(SPRITE_MANIFEST_TXT) $(MKSPRITE)
 	@mkdir -p $(dir $@)
 	@echo "    [GFX] $<"
-	bash convert_gfx.bash $<
+	bash convert_gfx.bash $< $(REDIRECT_STDOUT)
 
 # Sound Effects
 $(WAV64_DIR)/%.wav64: $(WAV_DIR)/%.wav $(AUDIOCONV64)
 	@mkdir -p $(dir $@)
 	@echo "    [SFX] $<"
-	$(AUDIOCONV64) -o $(WAV64_DIR) $<
+	$(AUDIOCONV64) -o $(WAV64_DIR) $< $(REDIRECT_STDOUT)
 
 # Filesystem
 $(DFS_FILE): $(SPRITE_FILES) $(WAV64_FILES) $(MKDFS)
@@ -173,17 +174,17 @@ $(LIBDRAGON_LIBS): libdragon ;
 $(AUDIOCONV64) $(CHKSUM64) $(MKDFS) $(MKSPRITE) $(N64TOOL): libdragon-tools ;
 
 libdragon: gitmodules
-	@echo "    [DEP] libdragon"
-	$(MAKE) -C libdragon D=1 $(REDIRECT_STDOUT)
+	@echo "    [DEP] $@"
+	$(MAKE) -C $(LIBDRAGON_DIR) D=1 V=$(V) $(REDIRECT_STDOUT)
 .PHONY: libdragon
 
 libdragon-tools: gitmodules
-	@echo "    [DEP] libdragon-tools"
-	$(MAKE) -C libdragon tools $(REDIRECT_STDOUT)
+	@echo "    [DEP] $@"
+	$(MAKE) -C $(LIBDRAGON_DIR) tools $(REDIRECT_STDOUT)
 .PHONY: libdragon-tools
 
 libdragon-clean:
-	$(MAKE) -C libdragon clean tools-clean $(REDIRECT_STDOUT)
+	$(MAKE) -C $(LIBDRAGON_DIR) clean tools-clean $(REDIRECT_STDOUT)
 .PHONY: libdragon-clean
 
 #
@@ -219,7 +220,7 @@ clean:
 .PHONY: clean
 
 distclean:
-	rm -Rf $(BUILD_DIR) $(LIBDRAGON_DIR) *.z64
+	rm -Rf $(BUILD_DIR) $(LIBDRAGON_DIR) *.z64 .guard-*
 	git restore $(LIBDRAGON_DIR) '*.z64'
 .PHONY: distclean
 
@@ -234,8 +235,8 @@ ifeq ($(GITMODULES),1)
 gitmodules:
 	@if git submodule status | egrep -q '^[-]|^[+]' ; then \
 		echo "    [GIT] submodules"; \
-		git submodule update --init; \
-		$(MAKE) libdragon-clean; \
+		git submodule update --init $(REDIRECT_STDOUT); \
+		$(MAKE) libdragon-clean V=$(V) $(REDIRECT_STDOUT); \
     fi
 else
 gitmodules: ;
