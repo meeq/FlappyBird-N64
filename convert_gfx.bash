@@ -1,25 +1,21 @@
-#!/user/bin/env bash
+#!/usr/bin/env bash
 #
 # Convert pngs into 16-bit libdragon sprites
-set -eu
+#
 
-if [ -z ${MKSPRITE+x} ]; then
-  MKSPRITE=${N64_INST}/bin/mksprite
-fi
+set -euo pipefail
 
+# Provide sensible defaults, but these should be set by the Makefile
+[ -z ${MKSPRITE+x} ] && MKSPRITE="libdragon/tools/mksprite/mksprite"
+[ -z ${PNG_DIR+x} ] && PNG_DIR="resources/gfx"
+[ -z ${SPRITE_DIR+x} ] && SPRITE_DIR="build/filesystem/gfx"
+
+# Ensure the `mksprite` command exists
 command -v ${MKSPRITE} >/dev/null 2>&1 || { \
   echo >&2 'This script requires the `mksprite` command.'; \
-  echo >&2 'Make sure your N64_INST environment var is set.'; \
+  echo >&2 'Run `make libdragon-tools` to resolve this issue.'; \
   exit 1; \
 }
-
-if [ -z ${PNG_DIR+x} ]; then
-  PNG_DIR="resources/gfx"
-fi
-
-if [ -z ${SPRITE_DIR+x} ]; then
-  SPRITE_DIR="build/filesystem/gfx"
-fi
 
 PNG_EXT=".png"
 SPRITE_EXT=".sprite"

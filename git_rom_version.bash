@@ -1,15 +1,23 @@
 #!/usr/bin/env bash
 #
 # Determine the ROM version based on git status
-set -eu
+#
 
+set -euo pipefail
 
-STATUS="$(git status --untracked-files=no --porcelain | grep -v '.z64$')"
-SHA="$(git rev-parse --short HEAD)"
-TAG="$(git tag --points-at HEAD)"
+GIT_STATUS="$(\
+    git status --porcelain --untracked-files=no | \
+    { grep -v '.z64$' || test $? = 1; } \
+)"
+VERSION_TAG="$(git tag --list 'v*'--points-at HEAD)"
+COMMIT_REV="git-$(git rev-parse --short HEAD)"
 
-if [[ -z "$STATUS" ]]; then
-    [[ ! -z "$TAG" ]] && echo "$TAG" || echo "$SHA"
+if [[ -z "${GIT_STATUS}" ]]; then
+    if [[ -n "${VERSION_TAG}" ]]; then
+        echo "${VERSION_TAG}"
+    else
+        echo "${COMMIT_REV}"
+    fi
 else
-    echo "${SHA}-dirty"
+    echo "${COMMIT_REV}-dirty"
 fi

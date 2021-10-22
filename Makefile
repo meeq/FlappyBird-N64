@@ -1,9 +1,34 @@
 # ROM details
-ROM_NAME := FlappyBird
-ROM_TITLE := "FlappyBird64"
+ROM_NAME ?= FlappyBird
+ROM_TITLE ?= "Flappy Bird for N64"
+
 # Allow ROM_VERSION to be specified; default to current git branch/tag/commit
 ifndef ROM_VERSION
 ROM_VERSION := $(shell bash git_rom_version.bash)
+endif
+# Use a "guard" file to ensure the ROM re-builds when the version changes
+ROM_VERSION_GUARD := .guard-ROM_VERSION-$(ROM_VERSION)
+# Expose ROM_VERSION as a string constant to the compiler
+CFLAGS += -DROM_VERSION='"$(ROM_VERSION)"'
+
+ifndef ROM_FILE
+ifeq ($(shell echo "$(ROM_VERSION)" | egrep -e "-dirty$$"),)
+# Set the version in the filename for clean builds
+ROM_FILE := $(ROM_NAME)-$(ROM_VERSION).z64
+else
+ROM_FILE := $(ROM_NAME).z64
+endif
+endif
+
+# Keep git submodules up-to-date; set GITMODULES=0 to skip
+GITMODULES ?= 1
+
+# Silent by default; set V=1 to enable verbose Make output
+ifneq ($(V),1)
+.SILENT:
+REDIRECT_STDOUT := >/dev/null
+else
+REDIRECT_STDOUT :=
 endif
 
 # Directories
@@ -36,7 +61,6 @@ ROM_HEADER := $(LIBDRAGON_DIR)/header
 
 # Code artifacts
 C_FILES := $(wildcard $(SRC_DIR)/*.c)
-H_FILES := $(wildcard $(SRC_DIR)/*.h)
 OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/$(SRC_DIR)/%.o,$(C_FILES))
 DEPS := $(OBJS:.o=.d)
 
@@ -53,8 +77,7 @@ PNG_FILES := $(wildcard $(PNG_DIR)/*.png)
 SPRITE_FILES := $(patsubst $(PNG_DIR)/%.png,$(SPRITE_DIR)/%.sprite,$(PNG_FILES))
 SPRITE_MANIFEST_TXT := $(PNG_DIR)/manifest.txt
 
-# Build products
-ROM_FILE := $(if $(ROM_VERSION),$(ROM_NAME)-$(ROM_VERSION).z64,$(ROM_NAME).z64)
+# Build artifacts
 DFS_FILE := $(BUILD_DIR)/$(ROM_NAME).dfs
 RAW_BINARY := $(BUILD_DIR)/$(ROM_NAME).bin
 LINKED_OBJS := $(BUILD_DIR)/$(ROM_NAME).elf
@@ -65,7 +88,6 @@ CFLAGS += -DN64 -march=vr4300 -mtune=vr4300 -std=gnu99 -Og -ggdb3
 CFLAGS += -Wall -Werror -Wa,--fatal-warnings -fdiagnostics-color=always
 CFLAGS += -falign-functions=32 -ffunction-sections -fdata-sections
 CFLAGS += -I$(SDK_DIR)/mips64-elf/include -I$(LIBDRAGON_DIR)/include
-CFLAGS += -DROM_VERSION='"$(ROM_VERSION)"'
 
 # Linker flags
 LDFLAGS += --library=dragon --library=c --library=m --library=dragonsys
@@ -77,7 +99,7 @@ all: $(ROM_FILE)
 .PHONY: all
 
 # Final N64 ROM file in big-endian format
-$(ROM_FILE): $(RAW_BINARY) $(DFS_FILE) $(N64TOOL) $(CHKSUM64)
+$(ROM_FILE): $(ROM_VERSION_GUARD) $(RAW_BINARY) $(DFS_FILE) $(N64TOOL) $(CHKSUM64)
 	@mkdir -p $(dir $@)
 	@echo "    [Z64] $@"
 	@rm -f $@
@@ -107,9 +129,9 @@ $(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
 # Filesystem pipeline
 
 # Graphics
-$(SPRITE_DIR)/%.sprite: export MKSPRITE
-$(SPRITE_DIR)/%.sprite: export PNG_DIR
-$(SPRITE_DIR)/%.sprite: export SPRITE_DIR
+$(SPRITE_DIR)/%.sprite: export MKSPRITE := $(MKSPRITE)
+$(SPRITE_DIR)/%.sprite: export PNG_DIR := $(PNG_DIR)
+$(SPRITE_DIR)/%.sprite: export SPRITE_DIR := $(SPRITE_DIR)
 $(SPRITE_DIR)/%.sprite: $(PNG_DIR)/%.png $(SPRITE_MANIFEST_TXT) $(MKSPRITE)
 	@mkdir -p $(dir $@)
 	@echo "    [GFX] $<"
@@ -173,7 +195,7 @@ endif
 # Housekeeping
 
 clean:
-	rm -Rf $(BUILD_DIR)
+	rm -Rf $(BUILD_DIR) $(ROM_NAME).z64
 .PHONY: clean
 
 distclean:
@@ -181,9 +203,14 @@ distclean:
 	git restore $(LIBDRAGON_DIR) '*.z64'
 .PHONY: distclean
 
-# Ensure submodules are up-to-date; set GITMODULES=0 to skip.
-GITMODULES ?= 1
+# Rebuild files that depend on the ROM_VERSION when it changes
+$(ROM_VERSION_GUARD):
+	rm -f $(BUILD_DIR)/$(SRC_DIR)/ui.o
+	rm -f .guard-ROM_VERSION-* 
+	touch $@
+
 ifeq ($(GITMODULES),1)
+# Update git submodules
 gitmodules:
 	@if git submodule status | egrep -q '^[-]|^[+]' ; then \
 		echo "    [GIT] submodules"; \
@@ -197,14 +224,3 @@ endif
 
 # Include compiler-generated dependency files
 -include $(DEPS)
-
-# Silence Make directory traversal messages 
-export GNUMAKEFLAGS=--no-print-directory
-
-# Silent by default; set V=1 to enable verbose Make output
-ifneq ($(V),1)
-.SILENT:
-REDIRECT_STDOUT := >/dev/null
-else
-REDIRECT_STDOUT :=
-endif

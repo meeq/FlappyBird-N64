@@ -330,12 +330,12 @@ inline static void ui_logo_draw(const ui_t * ui)
     const char * const credit1_str = "Game by .GEARS";
     const int credit1_w = strlen(credit1_str) * 8;
     const int credit1_x = center_x - (credit1_w >> 1);
-    const int credit1_y = gfx->height - 96;
+    const int credit1_y = gfx->height - 80;
 
     const char * const credit2_str = "N64 Port by Meeq";
     const int credit2_w = strlen(credit2_str) * 8;
     const int credit2_x = center_x - (credit2_w >> 1);
-    const int credit2_y = gfx->height - 82;
+    const int credit2_y = gfx->height - 62;
 
     const char * const version_str = ROM_VERSION;
     const int version_w = strlen(version_str) * 8;
