@@ -2,3 +2,5 @@
 	path = libdragon
 	url = https://github.com/DragonMinded/libdragon
 	branch = trunk
+	ignore = dirty
+	shallow = true
