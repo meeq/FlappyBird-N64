@@ -7,7 +7,7 @@ your favorite obsolete 64-bit home console.
 
 ## Installation
 
-[Download](./FlappyBird-v1.3.z64?raw=true) or compile the ROM file and load it as
+[Download](./FlappyBird-v1.4.z64?raw=true) or compile the ROM file and load it as
 you would any other N64 ROM.
 
 This ROM file has been tested to work on real Nintendo 64 hardware using the
