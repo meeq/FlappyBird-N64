@@ -113,11 +113,11 @@ CFLAGS += -MMD -MP # Generate dependency files during compilation
 CFLAGS += -DN64 -march=vr4300 -mtune=vr4300 -std=gnu99 -Og -ggdb3
 CFLAGS += -Wall -Werror -Wa,--fatal-warnings -fdiagnostics-color=always
 CFLAGS += -falign-functions=32 -ffunction-sections -fdata-sections
-CFLAGS += -I"$(N64_INCLUDE_DIR)" -I"$(LIBDRAGON_DIR)/include"
+CFLAGS += -I"$(LIBDRAGON_DIR)/include" -I"$(N64_INCLUDE_DIR)"
 
 # Linker flags
+LDFLAGS += --library-path="$(LIBDRAGON_DIR)" --library-path="$(N64_LIB_DIR)"
 LDFLAGS += --library=dragon --library=c --library=m --library=dragonsys
-LDFLAGS += --library-path="$(N64_LIB_DIR)" --library-path="$(LIBDRAGON_DIR)"
 LDFLAGS += --script="$(LIBDRAGON_DIR)/n64.ld" --gc-sections
 
 #
