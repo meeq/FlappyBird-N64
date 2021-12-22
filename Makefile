@@ -134,7 +134,9 @@ $(ROM_FILE): $(N64TOOL) $(CHKSUM64)
 	@mkdir -p "$(dir $@)"
 	@echo "    [Z64] $@"
 	@rm -f "$@"
-	$(N64TOOL) -o "$@" --header "$(ROM_HEADER)" --title "$(ROM_TITLE)" \
+	$(N64TOOL) -o "$@" \
+		--header "$(ROM_HEADER)" \
+		--title "$(ROM_TITLE)" \
 		"$(RAW_BINARY)" \
 		--offset 1M "$(DFS_FILE)"
 	$(CHKSUM64) "$@" $(REDIRECT_STDOUT)
