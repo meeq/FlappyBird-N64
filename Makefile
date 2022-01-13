@@ -45,12 +45,15 @@ endif
 endif
 
 # Set N64_INST to skip the really long toolchain build process.
-# This is also useful if you are using the libdragon Docker container.
 ifeq ($(N64_INST),)
 TOOLCHAIN_DIR := ./toolchain
-# Use a guard to cache the toolchain in-project and export it for libdragon
+# Ensure the toolchain directory exists in order to get its full path
+override N64_INST := $(shell \
+	mkdir -p "$(TOOLCHAIN_DIR)" && \
+	realpath "$(TOOLCHAIN_DIR)" \
+)
+# Use a guard to cache the toolchain in-project
 TOOLCHAIN_GUARD := $(TOOLCHAIN_DIR)/.installed
-override N64_INST := $(realpath $(TOOLCHAIN_DIR))
 endif
 
 # Set V=1 to enable verbose Make output
@@ -264,8 +267,8 @@ clean:
 	rm -Rf "$(BUILD_DIR)" "$(ROM_NAME)-dirty.z64"
 .PHONY: clean
 
-distclean:
-	rm -Rf "$(BUILD_DIR)" "$(LIBDRAGON_DIR)" *.z64 .guard-*
+distclean: clean toolchain-clean
+	rm -Rf "$(LIBDRAGON_DIR)" *.z64 .guard-*
 	git restore "$(LIBDRAGON_DIR)" '*.z64'
 .PHONY: distclean
 
