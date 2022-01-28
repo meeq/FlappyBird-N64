@@ -29,15 +29,15 @@ This project is considered "done", and is no longer being actively developed. It
 
 ## Play the game
 
-[Download](./FlappyBird-v1.4.z64?raw=true) or compile the ROM file and load it as you would any other N64 ROM.
+[Download](./FlappyBird-v1.4.z64?raw=true) or [compile](#build-the-rom) the ROM file and load it as you would any other N64 ROM.
 
 This ROM file has been tested to work on real Nintendo 64 hardware using the [EverDrive-64 by krikzz](http://krikzz.com/) and [64drive by retroactive](http://64drive.retroactive.be/).
 
 This ROM file should also be compatible with low-level, accuracy-focused Nintendo 64 emulators such as [Ares](https://ares-emulator.github.io/), [CEN64](https://cen64.com/) and [MAME](http://mamedev.org/).
 
-Due to the usage of [LibDragon](https://dragonminded.com/n64dev/libdragon/), it is an explicit non-goal of this project to suppport emulators. The goal was to make a game for Nintendo 64.
+**Due to the usage of [LibDragon](https://dragonminded.com/n64dev/libdragon/), it is an explicit non-goal of this project to suppport emulators.** The goal was to make a game for Nintendo 64, so tautologically:
 
-> If it works on a real console but not on an emulator, then the emulator is insufficiently accurate.
+> If it works on a real console but not on the emulator, then the emulator is insufficiently accurate.
 
 ## Build the ROM
 
