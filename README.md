@@ -1,24 +1,43 @@
 # Flappy Bird for Nintendo 64
 
-Tap A to flap your wings and fly! The hit iOS game from 2013 is now available for the hottest cartridge-based game console of 1997.
+> Tap A to flap your wings and fly!
+
+The hit iOS game from 2013 is now available for N64! Navigate a bird through a series of gaps and try not to hit the walls. This simple, one-button game is so easy to play that everyone will want a turn to see how far they can go.
 
 ![Screenshots of Flappy Bird menus and gameplay](./Screenshots.png?raw=true)
 
 This project is intended to be a complete example of a simple yet non-trivial game built for Nintendo 64 using the open source [LibDragon SDK](https://dragonminded.com/n64dev/libdragon/).
 
-## Installation
+## Project status
 
-[Download](./FlappyBird-v1.4.z64?raw=true) or [compile the ROM file](#building) and load it as you would any other N64 ROM.
+This project is considered "done", and is no longer being actively developed. Occasionally, there may be maintenance updates to ensure the code remains compatible with upstream changes to LibDragon.
+
+### Features
+
+* A faithful recreation of the original iOS game
+* Hardware-accelerated graphics rendering
+* Hardware-accelerated audio mixing
+* 60FPS gameplay at 320x240 resolution
+* Parallax background scrolling
+* Rumble Pak support
+
+### Known issues
+
+* Bird sprites do not rotate
+* High score is not saved across resets
+* Hardware reset shows an exception handler screen during pre-NMI
+
+## Play the game
+
+[Download](./FlappyBird-v1.4.z64?raw=true) or compile the ROM file and load it as you would any other N64 ROM.
 
 This ROM file has been tested to work on real Nintendo 64 hardware using the [EverDrive-64 by krikzz](http://krikzz.com/) and [64drive by retroactive](http://64drive.retroactive.be/).
 
-This ROM file should also be compatible with low-level, high-accuracy Nintendo 64 emulators such as [Ares](https://ares-emulator.github.io/), [CEN64](https://cen64.com/) and [MAME](http://mamedev.org/).
+This ROM file should also be compatible with low-level, accuracy-focused Nintendo 64 emulators such as [Ares](https://ares-emulator.github.io/), [CEN64](https://cen64.com/) and [MAME](http://mamedev.org/).
 
-Due to the usage of [LibDragon](https://dragonminded.com/n64dev/libdragon/), it is an explicit non-goal of this project to suppport emulators:
+Due to the usage of [LibDragon](https://dragonminded.com/n64dev/libdragon/), it is an explicit non-goal of this project to suppport emulators. The goal was to make a game for Nintendo 64. If it works on a real console but not on an emulator, then the emulator is insufficiently accurate.
 
-> If it works on a real N64 but not on an emulator, the emulator is wrong.
-
-## Building
+## Build the ROM
 
 Run `make` to produce a ROM file from this source tree. The filename of the ROM is derived from the `ROM_VERSION` variable, which will reference the current Git tag or commit hash. If the repository has uncommitted changes, the ROM will be marked `-dirty` (indicating that it is not suitable for release).
 
@@ -28,13 +47,13 @@ If you already have a toolchain, the Makefile will respect your existing `N64_IN
 
 [See the LibDragon toolchain script for information on prerequisites and dependencies.](https://github.com/DragonMinded/libdragon/blob/trunk/tools/build-toolchain.sh)
 
-### Build Options
+### Configuration
 
 The Makefile can be configured using the following environment variables:
 
-* `N64_INST`: Specify where your MIPS toolchain is installed. If unspecified, the toolchain will be built in-project, which may take a while.
-* `V=1`: Enable "verbose" Make output; useful for troubleshooting.
-* `GITMODULES=0`: Disable updating Git submodules when building; useful for experimenting with modifications to and alternate versions of LibDragon.
+* `N64_INST` — Specify where your MIPS toolchain is installed. If unspecified, the toolchain will be built in-project, which may take a while.
+* `V=1` — Enable "verbose" Make output; useful for troubleshooting.
+* `GITMODULES=0` — Disable updating Git submodules when building; useful for experimenting with modifications to and alternate versions of LibDragon.
 
 ## License
 
