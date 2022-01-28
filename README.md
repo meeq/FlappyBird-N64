@@ -1,22 +1,20 @@
 # Flappy Bird for Nintendo 64
 
-> Tap A to flap your wings and fly!
-
-The hit iOS game from 2013 is now available for N64! Navigate a bird through a series of gaps and try not to hit the walls. This simple, one-button game is so easy to play that everyone will want a turn to see how far they can go.
-
 ![Screenshots of Flappy Bird menus and gameplay](./Screenshots.png?raw=true)
+
+Tap A to flap your wings and fly! The hit iOS game from 2013 is now available for N64! Navigate a bird through a series of gaps and try not to hit the walls. This simple, one-button game is so easy to play that everyone will want a turn to see how far they can go.
+
+## Overview
 
 This project is intended to be a complete example of a simple yet non-trivial game built for Nintendo 64 using the open source [LibDragon SDK](https://dragonminded.com/n64dev/libdragon/).
 
-## Project status
-
-This project is considered "done", and is no longer being actively developed. Occasionally, there may be maintenance updates to ensure the code remains compatible with upstream changes to LibDragon.
+This project is considered "done", and is no longer being actively developed. It may receive occasional maintenance updates to ensure the code remains compatible with upstream changes in LibDragon.
 
 ### Features
 
-* A faithful recreation of the original iOS game
-* Hardware-accelerated graphics rendering
-* Hardware-accelerated audio mixing
+* Faithful recreation of the original iOS game
+* N64 RDP-accelerated graphics rendering
+* N64 RSP-accelerated audio mixing
 * 60FPS gameplay at 320x240 resolution
 * Parallax background scrolling
 * Rumble Pak support
@@ -25,7 +23,7 @@ This project is considered "done", and is no longer being actively developed. Oc
 
 * Bird sprites do not rotate
 * High score is not saved across resets
-* Hardware reset shows an exception handler screen during pre-NMI
+* Hardware reset briefly shows an exception handler screen
 
 ## Play the game
 
@@ -39,7 +37,7 @@ Due to the usage of [LibDragon](https://dragonminded.com/n64dev/libdragon/), it 
 
 ## Build the ROM
 
-Run `make` to produce a ROM file from this source tree. The filename of the ROM is derived from the `ROM_VERSION` variable, which will reference the current Git tag or commit hash. If the repository has uncommitted changes, the ROM will be marked `-dirty` (indicating that it is not suitable for release).
+Run `make` to produce a ROM file from this source tree. The filename of the ROM is derived from the `ROM_VERSION` variable, which will reference the current Git tag or commit hash. If the project has uncommitted changes, the ROM will be marked `-dirty` (indicating that it is not suitable for release).
 
 A known-good version of [LibDragon](https://github.com/DragonMinded/libdragon) will be checked-out as a Git submodule and built as part of the Makefile process.
 
