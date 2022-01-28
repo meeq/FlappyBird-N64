@@ -1,8 +1,10 @@
 # Flappy Bird for Nintendo 64
 
+Tap A to flap your wings and fly! The hit iOS game from 2013 is now available on N64!
+
 ![Screenshots of Flappy Bird menus and gameplay](./Screenshots.png?raw=true)
 
-Tap A to flap your wings and fly! The hit iOS game from 2013 is now available for N64! Navigate a bird through a series of gaps and try not to hit the walls. This simple, one-button game is so easy to play that everyone will want a turn to see how far they can go.
+ Navigate a bird through a series of gaps and try not to hit the walls! This simple, one-button game is so easy to play that everyone will want a turn to see how far they can go!
 
 ## Overview
 
@@ -33,7 +35,9 @@ This ROM file has been tested to work on real Nintendo 64 hardware using the [Ev
 
 This ROM file should also be compatible with low-level, accuracy-focused Nintendo 64 emulators such as [Ares](https://ares-emulator.github.io/), [CEN64](https://cen64.com/) and [MAME](http://mamedev.org/).
 
-Due to the usage of [LibDragon](https://dragonminded.com/n64dev/libdragon/), it is an explicit non-goal of this project to suppport emulators. The goal was to make a game for Nintendo 64. If it works on a real console but not on an emulator, then the emulator is insufficiently accurate.
+Due to the usage of [LibDragon](https://dragonminded.com/n64dev/libdragon/), it is an explicit non-goal of this project to suppport emulators. The goal was to make a game for Nintendo 64.
+
+> If it works on a real console but not on an emulator, then the emulator is insufficiently accurate.
 
 ## Build the ROM
 
