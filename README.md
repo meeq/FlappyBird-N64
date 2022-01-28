@@ -8,31 +8,33 @@ This project is intended to be a complete example of a simple yet non-trivial ga
 
 ## Installation
 
-[Download](./FlappyBird-v1.4.z64?raw=true) or compile the ROM file and load it as you would any other N64 ROM.
+[Download](./FlappyBird-v1.4.z64?raw=true) or [compile the ROM file](#building) and load it as you would any other N64 ROM.
 
 This ROM file has been tested to work on real Nintendo 64 hardware using the [EverDrive-64 by krikzz](http://krikzz.com/) and [64drive by retroactive](http://64drive.retroactive.be/).
 
-This ROM file is also compatible with low-level, high-accuracy Nintendo 64 emulators such as [Ares](https://ares-emulator.github.io/), [CEN64](https://cen64.com/) and [MAME](http://mamedev.org/).
+This ROM file should also be compatible with low-level, high-accuracy Nintendo 64 emulators such as [Ares](https://ares-emulator.github.io/), [CEN64](https://cen64.com/) and [MAME](http://mamedev.org/).
 
-Due to the usage of [LibDragon](https://dragonminded.com/n64dev/libdragon/), it is an explicit non-goal of this project to suppport emulators that only implement the proprietary SDK used by official licensed Nintendo software: "If it works on a real N64 but not on an emulator, the emulator is wrong."
+Due to the usage of [LibDragon](https://dragonminded.com/n64dev/libdragon/), it is an explicit non-goal of this project to suppport emulators:
+
+> If it works on a real N64 but not on an emulator, the emulator is wrong.
 
 ## Building
 
-Run `make` to produce the `FlappyBird.z64` ROM file from this source tree.
+Run `make` to produce a ROM file from this source tree. The filename of the ROM is derived from the `ROM_VERSION` variable, which will reference the current Git tag or commit hash. If the repository has uncommitted changes, the ROM will be marked `-dirty` (indicating that it is not suitable for release).
 
-A known-good version of [LibDragon](https://github.com/DragonMinded/libdragon) will be checked-out and built as part of the Makefile process.
+A known-good version of [LibDragon](https://github.com/DragonMinded/libdragon) will be checked-out as a Git submodule and built as part of the Makefile process.
 
 If you already have a toolchain, the Makefile will respect your existing `N64_INST` environment variable. Otherwise, the toolchain will be built as part of the project.
 
-See the [LibDragon toolchain script](https://github.com/DragonMinded/libdragon/blob/trunk/tools/build-toolchain.sh) for information on prerequisites and dependencies.
+[See the LibDragon toolchain script for information on prerequisites and dependencies.](https://github.com/DragonMinded/libdragon/blob/trunk/tools/build-toolchain.sh)
 
 ### Build Options
 
-The Makefile will respect these environment variables, with specific effects:
+The Makefile can be configured using the following environment variables:
 
 * `N64_INST`: Specify where your MIPS toolchain is installed. If unspecified, the toolchain will be built in-project, which may take a while.
-* `GITMODULES`: Set to `GITMODULES=0` to disable fetching a known-good commit of LibDragon, useful for experimenting with modifications and alternate versions of LibDragon.
-* `V`: Set to `V=1` to enable "verbose" Make output, useful for troubleshooting.
+* `V=1`: Enable "verbose" Make output; useful for troubleshooting.
+* `GITMODULES=0`: Disable updating Git submodules when building; useful for experimenting with modifications to and alternate versions of LibDragon.
 
 ## License
 
