@@ -1,10 +1,10 @@
 /**
  * FlappyBird-N64 - bird.c
  *
- * Copyright 2021, Christopher Bonhage
+ * Copyright 2017-2022, Christopher Bonhage
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
+ * LICENSE.txt file in the root directory of this source tree.
  */
 
 #include <stdlib.h>
@@ -30,22 +30,22 @@
 #define BIRD_DYING_FRAME    ((int) 3)
 
 /* Center point */
-#define BIRD_TITLE_X        ((double) 0.5)
-#define BIRD_PLAY_X         ((double) 0.35)
-#define BIRD_ACCEL_X        ((double) 0.001)
-#define BIRD_MIN_Y          ((double) -0.90)
-#define BIRD_MAX_Y          ((double) 0.95)
+#define BIRD_TITLE_X        ((float) 0.5)
+#define BIRD_PLAY_X         ((float) 0.35)
+#define BIRD_ACCEL_X        ((float) 0.001)
+#define BIRD_MIN_Y          ((float) -0.90)
+#define BIRD_MAX_Y          ((float) 0.95)
 
 /* Flap */
 #define BIRD_VELOCITY_RATE  ((int) 16)
-#define BIRD_FLAP_VELOCITY  ((double) 0.0270)
-#define BIRD_GRAVITY_ACCEL  ((double) 0.0013)
+#define BIRD_FLAP_VELOCITY  ((float) 0.0270)
+#define BIRD_GRAVITY_ACCEL  ((float) 0.0013)
 
 /* Sine "floating" effect */
 #define BIRD_SINE_RATE      ((int) 20)
-#define BIRD_SINE_INCREMENT ((double) 0.1)
-#define BIRD_SINE_CYCLE     ((double) (M_PI * 2.0))
-#define BIRD_SINE_DAMPEN    ((double) 0.02)
+#define BIRD_SINE_INCREMENT ((float) 0.1)
+#define BIRD_SINE_CYCLE     ((float) (M_PI * 2.0))
+#define BIRD_SINE_DAMPEN    ((float) 0.02)
 
 /* Bird implementation */
 

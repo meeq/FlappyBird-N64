@@ -1,10 +1,10 @@
 /**
  * FlappyBird-N64 - bird.h
  *
- * Copyright 2021, Christopher Bonhage
+ * Copyright 2017-2022, Christopher Bonhage
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
+ * LICENSE.txt file in the root directory of this source tree.
  */
 
 #ifndef __FLAPPY_BIRD_H
@@ -28,7 +28,8 @@ typedef enum
     BIRD_COLOR_YELLOW,
     BIRD_COLOR_RED,
     BIRD_COLOR_BLUE,
-    BIRD_NUM_COLORS
+    // Additional colors go above this line
+    BIRD_NUM_COLORS // Not a color; just a count
 } bird_color_t;
 
 typedef struct bird_s

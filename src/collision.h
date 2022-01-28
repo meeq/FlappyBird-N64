@@ -1,10 +1,10 @@
 /**
  * FlappyBird-N64 - collision.h
  *
- * Copyright 2021, Christopher Bonhage
+ * Copyright 2017-2022, Christopher Bonhage
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
+ * LICENSE.txt file in the root directory of this source tree.
  */
 
 #ifndef __FLAPPY_COLLISION_H

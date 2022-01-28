@@ -1,10 +1,10 @@
 /**
  * FlappyBird-N64 - background.h
  *
- * Copyright 2021, Christopher Bonhage
+ * Copyright 2017-2022, Christopher Bonhage
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
+ * LICENSE.txt file in the root directory of this source tree.
  */
 
 #ifndef __FLAPPY_BACKGROUND_H
@@ -12,26 +12,18 @@
 
 #include "system.h"
 
-/* Background definitions */
+/* Background constants */
 
-#define BG_SKY_FILL_Y           ((int) 0)
-#define BG_SKY_FILL_H           ((int) 141)
-#define BG_CLOUD_TOP_Y          ((int) 130)
-#define BG_CLOUD_FILL_Y         ((int) 141)
-#define BG_CLOUD_FILL_H         ((int) 32)
-#define BG_CITY_TOP_Y           ((int) 155)
-#define BG_HILL_TOP_Y           ((int) 170)
-#define BG_HILL_FILL_Y          ((int) 179)
-#define BG_HILL_FILL_H          ((int) 11)
 #define BG_GROUND_TOP_Y         ((int) 190)
-#define BG_GROUND_FILL_Y        ((int) 200)
-#define BG_GROUND_FILL_H        ((int) 40)
+
+/* Background types */
 
 typedef enum
 {
     BG_DAY_TIME,
     BG_NIGHT_TIME,
-    BG_NUM_TIME_MODES
+    // Additional modes go above this line
+    BG_NUM_TIME_MODES // Not a mode; just a count
 } bg_time_mode_t;
 
 typedef struct background_s background_t;

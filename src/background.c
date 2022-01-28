@@ -1,10 +1,10 @@
 /**
  * FlappyBird-N64 - background.c
  *
- * Copyright 2021, Christopher Bonhage
+ * Copyright 2017-2022, Christopher Bonhage
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
+ * LICENSE.txt file in the root directory of this source tree.
  */
 
 #include <stdlib.h>
@@ -13,14 +13,27 @@
 
 #include "gfx.h"
 
-/* Background definitions */
+/* Background constants */
 
 #define BG_SCROLL_RATE          ((int) 16)
 
-#define BG_SKY_SCROLL_DX        ((double) -0.008)
-#define BG_CITY_SCROLL_DX       ((double) -0.04)
-#define BG_HILL_SCROLL_DX       ((double) -0.2)
-#define BG_GROUND_SCROLL_DX     ((double) -1.0)
+#define BG_SKY_SCROLL_DX        ((float) -0.008)
+#define BG_CITY_SCROLL_DX       ((float) -0.04)
+#define BG_HILL_SCROLL_DX       ((float) -0.2)
+#define BG_GROUND_SCROLL_DX     ((float) -1.0)
+
+#define BG_SKY_FILL_Y           ((int) 0)
+#define BG_SKY_FILL_H           ((int) 141)
+#define BG_CLOUD_TOP_Y          ((int) 130)
+#define BG_CLOUD_FILL_Y         ((int) 141)
+#define BG_CLOUD_FILL_H         ((int) 32)
+#define BG_CITY_TOP_Y           ((int) 155)
+#define BG_HILL_TOP_Y           ((int) 170)
+#define BG_HILL_FILL_Y          ((int) 179)
+#define BG_HILL_FILL_H          ((int) 11)
+//      BG_GROUND_TOP_Y         (defined in background.h)
+#define BG_GROUND_FILL_Y        ((int) 200)
+#define BG_GROUND_FILL_H        ((int) 40)
 
 #define BG_COLOR_DAY_SKY        graphics_make_color( 0x4E, 0xC0, 0xCA, 0xFF )
 #define BG_COLOR_NIGHT_SKY      graphics_make_color( 0x00, 0x87, 0x93, 0xFF )
@@ -29,6 +42,8 @@
 #define BG_COLOR_DAY_HILL       graphics_make_color( 0x52, 0xE0, 0x5D, 0xFF )
 #define BG_COLOR_NIGHT_HILL     graphics_make_color( 0x14, 0x96, 0x02, 0xFF )
 #define BG_COLOR_GROUND         graphics_make_color( 0xDF, 0xD8, 0x93, 0xFF )
+
+/* Background types */
 
 typedef enum
 {
@@ -57,9 +72,9 @@ typedef struct bg_fill_sprite_s
 {
     bg_sprite_index_t sprite;
     int y;
-    double scroll_x;
+    float scroll_x;
     int scroll_w;
-    double scroll_dx;
+    float scroll_dx;
 } bg_fill_sprite_t;
 
 typedef struct background_s
@@ -179,7 +194,7 @@ void background_free(background_t * bg)
 
 inline void background_tick_scroll(bg_fill_sprite_t * fill)
 {
-    double x = fill->scroll_x;
+    float x = fill->scroll_x;
     const int w = fill->scroll_w;
     x += fill->scroll_dx;
     while ( x > w ) x -= w;

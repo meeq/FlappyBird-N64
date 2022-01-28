@@ -1,10 +1,10 @@
 /**
  * FlappyBird-N64 - fps.c
  *
- * Copyright 2021, Christopher Bonhage
+ * Copyright 2017-2022, Christopher Bonhage
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
+ * LICENSE.txt file in the root directory of this source tree.
  */
 
 #include "fps.h"
@@ -16,7 +16,7 @@
 #define FPS_MAX             ((unsigned int) (60))
 #define FPS_FRAME_TICKS     ((unsigned int) ((1000.0 / FPS_MAX) * TICKS_PER_MS))
 #define FPS_STAT_TICKS      ((unsigned int) (500 * TICKS_PER_MS))
-#define FPS_STATS_PER_SEC   ((double) (FPS_STAT_TICKS / TICKS_PER_MS) / 1000.0)
+#define FPS_STATS_PER_SEC   ((float) (FPS_STAT_TICKS / TICKS_PER_MS) / 1000.0)
 #define FPS_NUM_HISTORY     ((size_t) 10)
 #define FPS_TEXT_LEN        ((size_t) 48)
 
@@ -32,8 +32,8 @@ typedef struct fps_counter_s
     ticks_t stat_ticks;
     int frames_per_stat;
     int stat_count;
-    double stat_fps[FPS_NUM_HISTORY];
-    double average_fps;
+    float stat_fps[FPS_NUM_HISTORY];
+    float average_fps;
 } fps_counter_t;
 
 /* FPS implementation */
@@ -68,14 +68,14 @@ void fps_tick(const gamepad_state_t * const gamepad)
     const ticks_t stat_diff = now_ticks - fps.stat_ticks;
     if ( stat_diff >= FPS_STAT_TICKS )
     {
-        double stat_fps = fps.frames_per_stat / FPS_STATS_PER_SEC;
+        float stat_fps = fps.frames_per_stat / FPS_STATS_PER_SEC;
         fps.stat_fps[fps.stat_count % FPS_NUM_HISTORY] = stat_fps;
         if ( fps.stat_count < FPS_NUM_HISTORY )
         {
             fps.stat_count++;
         }
 
-        double total_fps = 0.0;
+        float total_fps = 0.0;
         for (int i = 0; i < FPS_NUM_HISTORY; i++)
         {
             total_fps += fps.stat_fps[i];

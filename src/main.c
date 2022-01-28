@@ -1,10 +1,10 @@
 /**
  * FlappyBird-N64 - main.c
  *
- * Copyright 2021, Christopher Bonhage
+ * Copyright 2017-2022, Christopher Bonhage
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
+ * LICENSE.txt file in the root directory of this source tree.
  */
 
 #include "system.h"
@@ -20,15 +20,6 @@
 
 int main(void)
 {
-    /**
-     * init_interrupts has been deprecated as of October 13, 2021
-     * @see https://github.com/DragonMinded/libdragon/pull/195
-     */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    init_interrupts();
-#pragma GCC diagnostic pop
-
     /* Initialize libdragon subsystems */
     timer_init();
     dfs_init( DFS_DEFAULT_LOCATION );

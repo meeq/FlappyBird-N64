@@ -1,10 +1,10 @@
 /**
  * FlappyBird-N64 - pipes.c
  *
- * Copyright 2021, Christopher Bonhage
+ * Copyright 2017-2022, Christopher Bonhage
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
+ * LICENSE.txt file in the root directory of this source tree.
  */
 
 #include <stdlib.h>
@@ -19,7 +19,7 @@
 /* Pipes definitions */
 
 #define PIPES_SCROLL_RATE   ((int) 16)
-#define PIPES_SCROLL_DX     ((double) -0.00312)
+#define PIPES_SCROLL_DX     ((float) -0.00312)
 
 #define PIPE_TUBE_WIDTH     ((int) 26)
 #define PIPE_CAP_HEIGHT     ((int) 13)

@@ -41,7 +41,15 @@ This ROM file should also be compatible with low-level, accuracy-focused Nintend
 
 ## Build the ROM
 
-Run `make` to produce a ROM file from this source tree. The filename of the ROM is derived from the `ROM_VERSION` variable, which will reference the current Git tag or commit hash. If the project has uncommitted changes, the ROM will be marked `-dirty` (indicating that it is not suitable for release).
+Run `make` to produce a ROM file from this source tree.
+
+### Versioning
+
+The filename of the ROM will be derived from the current "ROM version". If the project repository is "clean", it will reference the current Git tag or commit hash. If the project has uncommitted changes, the version will be marked `-dirty` (indicating that it is unsuitable for release).
+
+Proper releases will be tagged as `vX.Y` where X is a major version number and Y is a minor version number.
+
+### Dependencies
 
 A known-good version of [LibDragon](https://github.com/DragonMinded/libdragon) will be checked-out as a Git submodule and built as part of the Makefile process.
 
