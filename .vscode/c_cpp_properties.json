@@ -1,0 +1,29 @@
+{
+    "version": 4,
+    "env": {
+        // ${env:N64_INST} does not work for unknown reasons.
+        // This setting will only work if the toolchain is built in-project.
+        // Feel free to change this to your N64_INST toolchain directory.
+        "N64_INST": "${workspaceFolder}/toolchain"
+    },
+    "configurations": [
+        {
+            "name": "N64-LibDragon",
+            "defines": ["N64=1"],
+            "includePath": [
+                "${workspaceFolder}/libdragon/include",
+                "${N64_INST}/mips64-elf/include"
+            ],
+            "compilerPath": "${N64_INST}/bin/mips64-elf-gcc",
+            "compilerArgs": [
+                "-march=vr4300",
+                "-mtune=vr4300",
+                "-Wall",
+                "-Werror"
+            ],
+            "cStandard": "gnu99",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "gcc-arm"
+        }
+    ]
+}

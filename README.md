@@ -23,9 +23,15 @@ This project is considered "done", and is no longer being actively developed. It
 
 ### Known issues
 
-* Bird sprites do not rotate
 * High score is not saved across resets
 * Hardware reset briefly shows an exception handler screen
+
+### Intentional omissions
+
+* Bird sprite does not rotate
+* Night sky is missing stars
+* Medals do not sparkle
+* Screen does not shake upon death
 
 ## Play the game
 
@@ -37,17 +43,11 @@ This ROM file should also be compatible with low-level, accuracy-focused Nintend
 
 **Due to the usage of [LibDragon](https://dragonminded.com/n64dev/libdragon/), it is an explicit non-goal of this project to suppport emulators.** The goal was to make a game for Nintendo 64, so tautologically:
 
-> If it works on a real console but not on the emulator, then the emulator is insufficiently accurate.
+> If it works on the real console but not on the emulator, then the emulator is insufficiently accurate.
 
 ## Build the ROM
 
 Run `make` to produce a ROM file from this source tree.
-
-### Versioning
-
-The filename of the ROM will be derived from the current "ROM version". If the project repository is "clean", it will reference the current Git tag or commit hash. If the project has uncommitted changes, the version will be marked `-dirty` (indicating that it is unsuitable for release).
-
-Proper releases will be tagged as `vX.Y` where X is a major version number and Y is a minor version number.
 
 ### Dependencies
 
@@ -64,6 +64,12 @@ The Makefile can be configured using the following environment variables:
 * `N64_INST` — Specify where your MIPS toolchain is installed. If unspecified, the toolchain will be built in-project, which may take a while.
 * `V=1` — Enable "verbose" Make output; useful for troubleshooting.
 * `GITMODULES=0` — Disable updating Git submodules when building; useful for experimenting with modifications to and alternate versions of LibDragon.
+
+### Versioning
+
+The filename of the ROM will be derived from the current "ROM version". If the project repository is "clean", it will reference the current Git tag or commit hash. If the project has uncommitted changes, the version will be marked `-dirty` (indicating that it is unsuitable for release).
+
+Proper releases will be tagged as `vX.Y` where X is a major version number and Y is a minor version number.
 
 ## License
 

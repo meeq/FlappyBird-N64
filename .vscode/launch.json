@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "type": "by-gdb",
+            "request": "launch",
+            "name": "Attach to N64 debugger on port 8080",
+            "program": "${workspaceRoot}/build/FlappyBird.elf",
+            "cwd": "${workspaceRoot}",
+            "debuggerPath": "gdb-multiarch",
+            "remote": {
+                "enabled": true,
+                "address": ":8080",
+                "mode": "remote",
+                "execfile": "build/FlappyBird.elf"
+            },
+            "commandsBeforeExec": ["set arch mips:4300"]
+        }
+    ]
+}
