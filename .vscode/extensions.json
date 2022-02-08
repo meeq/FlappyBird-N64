@@ -1,6 +1,7 @@
 {
     "recommendations": [
         "EditorConfig.EditorConfig",
-        "coolchyni.beyond-debug"
+        "coolchyni.beyond-debug",
+        "ZixuanWang.linkerscript"
     ]
 }
