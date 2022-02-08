@@ -14,7 +14,7 @@
 
 typedef enum
 {
-    SFX_DIE = 0,
+    SFX_DIE,
     SFX_HIT,
     SFX_POINT,
     SFX_SWOOSH,

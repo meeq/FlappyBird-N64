@@ -56,8 +56,7 @@ extern gfx_t *gfx;
 
 void gfx_init(
     resolution_t res, bitdepth_t bit, buffer_mode_t num_buffers,
-    gamma_t gamma, antialias_t aa
-);
+    gamma_t gamma, antialias_t aa);
 
 void gfx_close(void);
 
@@ -70,6 +69,6 @@ void gfx_detach_rdp(void);
 void gfx_rdp_color_fill(void);
 void gfx_rdp_texture_fill(void);
 
-sprite_t * read_dfs_sprite(const char * file);
+sprite_t *read_dfs_sprite(const char *file);
 
 #endif

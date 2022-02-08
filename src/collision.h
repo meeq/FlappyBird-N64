@@ -13,6 +13,6 @@
 typedef struct bird_s bird_t;
 typedef struct pipes_s pipes_t;
 
-void collision_tick(bird_t * bird, pipes_t * pipes);
+void collision_tick(bird_t *bird, pipes_t *pipes);
 
 #endif

@@ -20,8 +20,8 @@
 #define FPS_NUM_HISTORY     ((size_t) 10)
 #define FPS_TEXT_LEN        ((size_t) 48)
 
-#define FPS_TEXT_COLOR      graphics_make_color( 0x00, 0x00, 0x00, 0xFF )
-#define FPS_CLEAR_COLOR     graphics_make_color( 0x00, 0x00, 0x00, 0x00 )
+#define FPS_TEXT_COLOR      graphics_make_color(0x00, 0x00, 0x00, 0xFF)
+#define FPS_CLEAR_COLOR     graphics_make_color(0x00, 0x00, 0x00, 0x00)
 
 typedef struct fps_counter_s
 {
@@ -38,17 +38,17 @@ typedef struct fps_counter_s
 
 /* FPS implementation */
 
-static fps_counter_t fps = { 0 };
+static fps_counter_t fps = {0};
 
 void fps_init(void)
 {
     memset(&fps, 0, sizeof fps);
 }
 
-void fps_tick(const gamepad_state_t * const gamepad)
+void fps_tick(const gamepad_state_t *const gamepad)
 {
     /* Toggle drawing flag on C-up */
-    if ( gamepad->C_up )
+    if (gamepad->C_up)
     {
         fps.should_draw = !fps.should_draw;
     }
@@ -60,17 +60,17 @@ void fps_tick(const gamepad_state_t * const gamepad)
     /* Check timing */
     const ticks_t now_ticks = timer_ticks();
     const ticks_t frame_diff = now_ticks - fps.frame_ticks;
-    if ( fps.total_frames > 1 && frame_diff > FPS_FRAME_TICKS )
+    if (fps.total_frames > 1 && frame_diff > FPS_FRAME_TICKS)
     {
         int frame_period_diff = frame_diff - FPS_FRAME_TICKS;
         fps.total_misses += frame_period_diff / FPS_FRAME_TICKS;
     }
     const ticks_t stat_diff = now_ticks - fps.stat_ticks;
-    if ( stat_diff >= FPS_STAT_TICKS )
+    if (stat_diff >= FPS_STAT_TICKS)
     {
         float stat_fps = fps.frames_per_stat / FPS_STATS_PER_SEC;
         fps.stat_fps[fps.stat_count % FPS_NUM_HISTORY] = stat_fps;
-        if ( fps.stat_count < FPS_NUM_HISTORY )
+        if (fps.stat_count < FPS_NUM_HISTORY)
         {
             fps.stat_count++;
         }
@@ -92,20 +92,20 @@ void fps_tick(const gamepad_state_t * const gamepad)
 
 void fps_draw(void)
 {
-    if ( !fps.should_draw ) return;
+    if (!fps.should_draw) return;
 
     gfx_detach_rdp();
 
     static char fps_text[FPS_TEXT_LEN];
     const ticks_t ticks = timer_ticks();
 
-    graphics_set_color( FPS_TEXT_COLOR, FPS_CLEAR_COLOR );
+    graphics_set_color(FPS_TEXT_COLOR, FPS_CLEAR_COLOR);
 
-    const char * const line1_fmt = "FPS: %05.2f, Frame: %u, Miss: %u";
-    snprintf( fps_text, FPS_TEXT_LEN, line1_fmt, fps.average_fps, fps.total_frames, fps.total_misses );
-    graphics_draw_text( gfx->disp, 10, gfx->height - 33, fps_text );
+    const char *const line1_fmt = "FPS: %05.2f, Frame: %u, Miss: %u";
+    snprintf(fps_text, FPS_TEXT_LEN, line1_fmt, fps.average_fps, fps.total_frames, fps.total_misses);
+    graphics_draw_text(gfx->disp, 10, gfx->height - 33, fps_text);
 
-    const char * const line2_fmt = "Milli: %llu, Tick: %llu";
-    snprintf( fps_text, FPS_TEXT_LEN, line2_fmt, ticks / TICKS_PER_MS, ticks );
-    graphics_draw_text( gfx->disp, 10, gfx->height - 20, fps_text );
+    const char *const line2_fmt = "Milli: %llu, Tick: %llu";
+    snprintf(fps_text, FPS_TEXT_LEN, line2_fmt, ticks / TICKS_PER_MS, ticks);
+    graphics_draw_text(gfx->disp, 10, gfx->height - 20, fps_text);
 }

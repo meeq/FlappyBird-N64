@@ -20,7 +20,7 @@ typedef enum
     BIRD_STATE_PLAY,
     BIRD_STATE_DYING,
     BIRD_STATE_DEAD,
-    BIRD_STATE_TITLE
+    BIRD_STATE_TITLE,
 } bird_state_t;
 
 typedef enum
@@ -29,12 +29,12 @@ typedef enum
     BIRD_COLOR_RED,
     BIRD_COLOR_BLUE,
     // Additional colors go above this line
-    BIRD_NUM_COLORS // Not a color; just a count
+    BIRD_COLORS_COUNT, // Not a color; just a count
 } bird_color_t;
 
 typedef struct bird_s
 {
-    sprite_t * sprite;
+    sprite_t *sprite;
     int slice_w;
     int slice_h;
     bird_state_t state;
@@ -61,14 +61,14 @@ typedef struct bird_s
 
 /* Bird functions */
 
-bird_t * bird_init(bird_color_t color_type);
+bird_t *bird_init(bird_color_t color_type);
 
-void bird_free(bird_t * bird);
+void bird_free(bird_t *bird);
 
-void bird_draw(const bird_t * bird);
+void bird_draw(const bird_t *bird);
 
-void bird_hit(bird_t * bird);
+void bird_hit(bird_t *bird);
 
-void bird_tick(bird_t * bird, const gamepad_state_t * gamepad);
+void bird_tick(bird_t *bird, const gamepad_state_t *gamepad);
 
 #endif

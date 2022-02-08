@@ -12,43 +12,43 @@
 
 #include "system.h"
 
-#define PIPES_MAX_NUM   5
+#define PIPES_MAX_COUNT 5
 
 typedef enum
 {
     PIPE_COLOR_GREEN,
     PIPE_COLOR_RED,
     // Additional colors go above this line
-    PIPE_NUM_COLORS // Not a color; just a count
-} pipe_colors_t;
+    PIPE_COLORS_COUNT // Not a color; just a count
+} pipe_color_t;
 
 typedef struct pipe_s
 {
     float x;
-    float y; /* Min: -1.0   Max: 1.0 */
+    float y; /* (-1.0, +1.0) */
     bool has_scored;
 } pipe_t;
 
 typedef struct pipes_s
 {
-    pipe_colors_t color;
+    pipe_color_t color;
     int64_t reset_ms;
     int64_t scroll_ms;
-    sprite_t * cap_sprite;
-    sprite_t * tube_sprite;
-    pipe_t n[PIPES_MAX_NUM];
+    sprite_t *cap_sprite;
+    sprite_t *tube_sprite;
+    pipe_t n[PIPES_MAX_COUNT];
 } pipes_t;
 
 /* Pipes functions */
 
-pipes_t * pipes_init(void);
+pipes_t *pipes_init(void);
 
-void pipes_free(pipes_t * pipes);
+void pipes_free(pipes_t *pipes);
 
-void pipes_reset(pipes_t * pipes);
+void pipes_reset(pipes_t *pipes);
 
-void pipes_tick(pipes_t * pipes);
+void pipes_tick(pipes_t *pipes);
 
-void pipes_draw(const pipes_t * pipes);
+void pipes_draw(const pipes_t *pipes);
 
 #endif

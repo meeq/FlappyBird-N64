@@ -12,12 +12,12 @@
 bool is_rumble_present(void)
 {
     const int controllers = get_controllers_present();
-    if ( controllers & CONTROLLER_1_INSERTED )
+    if (controllers & CONTROLLER_1_INSERTED)
     {
-        const int accessories = get_accessories_present( NULL );
-        if ( accessories & CONTROLLER_1_INSERTED )
+        const int accessories = get_accessories_present(NULL);
+        if (accessories & CONTROLLER_1_INSERTED)
         {
-            return identify_accessory( CONTROLLER_1 ) == ACCESSORY_RUMBLEPAK;
+            return identify_accessory(CONTROLLER_1) == ACCESSORY_RUMBLEPAK;
         }
     }
     return false;
