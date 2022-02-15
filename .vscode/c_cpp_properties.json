@@ -4,6 +4,7 @@
         // ${env:N64_INST} does not work for unknown reasons.
         // This setting will only work if the toolchain is built in-project.
         // Feel free to change this to your N64_INST toolchain directory.
+        // Alternatively, symlink your N64_INST directory to ./toolchain
         "N64_INST": "${workspaceFolder}/toolchain"
     },
     "configurations": [

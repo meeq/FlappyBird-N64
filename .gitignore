@@ -3,6 +3,7 @@
 .directory
 
 # Compiler toolchain
+/toolchain
 /toolchain/
 
 # Compilation artifacts
