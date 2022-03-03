@@ -18,6 +18,8 @@
 
 #include <libdragon.h>
 
+#include "joypad.h"
+
 typedef uint32_t color32_t;
 typedef int64_t ticks_t;
 
@@ -27,12 +29,5 @@ static inline ticks_t get_total_ms(void)
 {
     return (timer_ticks() / TICKS_PER_MS);
 }
-
-#define CONTROLLER_1 0
-
-typedef struct SI_condat gamepad_state_t;
-typedef struct controller_data controllers_state_t;
-
-bool is_rumble_present(void);
 
 #endif

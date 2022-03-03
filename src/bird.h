@@ -69,6 +69,6 @@ void bird_draw(const bird_t *bird);
 
 void bird_hit(bird_t *bird);
 
-void bird_tick(bird_t *bird, const gamepad_state_t *gamepad);
+void bird_tick(bird_t *bird, const joypad_inputs_t *gamepad);
 
 #endif

@@ -40,7 +40,7 @@ void background_set_time_mode(background_t *bg, bg_time_mode_t time_mode);
 
 void background_randomize_time_mode(background_t *bg);
 
-void background_tick(background_t *bg, const gamepad_state_t *gamepad);
+void background_tick(background_t *bg, const joypad_inputs_t *gamepad);
 
 void background_draw(const background_t *bg);
 

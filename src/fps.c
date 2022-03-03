@@ -45,10 +45,10 @@ void fps_init(void)
     memset(&fps, 0, sizeof fps);
 }
 
-void fps_tick(const gamepad_state_t *const gamepad)
+void fps_tick(const joypad_inputs_t *const gamepad)
 {
     /* Toggle drawing flag on C-up */
-    if (gamepad->C_up)
+    if (gamepad->c_up)
     {
         fps.should_draw = !fps.should_draw;
     }
