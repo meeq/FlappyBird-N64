@@ -119,11 +119,8 @@ void bird_hit(bird_t *bird)
 {
     bird->hit_ms = get_total_ms();
     sfx_play(SFX_HIT);
-    if (joypad_is_rumble_supported(JOYPAD_PORT_1))
-    {
-        joypad_set_rumble_state(JOYPAD_PORT_1, true);
-        bird->is_rumbling = true;
-    }
+    joypad_set_rumble_active(JOYPAD_PORT_1, true);
+    bird->is_rumbling = true;
 }
 
 inline static void bird_tick_animation(bird_t *bird)
@@ -303,7 +300,7 @@ void bird_tick(bird_t *bird, const joypad_inputs_t *const gamepad)
     /* Stop rumbling after hitting a pipe/the ground */
     if (bird->is_rumbling && ticks_ms - bird->hit_ms >= BIRD_RUMBLE_MS)
     {
-        joypad_set_rumble_state(JOYPAD_PORT_1, false);
+        joypad_set_rumble_active(JOYPAD_PORT_1, false);
         bird->is_rumbling = false;
     }
     /* Progress the flapping/falling animation */

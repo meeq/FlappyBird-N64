@@ -42,7 +42,7 @@ int main(void)
     while (1)
     {
         /* Update controller state */
-        joypad_poll();
+        joypad_scan();
         joypad_inputs_t gamepad = joypad_pressed(JOYPAD_PORT_1);
 
         /* Calculate frame timing */
