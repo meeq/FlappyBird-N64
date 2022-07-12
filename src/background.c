@@ -185,7 +185,7 @@ void background_set_time_mode(background_t *bg, bg_time_mode_t time_mode)
     }
 }
 
-inline static bg_time_mode_t background_random_time_mode(void)
+static bg_time_mode_t background_random_time_mode(void)
 {
     return ((float)rand() / (float)RAND_MAX) * BG_TIME_MODES_COUNT;
 }
@@ -206,7 +206,7 @@ void background_free(background_t *bg)
     free(bg);
 }
 
-inline void background_tick_scroll(bg_fill_sprite_t *fill)
+void background_tick_scroll(bg_fill_sprite_t *fill)
 {
     float x = fill->scroll_x;
     const int w = fill->scroll_w;
@@ -235,7 +235,7 @@ void background_tick(background_t *bg, const gamepad_state_t *gamepad)
     }
 }
 
-inline static void background_draw_color(const bg_fill_color_t *const fill)
+static void background_draw_color(const bg_fill_color_t *const fill)
 {
     gfx_rdp_color_fill();
     rdp_set_primitive_color(fill->color);

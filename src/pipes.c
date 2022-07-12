@@ -51,17 +51,17 @@ void pipes_free(pipes_t *pipes)
     free(pipes);
 }
 
-inline static pipe_color_t pipes_random_color(void)
+static pipe_color_t pipes_random_color(void)
 {
     return ((float)rand() / (float)RAND_MAX) * PIPE_COLORS_COUNT;
 }
 
-inline static size_t pipe_prev_index(size_t current_index)
+static size_t pipe_prev_index(size_t current_index)
 {
     return (current_index > 0) ? current_index - 1 : PIPES_MAX_COUNT - 1;
 }
 
-inline static float pipe_random_y(void)
+static float pipe_random_y(void)
 {
     float y = ((float)rand() / (float)RAND_MAX) * PIPE_MAX_Y;
     if (roundf((float)rand() / (float)RAND_MAX))
@@ -69,7 +69,7 @@ inline static float pipe_random_y(void)
     return y;
 }
 
-inline static float pipe_random_bias_y(float prev_y)
+static float pipe_random_bias_y(float prev_y)
 {
     float bias_y = ((float)rand() / (float)RAND_MAX) * PIPE_MAX_BIAS_Y;
     if (roundf((float)rand() / (float)RAND_MAX))

@@ -120,7 +120,7 @@ typedef struct ui_s
 
 /* UI implementation */
 
-inline static void ui_set_time_mode(ui_t *ui, bg_time_mode_t time_mode)
+static void ui_set_time_mode(ui_t *ui, bg_time_mode_t time_mode)
 {
     ui->time_mode = time_mode;
     if (time_mode == BG_TIME_DAY)
@@ -162,7 +162,7 @@ void ui_free(ui_t *ui)
     free(ui);
 }
 
-inline static void ui_bird_tick(ui_t *ui, const bird_t *bird)
+static void ui_bird_tick(ui_t *ui, const bird_t *bird)
 {
     /* Synchronize bird state to UI */
     ui->state = bird->state;
@@ -189,7 +189,7 @@ inline static void ui_bird_tick(ui_t *ui, const bird_t *bird)
     }
 }
 
-inline static void ui_flash_tick(ui_t *ui)
+static void ui_flash_tick(ui_t *ui)
 {
     const ticks_t ticks_ms = get_total_ms();
     /* Flash the screen for a split second after the bird dies */
@@ -212,7 +212,7 @@ inline static void ui_flash_tick(ui_t *ui)
     }
 }
 
-inline static void ui_gameover_tick(ui_t *ui)
+static void ui_gameover_tick(ui_t *ui)
 {
     if (ui->state != BIRD_STATE_DEAD)
     {
@@ -317,7 +317,7 @@ void ui_tick(ui_t *ui, const bird_t *bird, const background_t *bg)
 
 /* Below this point there be magic numbers! */
 
-inline static void ui_logo_draw(const ui_t *ui)
+static void ui_logo_draw(const ui_t *ui)
 {
     sprite_t *const logo = ui->sprites[UI_SPRITE_LOGO];
 
@@ -365,7 +365,7 @@ inline static void ui_logo_draw(const ui_t *ui)
     }
 }
 
-inline static void ui_heading_draw(const ui_t *ui, int stride)
+static void ui_heading_draw(const ui_t *ui, int stride)
 {
     sprite_t *const headings = ui->sprites[UI_SPRITE_HEADINGS];
 
@@ -379,7 +379,7 @@ inline static void ui_heading_draw(const ui_t *ui, int stride)
     graphics_draw_sprite_trans_stride(gfx->disp, x, y, headings, stride);
 }
 
-inline static void ui_howto_draw(const ui_t *ui)
+static void ui_howto_draw(const ui_t *ui)
 {
     sprite_t *const howto = ui->sprites[UI_SPRITE_HOWTO];
 
@@ -393,7 +393,7 @@ inline static void ui_howto_draw(const ui_t *ui)
     graphics_draw_sprite_trans(gfx->disp, x, y, howto);
 }
 
-inline static void ui_score_draw(const ui_t *ui)
+static void ui_score_draw(const ui_t *ui)
 {
     uint16_t score = ui->last_score;
     sprite_t *const font = ui->sprites[UI_SPRITE_FONT_LARGE];
@@ -423,7 +423,7 @@ inline static void ui_score_draw(const ui_t *ui)
     }
 }
 
-inline static void ui_scoreboard_draw(const ui_t *ui)
+static void ui_scoreboard_draw(const ui_t *ui)
 {
     sprite_t *const scoreboard = ui->sprites[UI_SPRITE_SCOREBOARD];
 
@@ -435,7 +435,7 @@ inline static void ui_scoreboard_draw(const ui_t *ui)
     graphics_draw_sprite_trans(gfx->disp, x, ui->board_y, scoreboard);
 }
 
-inline static void ui_medal_draw(const ui_t *ui)
+static void ui_medal_draw(const ui_t *ui)
 {
     int stride;
     const int score = ui->last_score;
@@ -462,7 +462,7 @@ inline static void ui_medal_draw(const ui_t *ui)
     graphics_draw_sprite_trans_stride(gfx->disp, x, y, medal, stride);
 }
 
-inline static void ui_highscores_score_draw(const ui_t *ui, int score, int y)
+static void ui_highscores_score_draw(const ui_t *ui, int score, int y)
 {
     sprite_t *const font = ui->sprites[UI_SPRITE_FONT_MED];
     const display_context_t disp = gfx->disp;
@@ -486,7 +486,7 @@ inline static void ui_highscores_score_draw(const ui_t *ui, int score, int y)
     }
 }
 
-inline static void ui_highscores_draw(const ui_t *ui)
+static void ui_highscores_draw(const ui_t *ui)
 {
     gfx_detach_rdp();
 
@@ -503,7 +503,7 @@ inline static void ui_highscores_draw(const ui_t *ui)
     }
 }
 
-inline static void ui_flash_draw(const ui_t *ui)
+static void ui_flash_draw(const ui_t *ui)
 {
     gfx_rdp_color_fill();
     rdp_set_primitive_color(ui->flash_color);

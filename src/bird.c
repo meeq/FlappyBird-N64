@@ -126,7 +126,7 @@ void bird_hit(bird_t *bird)
     }
 }
 
-inline static void bird_tick_animation(bird_t *bird)
+static void bird_tick_animation(bird_t *bird)
 {
     const ticks_t ticks_ms = get_total_ms();
     ticks_t anim_ms = bird->anim_ms;
@@ -160,7 +160,7 @@ inline static void bird_tick_animation(bird_t *bird)
     bird->anim_frame = anim_frame;
 }
 
-inline static void bird_tick_dx(bird_t *bird)
+static void bird_tick_dx(bird_t *bird)
 {
     /* Move the bird over if needed */
     if (bird->state != BIRD_STATE_TITLE && bird->x > BIRD_PLAY_X)
@@ -174,7 +174,7 @@ inline static void bird_tick_dx(bird_t *bird)
     }
 }
 
-inline static void bird_tick_sine_wave(bird_t *bird)
+static void bird_tick_sine_wave(bird_t *bird)
 {
     /* Center the bird in the sky */
     bird->y = 0.0;
@@ -234,7 +234,7 @@ static void bird_tick_velocity(bird_t *bird, const gamepad_state_t *const gamepa
     }
 }
 
-inline static bird_color_t bird_random_color_type(void)
+static bird_color_t bird_random_color_type(void)
 {
     return ((float)rand() / (float)RAND_MAX) * BIRD_COLORS_COUNT;
 }
