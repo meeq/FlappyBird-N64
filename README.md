@@ -37,7 +37,7 @@ This project is considered "done", and is no longer being actively developed. It
 
 [Download](./FlappyBird-v1.4.z64?raw=true) or [compile](#build-the-rom) the ROM file and load it as you would any other N64 ROM.
 
-This ROM file has been tested to work on real Nintendo 64 hardware using the [EverDrive-64 by krikzz](http://krikzz.com/) and [64drive by retroactive](http://64drive.retroactive.be/).
+This ROM file has been tested to work on real Nintendo 64 hardware using the [EverDrive-64 by krikzz](http://krikzz.com/), [64drive by retroactive](http://64drive.retroactive.be/), and [SummerCart64](https://github.com/Polprzewodnikowy/SummerCart64).
 
 This ROM file should also be compatible with low-level, accuracy-focused Nintendo 64 emulators such as [Ares](https://ares-emulator.github.io/), [CEN64](https://cen64.com/) and [MAME](http://mamedev.org/).
 
@@ -51,23 +51,24 @@ Run `make` to produce a ROM file from this source tree.
 
 ### Dependencies
 
-A known-good version of [LibDragon](https://github.com/DragonMinded/libdragon) will be checked-out as a Git submodule and built as part of the Makefile process.
+This project has been tested with the `trunk` branch of LibDragon:
 
-If you already have a toolchain, the Makefile will respect your existing `N64_INST` environment variable. Otherwise, the toolchain will be built as part of the project.
+```sh
+git clone https://github.com/meeq/libdragon.git
+cd libdragon
+git checkout d74706b5962ecbbf4c9faa00075a2843eeebcabe
+```
 
-[See the LibDragon toolchain script for information on prerequisites and dependencies.](https://github.com/DragonMinded/libdragon/blob/trunk/tools/build-toolchain.sh)
+[See the LibDragon build script for information on prerequisites and dependencies.](https://github.com/DragonMinded/libdragon/blob/unstable/build.sh)
 
 ### Configuration
 
 The Makefile can be configured using the following environment variables:
 
-* `N64_INST` — Specify where your MIPS toolchain is installed. If unspecified, the toolchain will be built in-project, which may take a while.
+* `N64_INST` — Specify where your N64 GCC toolchain is installed.
 * `V=1` — Enable "verbose" Make output; useful for troubleshooting.
-* `GITMODULES=0` — Disable updating Git submodules when building; useful for experimenting with modifications to and alternate versions of LibDragon.
 
 ### Versioning
-
-The filename of the ROM will be derived from the current "ROM version". If the project repository is "clean", it will reference the current Git tag or commit hash. If the project has uncommitted changes, the version will be marked `-dirty` (indicating that it is unsuitable for release).
 
 Proper releases will be tagged as `vX.Y` where X is a major version number and Y is a minor version number.
 

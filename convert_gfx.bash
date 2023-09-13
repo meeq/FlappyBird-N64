@@ -26,7 +26,7 @@ convert_png_to_sprite() {
     local PNG_FILE=$1
     FILE_BASENAME=$(basename -s ${PNG_EXT} ${PNG_FILE})
     # Look up the file in the manifest
-    LINE=$(egrep "^${FILE_BASENAME}\s+" ${MANIFEST})
+    LINE=$(grep -Ee "^${FILE_BASENAME}\s+" ${MANIFEST})
     # Assume a 1x1 sprite if it's not in the manifest
     if [ -z "$LINE" ]; then
         echo >&2 "WARNING: PNG file '${PNG_FILE}' is not in the manifest!"

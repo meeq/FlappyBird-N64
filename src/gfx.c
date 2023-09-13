@@ -18,40 +18,11 @@ void gfx_init(
     /* Set up the display and RDP subsystems */
     display_init(res, depth, num_buffers, gamma, aa);
     rdp_init();
-    /* Figure out the screen resolution */
-    int width = 0, height = 0;
-    switch (res)
-    {
-    case RESOLUTION_320x240:
-        width = 320;
-        height = 240;
-        break;
-    case RESOLUTION_640x480:
-        width = 640;
-        height = 480;
-        break;
-    case RESOLUTION_256x240:
-        width = 256;
-        height = 240;
-        break;
-    case RESOLUTION_512x480:
-        width = 512;
-        height = 480;
-        break;
-    case RESOLUTION_512x240:
-        width = 512;
-        height = 240;
-        break;
-    case RESOLUTION_640x240:
-        width = 640;
-        height = 240;
-        break;
-    }
     gfx = malloc(sizeof(gfx_t));
     /* Setup state */
     gfx->res = res;
-    gfx->width = width;
-    gfx->height = height;
+    gfx->width = res.width;
+    gfx->height = res.height;
     gfx->color_depth = depth;
     gfx->num_buffers = num_buffers;
     gfx->gamma = gamma;
@@ -108,7 +79,7 @@ void gfx_attach_rdp(void)
         rdp_set_default_clipping();
 
         /* Attach RDP to display */
-        rdp_attach_display(gfx->disp);
+        rdp_attach(gfx->disp);
         gfx->rdp_attached = RDP_ATTACHED;
     }
 }
@@ -118,7 +89,7 @@ void gfx_detach_rdp(void)
     if (gfx->rdp_attached == RDP_ATTACHED)
     {
         /* Inform the RDP drawing is finished; flush pending operations */
-        rdp_detach_display();
+        rdp_detach();
         gfx->rdp_attached = RDP_DETACHED;
         gfx->rdp_fill_mode = RDP_FILL_NONE;
     }

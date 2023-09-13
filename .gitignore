@@ -9,9 +9,6 @@
 # Compilation artifacts
 /build/
 
-# Makefile guards
-.guard-*
-
 # Only commit clean, tagged versions of ROMs
 *.z64
 !/FlappyBird-v*.z64
