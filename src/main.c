@@ -22,7 +22,7 @@ int main(void)
 {
     /* Initialize libdragon subsystems */
     timer_init();
-    controller_init();
+    joypad_init();
     dfs_init(DFS_DEFAULT_LOCATION);
 
     /* Initialize game subsystems */
@@ -37,21 +37,21 @@ int main(void)
     bird_t *const bird = bird_init(BIRD_COLOR_YELLOW);
     pipes_t *const pipes = pipes_init();
     ui_t *const ui = ui_init(bg);
+    joypad_buttons_t buttons;
 
     /* Run the main loop */
     while (1)
     {
-        /* Update controller state */
-        controller_scan();
-        const controllers_state_t controllers = get_keys_down();
-        const gamepad_state_t *const gamepad = &controllers.c[CONTROLLER_1];
+        /* Update joypad state */
+        joypad_poll();
+        buttons = joypad_get_buttons(JOYPAD_PORT_1);
 
         /* Calculate frame timing */
-        fps_tick(gamepad);
+        fps_tick(&buttons);
 
         /* Update bird state before the rest of the world */
         const bird_state_t prev_bird_state = bird->state;
-        bird_tick(bird, gamepad);
+        bird_tick(bird, &buttons);
 
         /* Reset the world when the bird resets after dying */
         if (prev_bird_state != bird->state && prev_bird_state == BIRD_STATE_DEAD)
@@ -65,10 +65,10 @@ int main(void)
         {
         case BIRD_STATE_TITLE:
         case BIRD_STATE_READY:
-            background_tick(bg, gamepad);
+            background_tick(bg, &buttons);
             break;
         case BIRD_STATE_PLAY:
-            background_tick(bg, gamepad);
+            background_tick(bg, &buttons);
             pipes_tick(pipes);
             collision_tick(bird, pipes);
             break;

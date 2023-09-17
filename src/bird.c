@@ -119,11 +119,7 @@ void bird_hit(bird_t *bird)
 {
     bird->hit_ms = get_total_ms();
     sfx_play(SFX_HIT);
-    if (is_rumble_present())
-    {
-        rumble_start(CONTROLLER_1);
-        bird->is_rumbling = true;
-    }
+    joypad_set_rumble_active(JOYPAD_PORT_1, bird->is_rumbling = true);
 }
 
 static void bird_tick_animation(bird_t *bird)
@@ -194,10 +190,10 @@ static void bird_tick_sine_wave(bird_t *bird)
     }
 }
 
-static void bird_tick_velocity(bird_t *bird, const gamepad_state_t *const gamepad)
+static void bird_tick_velocity(bird_t *bird, const joypad_buttons_t *const buttons)
 {
     /* Flap when the player presses A */
-    if (bird->state == BIRD_STATE_PLAY && gamepad->A)
+    if (bird->state == BIRD_STATE_PLAY && buttons->a)
     {
         bird->dy = -BIRD_FLAP_VELOCITY;
         bird->anim_frame = BIRD_ANIM_FRAMES - 1;
@@ -239,7 +235,7 @@ static bird_color_t bird_random_color_type(void)
     return ((float)rand() / (float)RAND_MAX) * BIRD_COLORS_COUNT;
 }
 
-void bird_tick(bird_t *bird, const gamepad_state_t *const gamepad)
+void bird_tick(bird_t *bird, const joypad_buttons_t *const buttons)
 {
     const ticks_t ticks_ms = get_total_ms();
     /* State transitions based on button input */
@@ -247,7 +243,7 @@ void bird_tick(bird_t *bird, const gamepad_state_t *const gamepad)
     {
     case BIRD_STATE_TITLE:
     case BIRD_STATE_DEAD:
-        if ((gamepad->A || gamepad->start) &&
+        if ((buttons->a || buttons->start) &&
             (ticks_ms - bird->dead_ms > BIRD_RESET_DELAY))
         {
             /* Change the bird color after each death */
@@ -263,7 +259,7 @@ void bird_tick(bird_t *bird, const gamepad_state_t *const gamepad)
         }
         break;
     case BIRD_STATE_READY:
-        if (gamepad->A)
+        if (buttons->a)
         {
             bird->state = BIRD_STATE_PLAY;
         }
@@ -279,7 +275,7 @@ void bird_tick(bird_t *bird, const gamepad_state_t *const gamepad)
         break;
     }
     /* Cycle through bird colors with right trigger */
-    if (gamepad->R)
+    if (buttons->r)
     {
         if (++bird->color_type >= BIRD_COLORS_COUNT)
         {
@@ -295,7 +291,7 @@ void bird_tick(bird_t *bird, const gamepad_state_t *const gamepad)
         break;
     case BIRD_STATE_PLAY:
     case BIRD_STATE_DYING:
-        bird_tick_velocity(bird, gamepad);
+        bird_tick_velocity(bird, buttons);
         break;
     default:
         break;
@@ -303,8 +299,7 @@ void bird_tick(bird_t *bird, const gamepad_state_t *const gamepad)
     /* Stop rumbling after hitting a pipe/the ground */
     if (bird->is_rumbling && ticks_ms - bird->hit_ms >= BIRD_RUMBLE_MS)
     {
-        rumble_stop(CONTROLLER_1);
-        bird->is_rumbling = false;
+        joypad_set_rumble_active(JOYPAD_PORT_1, bird->is_rumbling = false);
     }
     /* Progress the flapping/falling animation */
     bird_tick_animation(bird);

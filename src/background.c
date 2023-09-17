@@ -216,10 +216,10 @@ void background_tick_scroll(bg_fill_sprite_t *fill)
     fill->scroll_x = x;
 }
 
-void background_tick(background_t *bg, const gamepad_state_t *gamepad)
+void background_tick(background_t *bg, const joypad_buttons_t *buttons)
 {
     /* Switch between day and night */
-    if (gamepad->L)
+    if (buttons->l)
     {
         background_set_time_mode(bg, !bg->time_mode);
     }

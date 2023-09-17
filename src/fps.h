@@ -16,7 +16,7 @@
 
 void fps_init(void);
 
-void fps_tick(const gamepad_state_t *const gamepad);
+void fps_tick(const joypad_buttons_t *buttons);
 
 void fps_draw(void);
 
