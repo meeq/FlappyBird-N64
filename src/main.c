@@ -11,32 +11,32 @@
 #include "gfx.h"
 #include "sfx.h"
 
-#include "background.h"
+#include "bg.h"
 #include "bird.h"
 #include "collision.h"
-#include "fps.h"
 #include "pipes.h"
 #include "ui.h"
 
 int main(void)
 {
+    // Initialize debug logs
+    debug_init_isviewer();
+    debug_init_usblog();
+
     /* Initialize libdragon subsystems */
     timer_init();
     joypad_init();
     dfs_init(DFS_DEFAULT_LOCATION);
 
     /* Initialize game subsystems */
+    gfx_init();
     sfx_init();
-    gfx_init(
-        RESOLUTION_320x240, DEPTH_16_BPP, BUFFERING_DOUBLE,
-        GAMMA_NONE, ANTIALIAS_RESAMPLE_FETCH_ALWAYS);
-    fps_init();
 
     /* Initialize game state */
-    background_t *const bg = background_init(BG_TIME_DAY);
+    bg_init();
     bird_t *const bird = bird_init(BIRD_COLOR_YELLOW);
     pipes_t *const pipes = pipes_init();
-    ui_t *const ui = ui_init(bg);
+    ui_t *const ui = ui_init();
     joypad_buttons_t buttons;
 
     /* Run the main loop */
@@ -46,9 +46,6 @@ int main(void)
         joypad_poll();
         buttons = joypad_get_buttons(JOYPAD_PORT_1);
 
-        /* Calculate frame timing */
-        fps_tick(&buttons);
-
         /* Update bird state before the rest of the world */
         const bird_state_t prev_bird_state = bird->state;
         bird_tick(bird, &buttons);
@@ -56,7 +53,7 @@ int main(void)
         /* Reset the world when the bird resets after dying */
         if (prev_bird_state != bird->state && prev_bird_state == BIRD_STATE_DEAD)
         {
-            background_randomize_time_mode(bg);
+            bg_randomize_time_mode();
             pipes_reset(pipes);
         }
 
@@ -65,10 +62,10 @@ int main(void)
         {
         case BIRD_STATE_TITLE:
         case BIRD_STATE_READY:
-            background_tick(bg, &buttons);
+            bg_tick(&buttons);
             break;
         case BIRD_STATE_PLAY:
-            background_tick(bg, &buttons);
+            bg_tick(&buttons);
             pipes_tick(pipes);
             collision_tick(bird, pipes);
             break;
@@ -77,7 +74,7 @@ int main(void)
         }
 
         /* Update the UI based on the world state */
-        ui_tick(ui, bird, bg);
+        ui_tick(ui, bird);
 
         /* Buffer sound effects */
         if (audio_can_write())
@@ -91,13 +88,12 @@ int main(void)
         gfx_display_lock();
         {
             /* Draw the game state */
-            background_draw(bg);
-            pipes_draw(pipes);
-            bird_draw(bird);
-            ui_draw(ui);
-            fps_draw();
+            bg_draw();
+            // pipes_draw(pipes);
+            // bird_draw(bird);
+            // ui_draw(ui);
         }
         /* Finish drawing and show the framebuffer */
-        gfx_display_flip();
+        rdpq_detach_show();
     }
 }

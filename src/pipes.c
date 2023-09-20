@@ -14,7 +14,7 @@
 
 #include "system.h"
 #include "gfx.h"
-#include "background.h"
+#include "bg.h"
 
 /* Pipes definitions */
 
@@ -136,7 +136,7 @@ void pipes_draw(const pipes_t *pipes)
     const mirror_t mirror = MIRROR_DISABLED;
     int16_t cx, cy, tx, ty, bx, by, gap_cy;
 
-    gfx_rdp_texture_fill();
+    gfx_rdp_texture_fill(true);
     rdp_sync(SYNC_PIPE);
 
     const pipe_t *pipe;

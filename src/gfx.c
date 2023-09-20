@@ -11,66 +11,29 @@
 
 gfx_t *gfx;
 
-void gfx_init(
-    resolution_t res, bitdepth_t depth, buffer_mode_t num_buffers,
-    gamma_t gamma, antialias_t aa)
+void gfx_init(void)
 {
     /* Set up the display and RDP subsystems */
-    display_init(res, depth, num_buffers, gamma, aa);
-    rdp_init();
-    gfx = malloc(sizeof(gfx_t));
+    display_init(RESOLUTION_320x240, DEPTH_16_BPP, 3, GAMMA_NONE, FILTERS_RESAMPLE);
+    rdp_init(); // TODO Replace with rdpq_init()
     /* Setup state */
-    gfx->res = res;
-    gfx->width = res.width;
-    gfx->height = res.height;
-    gfx->color_depth = depth;
-    gfx->num_buffers = num_buffers;
-    gfx->gamma = gamma;
-    gfx->antialias = aa;
-    /* Drawing state */
-    gfx->disp = 0;
-    /* RDP state */
-    gfx->rdp_attached = RDP_DETACHED;
-    gfx->rdp_fill_mode = RDP_FILL_NONE;
-}
-
-void gfx_close(void)
-{
-    rdp_close();
-    display_close();
-    free(gfx);
-    gfx = NULL;
+    gfx = malloc(sizeof(gfx_t));
+    gfx->width = display_get_width();
+    gfx->height = display_get_height();
+    gfx->disp = NULL;
 }
 
 void gfx_display_lock(void)
 {
     /* Grab a render buffer */
-    static display_context_t disp = 0;
-    while (!(disp = display_lock())) { /* Spinlock! */ }
+    surface_t *disp = display_get();
+    rdpq_attach_clear(disp, NULL);
     gfx->disp = disp;
-    /* Reset RDP state */
-    gfx->rdp_attached = RDP_DETACHED;
-    gfx->rdp_fill_mode = RDP_FILL_NONE;
-}
-
-void gfx_display_flip(void)
-{
-    if (gfx->disp)
-    {
-        /* Detach the RDP and sync before flipping the display buffer */
-        if (gfx->rdp_attached == RDP_ATTACHED)
-        {
-            gfx_detach_rdp();
-        }
-        /* Force backbuffer flip and reset the display handle */
-        display_show(gfx->disp);
-        gfx->disp = 0;
-    }
 }
 
 void gfx_attach_rdp(void)
 {
-    if (gfx->rdp_attached == RDP_DETACHED && gfx->disp)
+    if (!rdpq_is_attached() && gfx->disp)
     {
         /* Ensure the RDP is ready for new commands */
         rdp_sync(SYNC_PIPE);
@@ -80,43 +43,28 @@ void gfx_attach_rdp(void)
 
         /* Attach RDP to display */
         rdp_attach(gfx->disp);
-        gfx->rdp_attached = RDP_ATTACHED;
     }
 }
 
 void gfx_detach_rdp(void)
 {
-    if (gfx->rdp_attached == RDP_ATTACHED)
+    if (rdpq_is_attached())
     {
         /* Inform the RDP drawing is finished; flush pending operations */
-        rdp_detach();
-        gfx->rdp_attached = RDP_DETACHED;
-        gfx->rdp_fill_mode = RDP_FILL_NONE;
+        rdpq_detach_wait();
     }
 }
 
-void gfx_rdp_color_fill(void)
+void gfx_rdp_color_fill(color_t color)
 {
     gfx_attach_rdp();
-    /* Setup the RDP for color fills if it isn't already */
-    if (gfx->rdp_fill_mode != RDP_FILL_COLOR)
-    {
-        /* Enable solid colors instead of texture fills */
-        rdp_enable_primitive_fill();
-        gfx->rdp_fill_mode = RDP_FILL_COLOR;
-    }
+    rdpq_set_mode_fill(color);
 }
 
-void gfx_rdp_texture_fill(void)
+void gfx_rdp_texture_fill(bool transparency)
 {
     gfx_attach_rdp();
-    /* Setup the RDP for textured fills if it isn't already */
-    if (gfx->rdp_fill_mode != RDP_FILL_TEXTURE)
-    {
-        /* Enable textures instead of solid color fill */
-        rdp_enable_texture_copy();
-        gfx->rdp_fill_mode = RDP_FILL_TEXTURE;
-    }
+    rdpq_set_mode_copy(transparency);
 }
 
 sprite_t *read_dfs_sprite(const char *const file)

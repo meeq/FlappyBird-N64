@@ -21,7 +21,7 @@
 typedef uint32_t color32_t;
 typedef int64_t ticks_t;
 
-#define TICKS_PER_MS ((ticks_t)(TICKS_PER_SECOND / 1000))
+#define TICKS_PER_MS (TICKS_PER_SECOND / 1000)
 
 static inline ticks_t get_total_ms(void)
 {

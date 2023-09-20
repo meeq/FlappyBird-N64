@@ -12,7 +12,7 @@
 #include "system.h"
 #include "gfx.h"
 #include "sfx.h"
-#include "background.h"
+#include "bg.h"
 #include "bird.h"
 
 /* UI definitions */
@@ -30,10 +30,18 @@
 #define UI_DEATH_BOARD_DY_MS    ((float)200.0)
 #define UI_DEATH_SCORE_DELAY    ((int)48)
 
-#define UI_DARK_COLOR   graphics_make_color(0x57, 0x37, 0x47, 0xFF)
-#define UI_LIGHT_COLOR  graphics_make_color(0xFF, 0xFF, 0xFF, 0xFF)
-#define UI_CLEAR_COLOR  graphics_make_color(0x00, 0x00, 0x00, 0x00)
-#define UI_FLASH_COLOR  graphics_make_color(0xFF, 0xFF, 0xFF, 0xFF)
+static color_t UI_DARK_COLOR  = {0};
+static color_t UI_LIGHT_COLOR = {0};
+static color_t UI_CLEAR_COLOR = {0};
+static color_t UI_FLASH_COLOR = {0};
+
+static inline void ui_init_colors(void)
+{
+    UI_DARK_COLOR  = RGBA32(0x57, 0x37, 0x47, 0xFF);
+    UI_LIGHT_COLOR = RGBA32(0xFF, 0xFF, 0xFF, 0xFF);
+    UI_CLEAR_COLOR = RGBA32(0x00, 0x00, 0x00, 0x00);
+    UI_FLASH_COLOR = RGBA32(0xFF, 0xFF, 0xFF, 0xFF);
+}
 
 typedef enum
 {
@@ -94,14 +102,14 @@ typedef struct ui_s
     bool new_high_score;
     /* Titles */
     bg_time_mode_t time_mode;
-    color32_t text_color;
-    color32_t shadow_color;
-    color32_t clear_color;
+    color_t text_color;
+    color_t shadow_color;
+    color_t clear_color;
     sprite_t *sprites[UI_SPRITES_COUNT];
     /* Death */
     bool did_flash;
     bool flash_draw;
-    color32_t flash_color;
+    color_t flash_color;
     ticks_t hit_ms;
     /* Game Over */
     ticks_t dead_ms;
@@ -135,15 +143,16 @@ static void ui_set_time_mode(ui_t *ui, bg_time_mode_t time_mode)
     }
 }
 
-ui_t *ui_init(const background_t *bg)
+ui_t *ui_init(void)
 {
+    ui_init_colors();
     ui_t *ui = malloc(sizeof(ui_t));
     if (ui == NULL) return NULL;
     memset(ui, 0, sizeof(ui_t));
 
     ui->flash_color = UI_FLASH_COLOR;
     ui->board_y = gfx->height;
-    ui_set_time_mode(ui, background_get_time_mode(bg));
+    ui_set_time_mode(ui, bg_get_time_mode());
     // Load the sprites
     for (size_t i = 0; i < UI_SPRITES_COUNT; i++)
     {
@@ -249,7 +258,7 @@ static void ui_gameover_tick(ui_t *ui)
     {
         sprite_t *const scoreboard = ui->sprites[UI_SPRITE_SCOREBOARD];
         const int board_diff_ms = ticks_ms - ui->board_ms;
-        const int max_y = gfx->height;
+        const int max_y = display_get_height();
         const int center_y = max_y / 2;
         const int min_y = center_y - (scoreboard->height / 2);
         ui->score_draw = board_diff_ms >= UI_DEATH_BOARD_DY_MS;
@@ -302,10 +311,10 @@ static void ui_gameover_tick(ui_t *ui)
     }
 }
 
-void ui_tick(ui_t *ui, const bird_t *bird, const background_t *bg)
+void ui_tick(ui_t *ui, const bird_t *bird)
 {
     /* Synchronize background state to UI */
-    const bg_time_mode_t bg_time_mode = background_get_time_mode(bg);
+    const bg_time_mode_t bg_time_mode = bg_get_time_mode();
     if (ui->time_mode != bg_time_mode)
     {
         ui_set_time_mode(ui, bg_time_mode);
@@ -320,6 +329,9 @@ void ui_tick(ui_t *ui, const bird_t *bird, const background_t *bg)
 static void ui_logo_draw(const ui_t *ui)
 {
     sprite_t *const logo = ui->sprites[UI_SPRITE_LOGO];
+    color32_t shadow_color = graphics_convert_color(ui->shadow_color);
+    color32_t clear_color = graphics_convert_color(ui->clear_color);
+    color32_t text_color = graphics_convert_color(ui->text_color);
 
     gfx_detach_rdp();
     const display_context_t disp = gfx->disp;
@@ -347,7 +359,7 @@ static void ui_logo_draw(const ui_t *ui)
     const int version_y = gfx->height - 32;
 
     /* Draw a shadow under the text */
-    graphics_set_color(ui->shadow_color, ui->clear_color);
+    graphics_set_color(shadow_color, clear_color);
     graphics_draw_text(disp, credit1_x + 1, credit1_y + 1, credit1_str);
     graphics_draw_text(disp, credit2_x + 1, credit2_y + 1, credit2_str);
     if (version_w)
@@ -356,7 +368,7 @@ static void ui_logo_draw(const ui_t *ui)
     }
 
     /* Draw the same text on top of the shadow */
-    graphics_set_color(ui->text_color, ui->clear_color);
+    graphics_set_color(text_color, clear_color);
     graphics_draw_text(disp, credit1_x, credit1_y, credit1_str);
     graphics_draw_text(disp, credit2_x, credit2_y, credit2_str);
     if (version_w)
@@ -505,8 +517,7 @@ static void ui_highscores_draw(const ui_t *ui)
 
 static void ui_flash_draw(const ui_t *ui)
 {
-    gfx_rdp_color_fill();
-    rdp_set_primitive_color(ui->flash_color);
+    gfx_rdp_color_fill(ui->flash_color);
     const int bx = gfx->width - 1;
     const int by = gfx->height - 1;
     rdp_draw_filled_rectangle(0, 0, bx, by);

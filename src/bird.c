@@ -14,7 +14,7 @@
 
 #include "gfx.h"
 #include "sfx.h"
-#include "background.h"
+#include "bg.h"
 
 /* Bird definitions */
 
@@ -107,7 +107,7 @@ void bird_draw(const bird_t *bird)
     const int tx = cx - bird_half_w, bx = cx + bird_half_w - 1,
               ty = bird_y - bird_half_h, by = bird_y + bird_half_h - 1;
     /* Load the current animation sprite slice as a texture */
-    gfx_rdp_texture_fill();
+    gfx_rdp_texture_fill(true);
     rdp_sync(SYNC_PIPE);
     int stride = (bird->color_type * bird->sprite->hslices) + bird->anim_frame;
     rdp_load_texture_stride(0, 0, mirror, bird->sprite, stride);
