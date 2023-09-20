@@ -10,7 +10,7 @@
 #ifndef __FLAPPY_BIRD_H
 #define __FLAPPY_BIRD_H
 
-#include "system.h"
+#include <libdragon.h>
 
 /* Bird definitions */
 
@@ -39,22 +39,23 @@ typedef struct bird_s
     int slice_h;
     bird_state_t state;
     bird_color_t color_type;
-    int64_t hit_ms;
-    int64_t dead_ms;
+    uint32_t hit_ticks;
+    uint32_t dead_ticks;
+    bool is_dead_reset;
     bool is_rumbling;
     bool played_die_sfx;
     int score;
     /* Animation */
-    int64_t anim_ms;
+    uint32_t anim_ticks;
     int anim_frame;
     /* Center point */
     float x;
     float y;
     float dx;
     float dy;
-    int64_t dy_ms;
+    uint32_t dy_ticks;
     /* Ready "floating" wave */
-    int64_t sine_ms;
+    uint32_t sine_ticks;
     float sine_x;
     float sine_y;
 } bird_t;

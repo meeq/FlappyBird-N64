@@ -18,7 +18,7 @@
 
 /* Pipes definitions */
 
-#define PIPES_SCROLL_RATE   ((int)16)
+#define PIPES_SCROLL_RATE   ((int)16 * TICKS_PER_MS)
 #define PIPES_SCROLL_DX     ((float)-0.00312)
 #define PIPE_TUBE_WIDTH     ((int)26)
 #define PIPE_CAP_HEIGHT     ((int)13)
@@ -35,7 +35,7 @@ pipes_t *pipes_init(void)
 {
     pipes_t *const pipes = malloc(sizeof(pipes_t));
     pipes->color = PIPE_COLOR_GREEN;
-    pipes->scroll_ms = 0;
+    pipes->scroll_ticks = 0;
     pipes->cap_sprite = read_dfs_sprite("gfx/pipe-cap.sprite");
     pipes->tube_sprite = read_dfs_sprite("gfx/pipe-tube.sprite");
     pipes_reset(pipes);
@@ -95,19 +95,19 @@ void pipes_reset(pipes_t *pipes)
         y = pipe_random_bias_y(y);
     }
     pipes->color = pipes_random_color();
-    pipes->scroll_ms = 0;
+    pipes->scroll_ticks = 0;
 }
 
 void pipes_tick(pipes_t *pipes)
 {
-    const ticks_t ticks_ms = get_total_ms();
+    const uint32_t now_ticks = TICKS_READ();
     /* Start scrolling after a reset */
-    if (pipes->scroll_ms == 0)
+    if (pipes->scroll_ticks == 0)
     {
-        pipes->scroll_ms = ticks_ms;
+        pipes->scroll_ticks = now_ticks;
     }
     /* Scroll the pipes and reset them as they go off-screen */
-    if (ticks_ms - pipes->scroll_ms >= PIPES_SCROLL_RATE)
+    if (TICKS_DISTANCE(pipes->scroll_ticks, now_ticks) >= PIPES_SCROLL_RATE)
     {
         pipe_t *pipe;
         for (size_t i = 0, j; i < PIPES_MAX_COUNT; i++)
@@ -123,7 +123,7 @@ void pipes_tick(pipes_t *pipes)
                 pipe->has_scored = false;
             }
         }
-        pipes->scroll_ms = ticks_ms;
+        pipes->scroll_ticks = now_ticks;
     }
 }
 

@@ -89,8 +89,8 @@ int main(void)
         {
             /* Draw the game state */
             bg_draw();
-            // pipes_draw(pipes);
-            // bird_draw(bird);
+            pipes_draw(pipes);
+            bird_draw(bird);
             // ui_draw(ui);
         }
         /* Finish drawing and show the framebuffer */

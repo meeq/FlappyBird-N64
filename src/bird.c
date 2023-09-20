@@ -19,11 +19,11 @@
 /* Bird definitions */
 
 /* Timing */
-#define BIRD_RESET_DELAY    ((int) 1000)
-#define BIRD_RUMBLE_MS      ((int) 500)
+#define BIRD_RESET_DELAY    (1000 * TICKS_PER_MS)
+#define BIRD_RUMBLE_MS      (500 * TICKS_PER_MS)
 
 /* Animation */
-#define BIRD_ANIM_RATE      ((int) 120)
+#define BIRD_ANIM_RATE      (120 * TICKS_PER_MS)
 #define BIRD_ANIM_FRAMES    ((int) 3)
 #define BIRD_DYING_FRAME    ((int) 3)
 
@@ -35,12 +35,12 @@
 #define BIRD_MAX_Y          ((float) 0.95)
 
 /* Flap */
-#define BIRD_VELOCITY_RATE  ((int) 16)
+#define BIRD_VELOCITY_RATE  (16 * TICKS_PER_MS)
 #define BIRD_FLAP_VELOCITY  ((float) 0.0270)
 #define BIRD_GRAVITY_ACCEL  ((float) 0.0013)
 
 /* Sine "floating" effect */
-#define BIRD_SINE_RATE      ((int) 20)
+#define BIRD_SINE_RATE      (20 * TICKS_PER_MS)
 #define BIRD_SINE_INCREMENT ((float) 0.1)
 #define BIRD_SINE_CYCLE     ((float) (M_PI * 2.0))
 #define BIRD_SINE_DAMPEN    ((float) 0.02)
@@ -57,18 +57,19 @@ bird_t *bird_init(bird_color_t color_type)
     bird->state = BIRD_STATE_TITLE;
     bird->color_type = color_type;
     bird->score = 0;
-    bird->hit_ms = 0;
-    bird->dead_ms = 0;
+    bird->hit_ticks = 0;
+    bird->dead_ticks = 0;
+    bird->is_dead_reset = true;
     bird->is_rumbling = false;
     bird->played_die_sfx = false;
-    bird->anim_ms = 0;
+    bird->anim_ticks = 0;
     bird->anim_frame = 0;
     bird->x = BIRD_TITLE_X;
     bird->y = 0.0;
     bird->dx = 0.0;
     bird->dy = 0.0;
-    bird->dy_ms = 0;
-    bird->sine_ms = 0;
+    bird->dy_ticks = 0;
+    bird->sine_ticks = 0;
     bird->sine_x = 0.0;
     bird->sine_y = 0.0;
     return bird;
@@ -117,20 +118,20 @@ void bird_draw(const bird_t *bird)
 
 void bird_hit(bird_t *bird)
 {
-    bird->hit_ms = get_total_ms();
+    bird->hit_ticks = TICKS_READ();
     sfx_play(SFX_HIT);
     joypad_set_rumble_active(JOYPAD_PORT_1, bird->is_rumbling = true);
 }
 
 static void bird_tick_animation(bird_t *bird)
 {
-    const ticks_t ticks_ms = get_total_ms();
-    ticks_t anim_ms = bird->anim_ms;
+    const uint32_t now_ticks = TICKS_READ();
+    uint32_t anim_ticks = bird->anim_ticks;
     int anim_frame = bird->anim_frame;
     if (bird->state == BIRD_STATE_DYING || bird->state == BIRD_STATE_DEAD)
     {
         /* Dead birds don't animate */
-        anim_ms = ticks_ms;
+        anim_ticks = now_ticks;
         if (bird->dy < 0.0)
         {
             anim_frame = BIRD_ANIM_FRAMES - 1;
@@ -142,17 +143,17 @@ static void bird_tick_animation(bird_t *bird)
     }
     else
     {
-        if (ticks_ms - anim_ms >= BIRD_ANIM_RATE)
+        if (TICKS_DISTANCE(anim_ticks, now_ticks) >= BIRD_ANIM_RATE)
         {
             /* Update animation state */
             if (++anim_frame >= BIRD_ANIM_FRAMES)
             {
                 anim_frame = 0;
             }
-            anim_ms = ticks_ms;
+            anim_ticks = now_ticks;
         }
     }
-    bird->anim_ms = anim_ms;
+    bird->anim_ticks = anim_ticks;
     bird->anim_frame = anim_frame;
 }
 
@@ -175,12 +176,12 @@ static void bird_tick_sine_wave(bird_t *bird)
     /* Center the bird in the sky */
     bird->y = 0.0;
     /* Periodically update the "floating" effect */
-    const ticks_t ticks_ms = get_total_ms();
-    if (ticks_ms - bird->sine_ms >= BIRD_SINE_RATE)
+    const uint32_t now_ticks = TICKS_READ();
+    if (TICKS_DISTANCE(bird->sine_ticks, now_ticks) >= BIRD_SINE_RATE)
     {
         bird_tick_dx(bird);
         /* Increment the "floating" effect sine wave */
-        bird->sine_ms = ticks_ms;
+        bird->sine_ticks = now_ticks;
         bird->sine_x += BIRD_SINE_INCREMENT;
         bird->sine_y = sinf(bird->sine_x) * BIRD_SINE_DAMPEN;
         while (bird->sine_x >= BIRD_SINE_CYCLE)
@@ -199,8 +200,8 @@ static void bird_tick_velocity(bird_t *bird, const joypad_buttons_t *const butto
         bird->anim_frame = BIRD_ANIM_FRAMES - 1;
         sfx_play(SFX_WING);
     }
-    const ticks_t ticks_ms = get_total_ms();
-    if (ticks_ms - bird->dy_ms >= BIRD_VELOCITY_RATE)
+    const uint32_t now_ticks = TICKS_READ();
+    if (TICKS_DISTANCE(bird->dy_ticks, now_ticks) >= BIRD_VELOCITY_RATE)
     {
         bird_tick_dx(bird);
         float y = bird->y;
@@ -221,12 +222,12 @@ static void bird_tick_velocity(bird_t *bird, const joypad_buttons_t *const butto
             {
                 bird_hit(bird);
             }
-            bird->dead_ms = ticks_ms;
+            bird->dead_ticks = now_ticks;
             bird->state = BIRD_STATE_DEAD;
         }
         bird->y = y;
         bird->dy = dy;
-        bird->dy_ms = ticks_ms;
+        bird->dy_ticks = now_ticks;
     }
 }
 
@@ -237,14 +238,17 @@ static bird_color_t bird_random_color_type(void)
 
 void bird_tick(bird_t *bird, const joypad_buttons_t *const buttons)
 {
-    const ticks_t ticks_ms = get_total_ms();
+    const uint32_t now_ticks = TICKS_READ();
     /* State transitions based on button input */
     switch (bird->state)
     {
-    case BIRD_STATE_TITLE:
     case BIRD_STATE_DEAD:
-        if ((buttons->a || buttons->start) &&
-            (ticks_ms - bird->dead_ms > BIRD_RESET_DELAY))
+        if (TICKS_DISTANCE(bird->dead_ticks, now_ticks) >= BIRD_RESET_DELAY)
+        {
+            bird->is_dead_reset = true;
+        }
+    case BIRD_STATE_TITLE:
+        if ((buttons->a || buttons->start) && bird->is_dead_reset)
         {
             /* Change the bird color after each death */
             if (bird->state == BIRD_STATE_DEAD)
@@ -254,6 +258,7 @@ void bird_tick(bird_t *bird, const joypad_buttons_t *const buttons)
             bird->state = BIRD_STATE_READY;
             bird->score = 0;
             bird->anim_frame = 0;
+            bird->is_dead_reset = false;
             bird->played_die_sfx = false;
             sfx_play(SFX_SWOOSH);
         }
@@ -297,7 +302,7 @@ void bird_tick(bird_t *bird, const joypad_buttons_t *const buttons)
         break;
     }
     /* Stop rumbling after hitting a pipe/the ground */
-    if (bird->is_rumbling && ticks_ms - bird->hit_ms >= BIRD_RUMBLE_MS)
+    if (bird->is_rumbling && TICKS_DISTANCE(bird->hit_ticks, now_ticks) >= BIRD_RUMBLE_MS)
     {
         joypad_set_rumble_active(JOYPAD_PORT_1, bird->is_rumbling = false);
     }
