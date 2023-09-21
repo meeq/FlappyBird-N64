@@ -32,6 +32,9 @@ int main(void)
     gfx_init();
     sfx_init();
 
+    // rdpq_debug_start();
+    // rdpq_debug_log(true);
+
     /* Initialize game state */
     bg_init();
     bird_t *const bird = bird_init(BIRD_COLOR_YELLOW);
