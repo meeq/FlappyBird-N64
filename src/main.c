@@ -47,7 +47,7 @@ int main(void)
     {
         /* Update joypad state */
         joypad_poll();
-        buttons = joypad_get_buttons(JOYPAD_PORT_1);
+        buttons = joypad_get_buttons_pressed(JOYPAD_PORT_1);
 
         /* Update bird state before the rest of the world */
         const bird_state_t prev_bird_state = bird->state;
