@@ -9,7 +9,7 @@
             "cwd": "${workspaceFolder}",
             "MIMode": "gdb",
             "targetArchitecture": "mips",
-            "miDebuggerPath": "${workspaceFolder}/../toolchain/bin/mips64-elf-gdb",
+            "miDebuggerPath": "${workspaceFolder}/toolchain/bin/mips64-elf-gdb",
             "miDebuggerServerAddress": "localhost:9123",
             "setupCommands": [
                 {

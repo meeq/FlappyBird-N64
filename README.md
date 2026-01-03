@@ -47,14 +47,43 @@ This ROM file should also be compatible with low-level, accuracy-focused Nintend
 
 ## Build the ROM
 
+### Using mise (recommended)
+
+This project uses [mise](https://mise.jdx.dev/) to manage the development environment and build tasks. Once mise is installed, run:
+
+```sh
+mise run setup
+```
+
+This will automatically initialize git submodules, build the N64 toolchain, and install LibDragon.
+
+#### Available tasks
+
+| Task | Alias | Description |
+|------|-------|-------------|
+| `mise run setup` | | Set up the complete development environment |
+| `mise run build` | `mise run b` | Build the ROM |
+| `mise run clean` | `mise run c` | Clean build artifacts |
+| `mise run ares` | | Build and run the ROM in Ares emulator |
+
+Additional lower-level tasks (usually run automatically by `setup`):
+
+| Task | Description |
+|------|-------------|
+| `mise run submodules` | Initialize and update git submodules |
+| `mise run toolchain` | Build the N64 GCC cross-compiler toolchain + GDB |
+| `mise run libdragon` | Build and install LibDragon into the toolchain |
+
+### Using make directly
+
 Run `make` to produce a ROM file from this source tree.
 
-### Dependencies
+#### Dependencies
 
 This project has been tested with the `trunk` branch of LibDragon:
 
 ```sh
-git clone https://github.com/meeq/libdragon.git
+git clone https://github.com/DragonMinded/libdragon.git
 cd libdragon
 git checkout d4b5b0b938fb143c0c746cd65d17e21b4112cc5d
 ```
@@ -63,7 +92,7 @@ Run the LibDragon [build-toolchain](https://github.com/DragonMinded/libdragon/bl
 
 Then run the LibDragon [build](https://github.com/DragonMinded/libdragon/blob/trunk/build.sh) script to install LibDragon in the toolchain.
 
-### Configuration
+#### Configuration
 
 The Makefile can be configured using the following environment variables:
 

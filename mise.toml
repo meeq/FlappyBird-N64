@@ -1,8 +1,73 @@
 [env]
-N64_INST = "{{config_root}}/../toolchain"
+N64_INST = "{{config_root}}/toolchain"
+ARES = "/Applications/ares.app/Contents/MacOS/ares"
 
-[tasks.make]
+[tasks.setup]
+description = "Set up the development environment"
+depends = ["submodules", "toolchain", "libdragon"]
+
+[tasks.submodules]
+description = "Initialize and update git submodules"
+run = "git submodule update --init --recursive"
+
+[tasks.toolchain]
+depends = ["submodules"]
+description = "Build the N64 GCC cross-compiler toolchain + GDB"
+sources = ["libdragon/tools/build-toolchain.sh", "libdragon/tools/build-gdb.sh"]
+outputs = ["toolchain/bin/mips64-elf-gcc", "toolchain/bin/mips64-elf-gdb"]
+dir = "{{config_root}}"
+run = """
+# Check if toolchain is already installed
+if [ -x "$N64_INST/bin/mips64-elf-gcc" ]; then
+  echo "Toolchain already installed at $N64_INST"
+  exit 0
+fi
+echo "Building N64 toolchain (this will take a while)..."
+mkdir -p "$N64_INST"
+export BUILD_PATH=$(mktemp -d)
+trap "rm -rf \"$BUILD_PATH\"" EXIT
+echo "Build directory: $BUILD_PATH"
+bash "libdragon/tools/build-toolchain.sh"
+bash "libdragon/tools/build-gdb.sh"
+echo "Toolchain build complete!"
+"""
+
+[tasks.libdragon]
+description = "Build and install LibDragon into the toolchain"
+depends = ["toolchain"]
+sources = ["libdragon/**/*"]
+outputs = ["toolchain/include/n64.mk", "toolchain/mips64-elf/lib/libdragon.a"]
+dir = "{{config_root}}/libdragon"
+run = """
+JOBS="${JOBS:-$(getconf _NPROCESSORS_ONLN)}" # Gotta go fast
+JOBS="${JOBS:-1}" # If getconf returned nothing, default to 1
+make -j "$JOBS" install-mk
+make -j "$JOBS" clobber
+make -j "$JOBS" libdragon tools
+make -j "$JOBS" install tools-install
+"""
+
+[tasks.build]
+alias = "b"
+description = "Build the ROM"
+dir = "{{config_root}}"
 run = "make all"
+sources = [
+    "src/**/*",
+    "resources/**/*",
+    "Makefile",
+    "toolchain/mips64-elf/lib/libdragon.a",
+]
+outputs = ["FlappyBird.z64"]
+
+[tasks.clean]
+alias = "c"
+description = "Clean build artifacts"
+dir = "{{config_root}}"
+run = "make clean"
 
 [tasks.ares]
-run = "/Applications/ares.app/Contents/MacOS/ares FlappyBird.z64"
+description = "Run the ROM in Ares emulator"
+depends = ["build"]
+dir = "{{config_root}}"
+run = "$ARES FlappyBird.z64"
