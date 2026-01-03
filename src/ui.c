@@ -32,14 +32,16 @@
 
 static color_t UI_DARK_COLOR  = {0};
 static color_t UI_LIGHT_COLOR = {0};
-static color_t UI_CLEAR_COLOR = {0};
 static color_t UI_FLASH_COLOR = {0};
+
+/* Font style IDs for UI text */
+#define UI_STYLE_SHADOW 1
+#define UI_STYLE_TEXT   2
 
 static inline void ui_init_colors(void)
 {
     UI_DARK_COLOR  = RGBA32(0x57, 0x37, 0x47, 0xFF);
     UI_LIGHT_COLOR = RGBA32(0xFF, 0xFF, 0xFF, 0xFF);
-    UI_CLEAR_COLOR = RGBA32(0x00, 0x00, 0x00, 0x00);
     UI_FLASH_COLOR = RGBA32(0xFF, 0xFF, 0xFF, 0xFF);
 }
 
@@ -104,7 +106,6 @@ typedef struct ui_s
     bg_time_mode_t time_mode;
     color_t text_color;
     color_t shadow_color;
-    color_t clear_color;
     sprite_t *sprites[UI_SPRITES_COUNT];
     /* Death */
     bool did_flash;
@@ -140,6 +141,13 @@ static void ui_set_time_mode(ui_t *ui, bg_time_mode_t time_mode)
     {
         ui->text_color = UI_LIGHT_COLOR;
         ui->shadow_color = UI_DARK_COLOR;
+    }
+    /* Update font styles for current time mode */
+    rdpq_font_t *font = (rdpq_font_t *)rdpq_text_get_font(FONT_DEBUG);
+    if (font)
+    {
+        rdpq_font_style(font, UI_STYLE_SHADOW, &(rdpq_fontstyle_t){ .color = ui->shadow_color });
+        rdpq_font_style(font, UI_STYLE_TEXT, &(rdpq_fontstyle_t){ .color = ui->text_color });
     }
 }
 
@@ -332,19 +340,15 @@ void ui_tick(ui_t *ui, const bird_t *bird)
 static void ui_logo_draw(const ui_t *ui)
 {
     sprite_t *const logo = ui->sprites[UI_SPRITE_LOGO];
-    color32_t shadow_color = graphics_convert_color(ui->shadow_color);
-    color32_t clear_color = graphics_convert_color(ui->clear_color);
-    color32_t text_color = graphics_convert_color(ui->text_color);
-
-    gfx_detach_rdp();
-    const display_context_t disp = gfx->disp;
 
     const int center_x = (gfx->width / 2);
     const int center_y = (gfx->height / 2);
     const int logo_x = center_x - (logo->width / 2);
     const int logo_y = center_y - (logo->height * 3.5);
 
-    graphics_draw_sprite_trans(disp, logo_x, logo_y, logo);
+    /* Draw logo sprite */
+    rdpq_set_mode_copy(true);
+    rdpq_sprite_blit(logo, logo_x, logo_y, NULL);
 
     const char *const credit1_str = "Game by .GEARS";
     const int credit1_w = strlen(credit1_str) * 8;
@@ -362,21 +366,21 @@ static void ui_logo_draw(const ui_t *ui)
     const int version_y = gfx->height - 32;
 
     /* Draw a shadow under the text */
-    graphics_set_color(shadow_color, clear_color);
-    graphics_draw_text(disp, credit1_x + 1, credit1_y + 1, credit1_str);
-    graphics_draw_text(disp, credit2_x + 1, credit2_y + 1, credit2_str);
+    rdpq_textparms_t shadow_parms = { .style_id = UI_STYLE_SHADOW };
+    rdpq_text_print(&shadow_parms, FONT_DEBUG, credit1_x + 1, credit1_y + 1, credit1_str);
+    rdpq_text_print(&shadow_parms, FONT_DEBUG, credit2_x + 1, credit2_y + 1, credit2_str);
     if (version_w)
     {
-        graphics_draw_text(disp, version_x + 1, version_y + 1, version_str);
+        rdpq_text_print(&shadow_parms, FONT_DEBUG, version_x + 1, version_y + 1, version_str);
     }
 
     /* Draw the same text on top of the shadow */
-    graphics_set_color(text_color, clear_color);
-    graphics_draw_text(disp, credit1_x, credit1_y, credit1_str);
-    graphics_draw_text(disp, credit2_x, credit2_y, credit2_str);
+    rdpq_textparms_t text_parms = { .style_id = UI_STYLE_TEXT };
+    rdpq_text_print(&text_parms, FONT_DEBUG, credit1_x, credit1_y, credit1_str);
+    rdpq_text_print(&text_parms, FONT_DEBUG, credit2_x, credit2_y, credit2_str);
     if (version_w)
     {
-        graphics_draw_text(disp, version_x, version_y, version_str);
+        rdpq_text_print(&text_parms, FONT_DEBUG, version_x, version_y, version_str);
     }
 }
 
@@ -384,37 +388,39 @@ static void ui_heading_draw(const ui_t *ui, int stride)
 {
     sprite_t *const headings = ui->sprites[UI_SPRITE_HEADINGS];
 
-    gfx_detach_rdp();
-
     const int center_x = (gfx->width / 2);
     const int center_y = (gfx->height / 2);
     const int x = center_x - (headings->width / 2);
     const int y = center_y - 70;
 
-    graphics_draw_sprite_trans_stride(gfx->disp, x, y, headings, stride);
+    /* Calculate slice dimensions for strided sprite */
+    const int slice_h = headings->height / headings->vslices;
+    const int t_offset = stride * slice_h;
+
+    rdpq_set_mode_copy(true);
+    rdpq_sprite_blit(headings, x, y, &(rdpq_blitparms_t){
+        .t0 = t_offset,
+        .height = slice_h,
+    });
 }
 
 static void ui_howto_draw(const ui_t *ui)
 {
     sprite_t *const howto = ui->sprites[UI_SPRITE_HOWTO];
 
-    gfx_detach_rdp();
-
     const int center_x = (gfx->width / 2);
     const int center_y = (gfx->height / 2);
     const int x = center_x - (howto->width / 2);
     const int y = center_y - (howto->height / 1.45);
 
-    graphics_draw_sprite_trans(gfx->disp, x, y, howto);
+    rdpq_set_mode_copy(true);
+    rdpq_sprite_blit(howto, x, y, NULL);
 }
 
 static void ui_score_draw(const ui_t *ui)
 {
     uint16_t score = ui->last_score;
     sprite_t *const font = ui->sprites[UI_SPRITE_FONT_LARGE];
-
-    gfx_detach_rdp();
-    const display_context_t disp = gfx->disp;
 
     size_t i = 0, num_digits;
     int digits[UI_SCORE_MAX_DIGITS];
@@ -426,14 +432,22 @@ static void ui_score_draw(const ui_t *ui)
     } while (score != 0 && num_digits < UI_SCORE_MAX_DIGITS);
 
     const int digit_w = font->width / font->hslices;
+    const int digit_h = font->height / font->vslices;
     const int score_w = digit_w * num_digits;
     const int center_x = gfx->width / 2;
     const int y = 20;
 
+    rdpq_set_mode_copy(true);
+
     int x = center_x + (score_w / 2) - digit_w;
     for (i = 0; i < num_digits; i++)
     {
-        graphics_draw_sprite_trans_stride(disp, x, y, font, digits[i]);
+        const int s_offset = digits[i] * digit_w;
+        rdpq_sprite_blit(font, x, y, &(rdpq_blitparms_t){
+            .s0 = s_offset,
+            .width = digit_w,
+            .height = digit_h,
+        });
         x -= digit_w;
     }
 }
@@ -442,12 +456,11 @@ static void ui_scoreboard_draw(const ui_t *ui)
 {
     sprite_t *const scoreboard = ui->sprites[UI_SPRITE_SCOREBOARD];
 
-    gfx_detach_rdp();
-
     const int center_x = (gfx->width / 2);
     const int x = center_x - (scoreboard->width / 2);
 
-    graphics_draw_sprite_trans(gfx->disp, x, ui->board_y, scoreboard);
+    rdpq_set_mode_copy(true);
+    rdpq_sprite_blit(scoreboard, x, ui->board_y, NULL);
 }
 
 static void ui_medal_draw(const ui_t *ui)
@@ -467,20 +480,27 @@ static void ui_medal_draw(const ui_t *ui)
 
     sprite_t *const medal = ui->sprites[UI_SPRITE_MEDAL];
 
-    gfx_detach_rdp();
-
+    const int slice_w = medal->width / medal->hslices;
+    const int slice_h = medal->height / medal->vslices;
     const int center_x = (gfx->width / 2);
     const int center_y = (gfx->height / 2);
-    const int x = center_x - ((medal->width / medal->hslices) / 2) - 32;
-    const int y = center_y - ((medal->height / medal->vslices) / 2) + 4;
+    const int x = center_x - (slice_w / 2) - 32;
+    const int y = center_y - (slice_h / 2) + 4;
 
-    graphics_draw_sprite_trans_stride(gfx->disp, x, y, medal, stride);
+    /* Calculate texture offset based on stride (horizontal slices) */
+    const int s_offset = stride * slice_w;
+
+    rdpq_set_mode_copy(true);
+    rdpq_sprite_blit(medal, x, y, &(rdpq_blitparms_t){
+        .s0 = s_offset,
+        .width = slice_w,
+        .height = slice_h,
+    });
 }
 
 static void ui_highscores_score_draw(const ui_t *ui, int score, int y)
 {
     sprite_t *const font = ui->sprites[UI_SPRITE_FONT_MED];
-    const display_context_t disp = gfx->disp;
 
     size_t i = 0, num_digits;
     int digits[UI_SCORE_MAX_DIGITS] = {0};
@@ -492,19 +512,26 @@ static void ui_highscores_score_draw(const ui_t *ui, int score, int y)
     } while (score != 0 && num_digits < UI_SCORE_MAX_DIGITS);
 
     const int digit_w = font->width / font->hslices;
+    const int digit_h = font->height / font->vslices;
     const int center_x = gfx->width / 2;
+
+    rdpq_set_mode_copy(true);
+
     int x = center_x + 38;
     for (i = 0; i < num_digits; i++)
     {
-        graphics_draw_sprite_trans_stride(disp, x, y, font, digits[i]);
+        const int s_offset = digits[i] * digit_w;
+        rdpq_sprite_blit(font, x, y, &(rdpq_blitparms_t){
+            .s0 = s_offset,
+            .width = digit_w,
+            .height = digit_h,
+        });
         x -= digit_w;
     }
 }
 
 static void ui_highscores_draw(const ui_t *ui)
 {
-    gfx_detach_rdp();
-
     const int center_x = (gfx->width / 2);
     const int center_y = (gfx->height / 2);
     ui_highscores_score_draw(ui, ui->last_score_acc, center_y - 11);
@@ -512,18 +539,19 @@ static void ui_highscores_draw(const ui_t *ui)
 
     if (ui->new_high_score && ui->high_score_acc == ui->high_score)
     {
+        sprite_t *const new_sprite = ui->sprites[UI_SPRITE_NEW];
         const int new_x = center_x + 10;
         const int new_y = center_y + 1;
-        graphics_draw_sprite(gfx->disp, new_x, new_y, ui->sprites[UI_SPRITE_NEW]);
+
+        rdpq_set_mode_copy(true);
+        rdpq_sprite_blit(new_sprite, new_x, new_y, NULL);
     }
 }
 
 static void ui_flash_draw(const ui_t *ui)
 {
     gfx_rdp_color_fill(ui->flash_color);
-    const int bx = gfx->width - 1;
-    const int by = gfx->height - 1;
-    rdp_draw_filled_rectangle(0, 0, bx, by);
+    rdpq_fill_rectangle(0, 0, gfx->width, gfx->height);
 }
 
 void ui_draw(const ui_t *ui)

@@ -20,8 +20,7 @@
 #define FPS_NUM_HISTORY     ((size_t) 10)
 #define FPS_TEXT_LEN        ((size_t) 48)
 
-#define FPS_TEXT_COLOR      graphics_make_color(0x00, 0x00, 0x00, 0xFF)
-#define FPS_CLEAR_COLOR     graphics_make_color(0x00, 0x00, 0x00, 0x00)
+static color_t FPS_TEXT_COLOR = {0};
 
 typedef struct fps_counter_s
 {
@@ -43,6 +42,13 @@ static fps_counter_t fps = {0};
 void fps_init(void)
 {
     memset(&fps, 0, sizeof fps);
+    FPS_TEXT_COLOR = RGBA32(0x00, 0x00, 0x00, 0xFF);
+    /* Setup font style for FPS text */
+    rdpq_font_t *font = (rdpq_font_t *)rdpq_text_get_font(FONT_DEBUG);
+    if (font)
+    {
+        rdpq_font_style(font, 0, &(rdpq_fontstyle_t){ .color = FPS_TEXT_COLOR });
+    }
 }
 
 void fps_tick(const joypad_buttons_t *buttons)
@@ -94,18 +100,13 @@ void fps_draw(void)
 {
     if (!fps.should_draw) return;
 
-    gfx_detach_rdp();
-
-    static char fps_text[FPS_TEXT_LEN];
     const ticks_t ticks = timer_ticks();
 
-    graphics_set_color(FPS_TEXT_COLOR, FPS_CLEAR_COLOR);
+    rdpq_text_printf(NULL, FONT_DEBUG, 10, gfx->height - 33,
+        "FPS: %05.2f, Frame: %u, Miss: %u",
+        fps.average_fps, fps.total_frames, fps.total_misses);
 
-    const char *const line1_fmt = "FPS: %05.2f, Frame: %u, Miss: %u";
-    snprintf(fps_text, FPS_TEXT_LEN, line1_fmt, fps.average_fps, fps.total_frames, fps.total_misses);
-    graphics_draw_text(gfx->disp, 10, gfx->height - 33, fps_text);
-
-    const char *const line2_fmt = "Milli: %llu, Tick: %llu";
-    snprintf(fps_text, FPS_TEXT_LEN, line2_fmt, ticks / TICKS_PER_MS, ticks);
-    graphics_draw_text(gfx->disp, 10, gfx->height - 20, fps_text);
+    rdpq_text_printf(NULL, FONT_DEBUG, 10, gfx->height - 20,
+        "Milli: %llu, Tick: %llu",
+        ticks / TICKS_PER_MS, ticks);
 }

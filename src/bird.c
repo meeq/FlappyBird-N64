@@ -87,7 +87,6 @@ void bird_draw(const bird_t *bird)
     /* Calculate player space center position */
     const int cx = gfx->width * bird->x;
     const int cy = BG_GROUND_TOP_Y / 2;
-    const mirror_t mirror = MIRROR_DISABLED;
     /* Calculate bird Y position */
     float bird_y = bird->y;
     switch (bird->state)
@@ -105,15 +104,19 @@ void bird_draw(const bird_t *bird)
     /* Calculate bird corner coordinates from center point */
     const int bird_half_w = bird->slice_w / 2,
               bird_half_h = bird->slice_h / 2;
-    const int tx = cx - bird_half_w, bx = cx + bird_half_w - 1,
-              ty = bird_y - bird_half_h, by = bird_y + bird_half_h - 1;
-    /* Load the current animation sprite slice as a texture */
-    gfx_rdp_texture_fill(true);
-    rdp_sync(SYNC_PIPE);
-    int stride = (bird->color_type * bird->sprite->hslices) + bird->anim_frame;
-    rdp_load_texture_stride(0, 0, mirror, bird->sprite, stride);
-    /* Draw the bird rectangle */
-    rdp_draw_textured_rectangle(0, tx, ty, bx, by, mirror);
+    const int tx = cx - bird_half_w,
+              ty = bird_y - bird_half_h;
+    /* Calculate texture offset for current animation frame and color */
+    const int s_offset = bird->anim_frame * bird->slice_w;
+    const int t_offset = bird->color_type * bird->slice_h;
+    /* Draw the bird sprite */
+    rdpq_set_mode_copy(true);
+    rdpq_sprite_blit(bird->sprite, tx, ty, &(rdpq_blitparms_t){
+        .s0 = s_offset,
+        .t0 = t_offset,
+        .width = bird->slice_w,
+        .height = bird->slice_h,
+    });
 }
 
 void bird_hit(bird_t *bird)

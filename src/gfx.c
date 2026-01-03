@@ -11,11 +11,17 @@
 
 gfx_t *gfx;
 
+/* Font IDs for RDPQ text rendering */
+#define FONT_DEBUG 1
+
 void gfx_init(void)
 {
     /* Set up the display and RDP subsystems */
     display_init(RESOLUTION_320x240, DEPTH_16_BPP, 3, GAMMA_NONE, FILTERS_RESAMPLE);
-    rdp_init(); // TODO Replace with rdpq_init()
+    rdpq_init();
+    /* Setup debug font for text rendering */
+    rdpq_font_t *debug_font = rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_MONO);
+    rdpq_text_register_font(FONT_DEBUG, debug_font);
     /* Setup state */
     gfx = malloc(sizeof(gfx_t));
     gfx->width = display_get_width();
@@ -35,23 +41,8 @@ void gfx_attach_rdp(void)
 {
     if (!rdpq_is_attached() && gfx->disp)
     {
-        /* Ensure the RDP is ready for new commands */
-        rdp_sync(SYNC_PIPE);
-
-        /* Remove any clipping windows */
-        rdp_set_default_clipping();
-
-        /* Attach RDP to display */
-        rdp_attach(gfx->disp);
-    }
-}
-
-void gfx_detach_rdp(void)
-{
-    if (rdpq_is_attached())
-    {
-        /* Inform the RDP drawing is finished; flush pending operations */
-        rdpq_detach_wait();
+        /* Attach RDP to display - RDPQ handles sync automatically */
+        rdpq_attach(gfx->disp, NULL);
     }
 }
 

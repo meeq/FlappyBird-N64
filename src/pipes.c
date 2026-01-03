@@ -132,12 +132,20 @@ void pipes_draw(const pipes_t *pipes)
     sprite_t *const tube = pipes->tube_sprite;
     sprite_t *const cap = pipes->cap_sprite;
     const int color = pipes->color;
-    const int hslices = cap->hslices;
-    const mirror_t mirror = MIRROR_DISABLED;
     int16_t cx, cy, tx, ty, bx, by, gap_cy;
 
-    gfx_rdp_texture_fill(true);
-    rdp_sync(SYNC_PIPE);
+    /* Calculate sprite slice dimensions */
+    const int tube_slice_w = tube->width / tube->hslices;
+    const int cap_slice_w = cap->width / cap->hslices;
+    const int cap_slice_h = cap->height / cap->vslices;
+
+    /* Texture offset for the pipe color */
+    const int tube_s_offset = color * tube_slice_w;
+    const int cap_s_offset = color * cap_slice_w;
+    /* Top cap uses the second row (flipped cap) */
+    const int top_cap_t_offset = cap_slice_h;
+
+    rdpq_set_mode_copy(true);
 
     const pipe_t *pipe;
     for (size_t i = 0; i < PIPES_MAX_COUNT; i++)
@@ -146,33 +154,45 @@ void pipes_draw(const pipes_t *pipes)
         /* Calculate X position */
         cx = gfx->width * pipe->x;
         tx = cx - (PIPE_TUBE_WIDTH / 2);
-        bx = cx + (PIPE_TUBE_WIDTH / 2) - 1;
+        bx = cx + (PIPE_TUBE_WIDTH / 2);
         /* Don't bother drawing the pipe if it is off-screen */
         if (bx < 0 || tx >= gfx->width) continue;
         /* Calculate Y position */
         cy = (BG_GROUND_TOP_Y / 2);
         gap_cy = cy + pipe->y * cy;
-        /* Load tube texture */
-        rdp_load_texture_stride(0, 0, mirror, tube, color);
+
+        /* Draw tube sections with tiling */
+        rdpq_texparms_t tube_texparams = {
+            .s = { .repeats = 1, .mirror = MIRROR_NONE },
+            .t = { .repeats = REPEAT_INFINITE, .mirror = MIRROR_NONE },
+        };
+        rdpq_sprite_upload(TILE0, tube, &tube_texparams);
+
         /* Top tube */
         ty = 0;
         by = gap_cy - (PIPE_GAP_Y / 2);
-        rdp_draw_textured_rectangle(0, tx, ty, bx, by, mirror);
+        rdpq_texture_rectangle(TILE0, tx, ty, bx, by, tube_s_offset, 0);
+
         /* Bottom tube */
         ty = gap_cy + (PIPE_GAP_Y / 2);
-        by = BG_GROUND_TOP_Y - 1;
-        rdp_draw_textured_rectangle(0, tx, ty, bx, by, mirror);
-        /* Load top cap texture */
-        rdp_load_texture_stride(0, 0, mirror, cap, color + hslices);
-        /* Top cap */
+        by = BG_GROUND_TOP_Y;
+        rdpq_texture_rectangle(TILE0, tx, ty, bx, by, tube_s_offset, 0);
+
+        /* Top cap (uses flipped sprite in second row) */
         ty = gap_cy - (PIPE_GAP_Y / 2);
-        by = ty + PIPE_CAP_HEIGHT - 1;
-        rdp_draw_textured_rectangle(0, tx, ty, bx, by, mirror);
-        /* Load bottom cap texture */
-        rdp_load_texture_stride(0, 0, mirror, cap, color);
+        rdpq_sprite_blit(cap, tx, ty, &(rdpq_blitparms_t){
+            .s0 = cap_s_offset,
+            .t0 = top_cap_t_offset,
+            .width = cap_slice_w,
+            .height = cap_slice_h,
+        });
+
         /* Bottom cap */
         ty = gap_cy + (PIPE_GAP_Y / 2) - PIPE_CAP_HEIGHT;
-        by = ty + PIPE_CAP_HEIGHT - 1;
-        rdp_draw_textured_rectangle(0, tx, ty, bx, by, mirror);
+        rdpq_sprite_blit(cap, tx, ty, &(rdpq_blitparms_t){
+            .s0 = cap_s_offset,
+            .width = cap_slice_w,
+            .height = cap_slice_h,
+        });
     }
 }

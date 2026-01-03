@@ -94,7 +94,7 @@ int main(void)
             bg_draw();
             pipes_draw(pipes);
             bird_draw(bird);
-            // ui_draw(ui);
+            ui_draw(ui);
         }
         /* Finish drawing and show the framebuffer */
         rdpq_detach_show();

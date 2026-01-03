@@ -12,6 +12,9 @@
 
 #include "system.h"
 
+/* Font IDs for RDPQ text rendering */
+#define FONT_DEBUG 1
+
 /* Graphics definitions */
 
 typedef struct gfx_s
@@ -32,7 +35,6 @@ void gfx_init(void);
 void gfx_display_lock(void);
 
 void gfx_attach_rdp(void);
-void gfx_detach_rdp(void);
 
 void gfx_rdp_color_fill(color_t color);
 void gfx_rdp_texture_fill(bool transparency);
