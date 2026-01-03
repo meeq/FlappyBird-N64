@@ -14,6 +14,10 @@ N64_ROM_NAME := FlappyBird
 N64_ROM_TITLE := Flappy Bird
 N64_ROM_FILE := $(N64_ROM_NAME).z64
 
+# ROM version
+ROM_VERSION := v1.5
+CFLAGS += -DROM_VERSION='"$(ROM_VERSION)"'
+
 all: $(N64_ROM_FILE)
 .PHONY: all
 

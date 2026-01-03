@@ -35,7 +35,7 @@ This project is considered "done", and is no longer being actively developed. It
 
 ## Play the game
 
-[Download](./FlappyBird-v1.4.z64?raw=true) or [compile](#build-the-rom) the ROM file and load it as you would any other N64 ROM.
+[Download](./FlappyBird-v1.5.z64?raw=true) or [compile](#build-the-rom) the ROM file and load it as you would any other N64 ROM.
 
 This ROM file has been tested to work on real Nintendo 64 hardware using the [EverDrive-64 by krikzz](http://krikzz.com/), [64drive by retroactive](http://64drive.retroactive.be/), and [SummerCart64](https://github.com/Polprzewodnikowy/SummerCart64).
 
@@ -56,10 +56,12 @@ This project has been tested with the `trunk` branch of LibDragon:
 ```sh
 git clone https://github.com/meeq/libdragon.git
 cd libdragon
-git checkout d74706b5962ecbbf4c9faa00075a2843eeebcabe
+git checkout d4b5b0b938fb143c0c746cd65d17e21b4112cc5d
 ```
 
-[See the LibDragon build script for information on prerequisites and dependencies.](https://github.com/DragonMinded/libdragon/blob/unstable/build.sh)
+Run the LibDragon [build-toolchain](https://github.com/DragonMinded/libdragon/blob/trunk/tools/build-toolchain.sh) and [build-gdb](https://github.com/DragonMinded/libdragon/blob/trunk/tools/build-gdb.sh) scripts to prepare a toolchain for LibDragon.
+
+Then run the LibDragon [build](https://github.com/DragonMinded/libdragon/blob/trunk/build.sh) script to install LibDragon in the toolchain.
 
 ### Configuration
 
