@@ -12,7 +12,10 @@ ground          1   1
 headings        1   2
 how-to          1   1
 logo            1   1
-medal           1   4
+medal-bronze    1   1
+medal-silver    1   1
+medal-gold      1   1
+medal-platinum  1   1
 new             1   1
 pipe-cap        2   2
 pipe-tube       2   1

@@ -61,19 +61,14 @@ typedef enum
 
 typedef enum
 {
-    UI_MEDAL_STRIDE_BRONZE,
-    UI_MEDAL_STRIDE_SILVER,
-    UI_MEDAL_STRIDE_GOLD,
-    UI_MEDAL_STRIDE_PLATINUM,
-} ui_medal_stride_t;
-
-typedef enum
-{
     UI_SPRITE_LOGO,
     UI_SPRITE_HEADINGS,
     UI_SPRITE_HOWTO,
     UI_SPRITE_SCOREBOARD,
-    UI_SPRITE_MEDAL,
+    UI_SPRITE_MEDAL_BRONZE,
+    UI_SPRITE_MEDAL_SILVER,
+    UI_SPRITE_MEDAL_GOLD,
+    UI_SPRITE_MEDAL_PLATINUM,
     UI_SPRITE_FONT_LARGE,
     UI_SPRITE_FONT_MED,
     UI_SPRITE_NEW,
@@ -88,7 +83,10 @@ static const char *const UI_SPRITE_FILES[UI_SPRITES_COUNT] = {
     "gfx/headings.sprite",
     "gfx/how-to.sprite",
     "gfx/scoreboard.sprite",
-    "gfx/medal.sprite",
+    "gfx/medal-bronze.sprite",
+    "gfx/medal-silver.sprite",
+    "gfx/medal-gold.sprite",
+    "gfx/medal-platinum.sprite",
     "gfx/font-large.sprite",
     "gfx/font-medium.sprite",
     "gfx/new.sprite",
@@ -465,37 +463,28 @@ static void ui_scoreboard_draw(const ui_t *ui)
 
 static void ui_medal_draw(const ui_t *ui)
 {
-    int stride;
+    ui_sprite_t medal_sprite;
     const int score = ui->last_score;
     if (score >= UI_MEDAL_SCORE_PLATINUM)
-        stride = UI_MEDAL_STRIDE_PLATINUM;
+        medal_sprite = UI_SPRITE_MEDAL_PLATINUM;
     else if (score >= UI_MEDAL_SCORE_GOLD)
-        stride = UI_MEDAL_STRIDE_GOLD;
+        medal_sprite = UI_SPRITE_MEDAL_GOLD;
     else if (score >= UI_MEDAL_SCORE_SILVER)
-        stride = UI_MEDAL_STRIDE_SILVER;
+        medal_sprite = UI_SPRITE_MEDAL_SILVER;
     else if (score >= UI_MEDAL_SCORE_BRONZE)
-        stride = UI_MEDAL_STRIDE_BRONZE;
+        medal_sprite = UI_SPRITE_MEDAL_BRONZE;
     else
         return;
 
-    sprite_t *const medal = ui->sprites[UI_SPRITE_MEDAL];
+    sprite_t *const medal = ui->sprites[medal_sprite];
 
-    const int slice_w = medal->width / medal->hslices;
-    const int slice_h = medal->height / medal->vslices;
     const int center_x = (gfx->width / 2);
     const int center_y = (gfx->height / 2);
-    const int x = center_x - (slice_w / 2) - 32;
-    const int y = center_y - (slice_h / 2) + 4;
-
-    /* Calculate texture offset based on stride (horizontal slices) */
-    const int s_offset = stride * slice_w;
+    const int x = center_x - (medal->width / 2) - 32;
+    const int y = center_y - (medal->height / 2) + 4;
 
     rdpq_set_mode_copy(true);
-    rdpq_sprite_blit(medal, x, y, &(rdpq_blitparms_t){
-        .s0 = s_offset,
-        .width = slice_w,
-        .height = slice_h,
-    });
+    rdpq_sprite_blit(medal, x, y, NULL);
 }
 
 static void ui_highscores_score_draw(const ui_t *ui, int score, int y)
