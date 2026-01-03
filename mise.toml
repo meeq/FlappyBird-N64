@@ -1,0 +1,2 @@
+[env]
+N64_INST = "{{config_root}}/toolchain"
