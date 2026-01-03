@@ -1,2 +1,5 @@
 [env]
-N64_INST = "{{config_root}}/toolchain"
+N64_INST = "{{config_root}}/../toolchain"
+
+[tasks.ares]
+run = "/Applications/ares.app/Contents/MacOS/ares FlappyBird.z64"
