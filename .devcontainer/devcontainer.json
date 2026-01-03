@@ -1,0 +1,30 @@
+{
+  "name": "N64 Flappy Bird",
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "target": "devcontainer"
+  },
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.makefile-tools"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "C_Cpp.default.compilerPath": "/n64_toolchain/bin/mips64-elf-gcc",
+        "C_Cpp.default.includePath": [
+          "${workspaceFolder}/src",
+          "/n64_toolchain/mips64-elf/include"
+        ]
+      }
+    }
+  },
+  "remoteEnv": {
+    "N64_INST": "/n64_toolchain"
+  },
+  "postCreateCommand": "echo 'N64 development environment ready!'",
+  "remoteUser": "root"
+}

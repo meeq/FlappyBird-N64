@@ -1,0 +1,73 @@
+name: Build ROM
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Get libdragon commit SHA
+        id: libdragon
+        run: |
+          sha=$(git rev-parse --short HEAD:libdragon)
+          echo "sha=$sha" >> $GITHUB_OUTPUT
+          echo "scope=libdragon-$sha" >> $GITHUB_OUTPUT
+          echo "tag=flappybird-n64:$sha" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: devcontainer
+          load: true
+          tags: ${{ steps.libdragon.outputs.tag }}
+          cache-from: type=gha,scope=${{ steps.libdragon.outputs.scope }}
+          cache-to: type=gha,mode=max,scope=${{ steps.libdragon.outputs.scope }}
+
+      - name: Build ROM
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/workspace ${{ steps.libdragon.outputs.tag }} make
+
+      - name: Upload ROM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FlappyBird
+          path: FlappyBird.z64
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Download ROM artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: FlappyBird
+
+      - name: Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Rename ROM with version
+        run: mv FlappyBird.z64 FlappyBird-${{ steps.version.outputs.VERSION }}.z64
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: FlappyBird-${{ steps.version.outputs.VERSION }}.z64
+          generate_release_notes: true
