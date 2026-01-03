@@ -88,9 +88,6 @@ $(WAV64_DIR)/%.wav64: $(WAV_DIR)/%.wav
 	$(N64_AUDIOCONV) -o "$(WAV64_DIR)" "$<" $(REDIRECT_STDOUT)
 
 # Filesystem
-# Workaround for n64.mk bug with nested filesystems
-# See: https://github.com/DragonMinded/libdragon/pull/436
-# The body of this rule can be removed if/when the above PR is merged
 $(DFS_FILE): $(SPRITE_FILES) $(WAV64_FILES)
 
 #
