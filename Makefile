@@ -11,7 +11,7 @@
 
 # ROM details
 N64_ROM_NAME := FlappyBird
-N64_ROM_TITLE := Flappy Bird for N64
+N64_ROM_TITLE := Flappy Bird
 N64_ROM_FILE := $(N64_ROM_NAME).z64
 
 all: $(N64_ROM_FILE)
@@ -21,7 +21,7 @@ all: $(N64_ROM_FILE)
 SOURCE_DIR := ./src
 RESOURCES_DIR := ./resources
 BUILD_DIR := ./build
-DFS_ROOTDIR := $(BUILD_DIR)/dfs
+N64_MKDFS_ROOT := $(BUILD_DIR)/dfs
 
 include $(N64_INST)/include/n64.mk
 
@@ -37,13 +37,13 @@ DEPS := $(OBJS:.o=.d)
 
 # Sound files
 WAV_DIR := $(RESOURCES_DIR)/sfx
-WAV64_DIR := $(DFS_ROOTDIR)/sfx
+WAV64_DIR := $(N64_MKDFS_ROOT)/sfx
 WAV_FILES := $(wildcard $(WAV_DIR)/*.wav)
 WAV64_FILES := $(patsubst $(WAV_DIR)/%.wav,$(WAV64_DIR)/%.wav64,$(WAV_FILES))
 
 # Image files
 PNG_DIR := $(RESOURCES_DIR)/gfx
-SPRITE_DIR := $(DFS_ROOTDIR)/gfx
+SPRITE_DIR := $(N64_MKDFS_ROOT)/gfx
 PNG_FILES := $(wildcard $(PNG_DIR)/*.png)
 SPRITE_FILES := $(patsubst $(PNG_DIR)/%.png,$(SPRITE_DIR)/%.sprite,$(PNG_FILES))
 SPRITE_MANIFEST_TXT := $(PNG_DIR)/manifest.txt
@@ -88,9 +88,6 @@ $(WAV64_DIR)/%.wav64: $(WAV_DIR)/%.wav
 # See: https://github.com/DragonMinded/libdragon/pull/436
 # The body of this rule can be removed if/when the above PR is merged
 $(DFS_FILE): $(SPRITE_FILES) $(WAV64_FILES)
-	@mkdir -p "$(dir $@)"
-	@echo "    [DFS] $@"
-	$(N64_MKDFS) "$@" "$(DFS_ROOTDIR)" $(REDIRECT_STDOUT)
 
 #
 # Housekeeping
