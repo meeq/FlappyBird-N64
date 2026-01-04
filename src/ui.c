@@ -15,6 +15,8 @@
 #include "bg.h"
 #include "bird.h"
 
+#include <eeprom.h>
+
 /* UI definitions */
 
 // This should be set by the project Makefile
@@ -125,6 +127,58 @@ typedef struct ui_s
     int high_score_acc;
 } ui_t;
 
+/* EEPROM high score persistence */
+
+#define EEPROM_MAGIC 0x464C4150  /* "FLAP" in ASCII */
+
+static void ui_load_high_score(ui_t *ui)
+{
+    eeprom_type_t eeprom_type = eeprom_present();
+    if (eeprom_type == EEPROM_NONE)
+    {
+        debugf("[EEPROM] No EEPROM detected\n");
+        return;
+    }
+    debugf("[EEPROM] Detected EEPROM type: %s\n", eeprom_type == EEPROM_4K ? "4K" : "16K");
+
+    uint8_t data[EEPROM_BLOCK_SIZE];
+    eeprom_read(0, data);
+
+    /* Check magic signature */
+    uint32_t magic = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
+    if (magic != EEPROM_MAGIC)
+    {
+        debugf("[EEPROM] No valid save found (magic: 0x%08lX)\n", magic);
+        return;
+    }
+
+    /* Extract high score */
+    ui->high_score = (data[4] << 24) | (data[5] << 16) | (data[6] << 8) | data[7];
+    debugf("[EEPROM] Loaded high score: %d\n", ui->high_score);
+}
+
+static void ui_save_high_score(const ui_t *ui)
+{
+    if (eeprom_present() == EEPROM_NONE) return;
+
+    uint8_t data[EEPROM_BLOCK_SIZE];
+
+    /* Write magic signature */
+    data[0] = (EEPROM_MAGIC >> 24) & 0xFF;
+    data[1] = (EEPROM_MAGIC >> 16) & 0xFF;
+    data[2] = (EEPROM_MAGIC >> 8) & 0xFF;
+    data[3] = EEPROM_MAGIC & 0xFF;
+
+    /* Write high score */
+    data[4] = (ui->high_score >> 24) & 0xFF;
+    data[5] = (ui->high_score >> 16) & 0xFF;
+    data[6] = (ui->high_score >> 8) & 0xFF;
+    data[7] = ui->high_score & 0xFF;
+
+    eeprom_write(0, data);
+    debugf("[EEPROM] Saved high score: %d\n", ui->high_score);
+}
+
 /* UI implementation */
 
 static void ui_set_time_mode(ui_t *ui, bg_time_mode_t time_mode)
@@ -159,6 +213,7 @@ ui_t *ui_init(void)
     ui->flash_color = UI_FLASH_COLOR;
     ui->board_y = gfx->height;
     ui_set_time_mode(ui, bg_get_time_mode());
+    ui_load_high_score(ui);
     // Load the sprites
     for (size_t i = 0; i < UI_SPRITES_COUNT; i++)
     {
@@ -316,6 +371,10 @@ static void ui_gameover_tick(ui_t *ui)
         {
             ui->medal_draw = true;
             ui->did_gameover = true;
+            if (ui->new_high_score)
+            {
+                ui_save_high_score(ui);
+            }
         }
     }
 }

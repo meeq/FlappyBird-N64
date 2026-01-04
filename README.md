@@ -19,12 +19,8 @@ This project is considered "done", and is no longer being actively developed. It
 * N64 RSP-accelerated audio mixing
 * 60FPS gameplay at 320x240 resolution
 * Parallax background scrolling
+* High score save support using EEPROM 4K
 * Rumble Pak support
-
-### Known issues
-
-* High score is not saved across resets
-* Hardware reset briefly shows an exception handler screen
 
 ### Intentional omissions
 

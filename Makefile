@@ -11,12 +11,7 @@
 
 # ROM details
 N64_ROM_NAME := FlappyBird
-N64_ROM_TITLE := Flappy Bird
 N64_ROM_FILE := $(N64_ROM_NAME).z64
-
-# ROM version
-ROM_VERSION := v1.5
-CFLAGS += -DROM_VERSION='"$(ROM_VERSION)"'
 
 all: $(N64_ROM_FILE)
 .PHONY: all
@@ -28,6 +23,10 @@ BUILD_DIR := ./build
 N64_MKDFS_ROOT := $(BUILD_DIR)/dfs
 
 include $(N64_INST)/include/n64.mk
+
+# ROM version (shown on title screen)
+ROM_VERSION := v1.5
+CFLAGS += -DROM_VERSION='"$(ROM_VERSION)"'
 
 # Set V=1 to enable verbose Make output
 ifneq ($(V),1)
@@ -64,7 +63,9 @@ N64_MKSPRITE ?= $(N64_BINDIR)/mksprite
 # Compilation pipeline
 #
 
-# Final N64 ROM file in big-endian format
+# Final N64 ROM
+$(N64_ROM_FILE): N64_ROM_TITLE := "Flappy Bird"
+$(N64_ROM_FILE): N64_ROM_SAVETYPE = eeprom4k
 $(N64_ROM_FILE): $(LINKED_OBJS) $(DFS_FILE)
 
 # Linked object code binary

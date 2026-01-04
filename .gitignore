@@ -11,4 +11,6 @@
 
 # Only commit clean, tagged versions of ROMs
 *.z64
+*.eeprom
+*.pak
 !/FlappyBird-v*.z64
