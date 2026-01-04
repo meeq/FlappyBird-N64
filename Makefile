@@ -24,8 +24,8 @@ N64_MKDFS_ROOT := $(BUILD_DIR)/dfs
 
 include $(N64_INST)/include/n64.mk
 
-# ROM version derived from Git
-ROM_VERSION := $(shell ./version.sh)
+# ROM version derived from Git (can override via environment)
+ROM_VERSION ?= $(shell ./version.sh)
 CFLAGS += -DROM_VERSION='"$(ROM_VERSION)"'
 
 # Set V=1 to enable verbose Make output

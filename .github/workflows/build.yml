@@ -93,10 +93,15 @@ jobs:
             type=gha,mode=max,scope=${{ steps.cache-keys.outputs.devcontainer_scope }}
             type=inline
 
+      - name: Get ROM version
+        id: rom-version
+        run: echo "ROM_VERSION=$(./version.sh)" >> $GITHUB_OUTPUT
+
       - name: Build ROM
         run: |
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
+            -e ROM_VERSION=${{ steps.rom-version.outputs.ROM_VERSION }} \
             ${{ steps.cache-keys.outputs.devcontainer_tag }} \
             make
 
