@@ -47,7 +47,7 @@ jobs:
           echo "toolchain_tag=${{ env.TOOLCHAIN_IMAGE }}:$toolchain_hash" >> $GITHUB_OUTPUT
 
           # Devcontainer tag based on libdragon submodule commit
-          libdragon_sha=$(git rev-parse --short HEAD:libdragon)
+          libdragon_sha=$(git -C libdragon rev-parse --short HEAD)
           echo "devcontainer_scope=devcontainer-$libdragon_sha" >> $GITHUB_OUTPUT
           echo "devcontainer_tag=${{ env.DEVCONTAINER_IMAGE }}:$libdragon_sha" >> $GITHUB_OUTPUT
 
@@ -100,7 +100,7 @@ jobs:
         run: |
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
-            -e ROM_VERSION=${{ steps.rom-version.outputs.ROM_VERSION }} \
+            -e ROM_VERSION="${{ steps.rom-version.outputs.ROM_VERSION }}" \
             ${{ steps.cache-keys.outputs.devcontainer_tag }} \
             make
 
