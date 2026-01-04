@@ -82,13 +82,14 @@ void fps_draw(void)
 
     const ticks_t ticks = timer_ticks();
     const int font_id = gfx->highres ? FONT_AT01_2X : FONT_AT01;
-    const int line_height = gfx->highres ? 26 : 13;
+    const int margin_x = GFX_SCALE(10);
+    const int line_height = GFX_SCALE(14);
 
-    rdpq_text_printf(NULL, font_id, 10, gfx->height - (line_height * 2 + 7),
+    rdpq_text_printf(NULL, font_id, margin_x, gfx->height - (line_height * 2),
         "FPS: %05.2f, Frame: %u, Miss: %u",
         display_get_fps(), fps.total_frames, fps.total_misses);
 
-    rdpq_text_printf(NULL, font_id, 10, gfx->height - (line_height + 7),
+    rdpq_text_printf(NULL, font_id, margin_x, gfx->height - (line_height * 1),
         "Milli: %llu, Tick: %llu",
         ticks / TICKS_PER_MS, ticks);
 }

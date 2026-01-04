@@ -35,6 +35,7 @@
 #define UI_SPARKLE_CYCLE_TICKS  ((int)500 * TICKS_PER_MS)
 
 static color_t UI_DARK_COLOR  = {0};
+static color_t UI_DIM_COLOR   = {0};
 static color_t UI_LIGHT_COLOR = {0};
 static color_t UI_FLASH_COLOR = {0};
 
@@ -46,6 +47,7 @@ static color_t UI_FLASH_COLOR = {0};
 static inline void ui_init_colors(void)
 {
     UI_DARK_COLOR  = RGBA32(0x57, 0x37, 0x47, 0xFF);
+    UI_DIM_COLOR   = RGBA32(0x88, 0x68, 0x78, 0xFF);
     UI_LIGHT_COLOR = RGBA32(0xFF, 0xFF, 0xFF, 0xFF);
     UI_FLASH_COLOR = RGBA32(0xFF, 0xFF, 0xFF, 0xFF);
 }
@@ -215,13 +217,13 @@ static void ui_set_time_mode(ui_t *ui, bg_time_mode_t time_mode)
     {
         rdpq_font_style(font_1x, UI_STYLE_SHADOW, &(rdpq_fontstyle_t){ .color = ui->shadow_color });
         rdpq_font_style(font_1x, UI_STYLE_TEXT, &(rdpq_fontstyle_t){ .color = ui->text_color });
-        rdpq_font_style(font_1x, UI_STYLE_DIM, &(rdpq_fontstyle_t){ .color = UI_DARK_COLOR });
+        rdpq_font_style(font_1x, UI_STYLE_DIM, &(rdpq_fontstyle_t){ .color = UI_DIM_COLOR });
     }
     if (font_2x)
     {
         rdpq_font_style(font_2x, UI_STYLE_SHADOW, &(rdpq_fontstyle_t){ .color = ui->shadow_color });
         rdpq_font_style(font_2x, UI_STYLE_TEXT, &(rdpq_fontstyle_t){ .color = ui->text_color });
-        rdpq_font_style(font_2x, UI_STYLE_DIM, &(rdpq_fontstyle_t){ .color = UI_DARK_COLOR });
+        rdpq_font_style(font_2x, UI_STYLE_DIM, &(rdpq_fontstyle_t){ .color = UI_DIM_COLOR });
     }
 }
 
@@ -436,42 +438,35 @@ static void ui_logo_draw(const ui_t *ui)
         .scale_y = gfx->scale,
     });
 
-    /* Select font and character width based on resolution */
+    /* Select font based on resolution */
     const int font_id = gfx->highres ? FONT_AT01_2X : FONT_AT01;
-    const int char_w = gfx->highres ? 10 : 5;
-    const int shadow_offset = gfx->highres ? 2 : 1;
+    const int shadow_offset = GFX_SCALE(1);
+    const int line_h = GFX_SCALE(16);
+
+    /* Credits positioned at right side, right-aligned */
+    const int credits_x = gfx->width / 2;
+    const int credits_w = gfx->width / 2 - GFX_SCALE(32);
+    const int credit1_y = gfx->height / 2 + GFX_SCALE(5) + line_h;
+    const int credit2_y = credit1_y + line_h;
+    const int version_y = credit2_y + line_h;
 
     const char *const credit1_str = "Game by .GEARS";
-    const int credit1_w = strlen(credit1_str) * char_w;
-    const int credit1_x = center_x - (credit1_w / 2);
-    const int credit1_y = gfx->height - GFX_SCALE(80);
-
     const char *const credit2_str = "N64 Port by Meeq";
-    const int credit2_w = strlen(credit2_str) * char_w;
-    const int credit2_x = center_x - (credit2_w / 2);
-    const int credit2_y = gfx->height - GFX_SCALE(62);
-
     const char *const version_str = ROM_VERSION;
-    const int version_w = strlen(version_str) * char_w;
-    const int version_x = gfx->width - GFX_SCALE(32) - version_w;
-    const int version_y = gfx->height - GFX_SCALE(32);
 
-    /* Draw a shadow under the text */
-    rdpq_textparms_t shadow_parms = { .style_id = UI_STYLE_SHADOW };
-    rdpq_text_print(&shadow_parms, font_id, credit1_x + shadow_offset, credit1_y + shadow_offset, credit1_str);
-    rdpq_text_print(&shadow_parms, font_id, credit2_x + shadow_offset, credit2_y + shadow_offset, credit2_str);
-    if (version_w)
-    {
-        rdpq_text_print(&shadow_parms, font_id, version_x + shadow_offset, version_y + shadow_offset, version_str);
-    }
+    /* Draw shadows then text for credits (right-aligned) */
+    rdpq_textparms_t shadow_parms = { .style_id = UI_STYLE_SHADOW, .width = credits_w, .align = ALIGN_RIGHT };
+    rdpq_textparms_t text_parms = { .style_id = UI_STYLE_TEXT, .width = credits_w, .align = ALIGN_RIGHT };
 
-    /* Draw the same text on top of the shadow */
-    rdpq_textparms_t text_parms = { .style_id = UI_STYLE_TEXT };
-    rdpq_text_print(&text_parms, font_id, credit1_x, credit1_y, credit1_str);
-    rdpq_text_print(&text_parms, font_id, credit2_x, credit2_y, credit2_str);
-    if (version_w)
+    rdpq_text_print(&shadow_parms, font_id, credits_x + shadow_offset, credit1_y + shadow_offset, credit1_str);
+    rdpq_text_print(&shadow_parms, font_id, credits_x + shadow_offset, credit2_y + shadow_offset, credit2_str);
+    rdpq_text_print(&text_parms, font_id, credits_x, credit1_y, credit1_str);
+    rdpq_text_print(&text_parms, font_id, credits_x, credit2_y, credit2_str);
+
+    if (version_str[0])
     {
-        rdpq_text_print(&text_parms, font_id, version_x, version_y, version_str);
+        rdpq_text_print(&shadow_parms, font_id, credits_x + shadow_offset, version_y + shadow_offset, version_str);
+        rdpq_text_print(&text_parms, font_id, credits_x, version_y, version_str);
     }
 }
 
@@ -768,12 +763,10 @@ void ui_menu_tick(ui_t *ui, bird_t *bird, const joypad_buttons_t *buttons)
 static void ui_menu_draw(const ui_t *ui)
 {
     const int font_id = gfx->highres ? FONT_AT01_2X : FONT_AT01;
-    const int char_w = gfx->highres ? 10 : 5;
-    const int line_h = gfx->highres ? 16 : 8;
-    const int shadow_offset = gfx->highres ? 2 : 1;
+    const int line_h = GFX_SCALE(16);
+    const int shadow_offset = GFX_SCALE(1);
 
-    const int center_x = gfx->width / 2;
-    const int start_y = gfx->height / 2 - GFX_SCALE(10);
+    const int start_y = gfx->height / 2 + GFX_SCALE(5);
 
     /* Get current values */
     const char *color_str = MENU_COLOR_NAMES[ui->bird_color];
@@ -799,8 +792,7 @@ static void ui_menu_draw(const ui_t *ui)
         char line[40];
         snprintf(line, sizeof(line), "%s%s", prefix, rows[i]);
 
-        const int text_w = strlen(line) * char_w;
-        const int x = center_x - (text_w / 2);
+        const int x = GFX_SCALE(32);
         const int y = start_y + (i * line_h);
 
         /* Draw shadow then text (dim if not focused) */

@@ -19,4 +19,4 @@ fi
 
 # Otherwise use short SHA with optional -dirty suffix
 sha=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-echo "${sha}${dirty}"
+echo "Build ${sha}${dirty}"

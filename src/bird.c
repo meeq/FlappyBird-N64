@@ -321,6 +321,15 @@ void bird_tick(bird_t *bird, const joypad_buttons_t *const buttons)
         {
             bird->state = BIRD_STATE_PLAY;
         }
+        else if (buttons->b)
+        {
+            bird->state = BIRD_STATE_TITLE;
+            bird->is_dead_reset = true;
+            bird->x = BIRD_TITLE_X;
+            bird->y = 0.0;
+            bird->dy = 0.0;
+            sfx_play(SFX_SWOOSH);
+        }
         break;
     case BIRD_STATE_DYING:
         if (bird->dy > 0 && !bird->played_die_sfx)
