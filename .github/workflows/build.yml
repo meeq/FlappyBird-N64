@@ -7,9 +7,17 @@ on:
   pull_request:
     branches: [master]
 
+env:
+  REGISTRY: ghcr.io
+  TOOLCHAIN_IMAGE: ghcr.io/${{ github.repository }}/toolchain
+  DEVCONTAINER_IMAGE: ghcr.io/${{ github.repository }}/devcontainer
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
 
     steps:
       - name: Checkout repository
@@ -20,43 +28,50 @@ jobs:
       - name: Compute cache keys
         id: cache-keys
         run: |
-          # Toolchain cache key based on build scripts content
-          toolchain_hash=$(sha256sum libdragon/tools/build-toolchain.sh libdragon/tools/build-gdb.sh | sha256sum | cut -c1-16)
+          # Toolchain tag based on build scripts content
+          toolchain_hash=$(sha256sum libdragon/tools/build-toolchain.sh libdragon/tools/build-gdb.sh | sha256sum | cut -c1-12)
           echo "toolchain=$toolchain_hash" >> $GITHUB_OUTPUT
 
-          # Libdragon cache key based on submodule commit
+          # Libdragon tag based on submodule commit
           libdragon_sha=$(git rev-parse --short HEAD:libdragon)
           echo "libdragon=$libdragon_sha" >> $GITHUB_OUTPUT
-
-          # Docker image tag
-          echo "tag=flappybird-n64:$libdragon_sha" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build toolchain stage
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push toolchain image
         uses: docker/build-push-action@v6
         with:
           context: .
           target: toolchain
-          cache-from: type=gha,scope=toolchain-${{ steps.cache-keys.outputs.toolchain }}
-          cache-to: type=gha,mode=max,scope=toolchain-${{ steps.cache-keys.outputs.toolchain }}
+          push: true
+          tags: ${{ env.TOOLCHAIN_IMAGE }}:${{ steps.cache-keys.outputs.toolchain }}
+          cache-from: type=registry,ref=${{ env.TOOLCHAIN_IMAGE }}:${{ steps.cache-keys.outputs.toolchain }}
+          cache-to: type=inline
 
-      - name: Build devcontainer image
+      - name: Build and push devcontainer image
         uses: docker/build-push-action@v6
         with:
           context: .
           target: devcontainer
+          push: true
           load: true
-          tags: ${{ steps.cache-keys.outputs.tag }}
+          tags: ${{ env.DEVCONTAINER_IMAGE }}:${{ steps.cache-keys.outputs.libdragon }}
           cache-from: |
-            type=gha,scope=toolchain-${{ steps.cache-keys.outputs.toolchain }}
-            type=gha,scope=libdragon-${{ steps.cache-keys.outputs.libdragon }}
-          cache-to: type=gha,mode=max,scope=libdragon-${{ steps.cache-keys.outputs.libdragon }}
+            type=registry,ref=${{ env.TOOLCHAIN_IMAGE }}:${{ steps.cache-keys.outputs.toolchain }}
+            type=registry,ref=${{ env.DEVCONTAINER_IMAGE }}:${{ steps.cache-keys.outputs.libdragon }}
+          cache-to: type=inline
 
       - name: Build ROM
         run: |
-          docker run --rm -v ${{ github.workspace }}:/workspace ${{ steps.cache-keys.outputs.tag }} make
+          docker run --rm -v ${{ github.workspace }}:/workspace ${{ env.DEVCONTAINER_IMAGE }}:${{ steps.cache-keys.outputs.libdragon }} make
 
       - name: Upload ROM artifact
         uses: actions/upload-artifact@v4
@@ -68,6 +83,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
 
     steps:
       - name: Download ROM artifact
