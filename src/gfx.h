@@ -36,9 +36,6 @@ void gfx_display_lock(void);
 
 void gfx_attach_rdp(void);
 
-void gfx_rdp_color_fill(color_t color);
-void gfx_rdp_texture_fill(bool transparency);
-
 sprite_t *read_dfs_sprite(const char *file);
 
 #endif

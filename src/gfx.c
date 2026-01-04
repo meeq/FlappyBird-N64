@@ -46,18 +46,6 @@ void gfx_attach_rdp(void)
     }
 }
 
-void gfx_rdp_color_fill(color_t color)
-{
-    gfx_attach_rdp();
-    rdpq_set_mode_fill(color);
-}
-
-void gfx_rdp_texture_fill(bool transparency)
-{
-    gfx_attach_rdp();
-    rdpq_set_mode_copy(transparency);
-}
-
 sprite_t *read_dfs_sprite(const char *const file)
 {
     int fp = dfs_open(file);

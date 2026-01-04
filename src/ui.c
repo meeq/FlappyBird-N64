@@ -26,7 +26,7 @@
 
 #define UI_SCORE_MAX_DIGITS     ((size_t)5)
 
-#define UI_DEATH_FLASH_TICKS    ((int)80 * TICKS_PER_MS)
+#define UI_DEATH_FLASH_TICKS    ((uint64_t)150 * TICKS_PER_MS)
 #define UI_DEATH_HEADING_DELAY  ((int)600 * TICKS_PER_MS)
 #define UI_DEATH_BOARD_DELAY    ((int)1500 * TICKS_PER_MS)
 #define UI_DEATH_BOARD_DY_TICKS ((float)200.0 * TICKS_PER_MS)
@@ -111,6 +111,7 @@ typedef struct ui_s
     /* Death */
     bool did_flash;
     bool flash_draw;
+    uint8_t flash_alpha;
     color_t flash_color;
     uint64_t hit_ticks;
     /* Game Over */
@@ -275,15 +276,24 @@ static void ui_flash_tick(ui_t *ui)
     {
         if (!ui->did_flash)
         {
-            const bool was_flash_draw = ui->flash_draw;
-            ui->flash_draw = (
-                (now_ticks - ui->hit_ticks)
-                <= UI_DEATH_FLASH_TICKS
-            );
-            if (was_flash_draw && !ui->flash_draw)
+            const uint64_t elapsed = now_ticks - ui->hit_ticks;
+            const uint64_t half = UI_DEATH_FLASH_TICKS / 2;
+            if (elapsed < half)
             {
+                /* Fade in */
+                ui->flash_alpha = (elapsed * 255) / half;
+            }
+            else if (elapsed < UI_DEATH_FLASH_TICKS)
+            {
+                /* Fade out */
+                ui->flash_alpha = 255 - ((elapsed - half) * 255) / half;
+            }
+            else
+            {
+                ui->flash_alpha = 0;
                 ui->did_flash = true;
             }
+            ui->flash_draw = (ui->flash_alpha > 0);
         }
     }
     else
@@ -649,7 +659,10 @@ static void ui_highscores_draw(const ui_t *ui)
 
 static void ui_flash_draw(const ui_t *ui)
 {
-    gfx_rdp_color_fill(ui->flash_color);
+    rdpq_set_mode_standard();
+    rdpq_mode_combiner(RDPQ_COMBINER_FLAT);
+    rdpq_mode_blender(RDPQ_BLENDER_MULTIPLY);
+    rdpq_set_prim_color(RGBA32(0xFF, 0xFF, 0xFF, ui->flash_alpha));
     rdpq_fill_rectangle(0, 0, gfx->width, gfx->height);
 }
 
