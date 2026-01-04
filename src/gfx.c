@@ -83,12 +83,3 @@ void gfx_attach_rdp(void)
         rdpq_attach(gfx->disp, NULL);
     }
 }
-
-sprite_t *read_dfs_sprite(const char *const file)
-{
-    int fp = dfs_open(file);
-    sprite_t *sprite = malloc(dfs_size(fp));
-    dfs_read(sprite, 1, dfs_size(fp), fp);
-    dfs_close(fp);
-    return sprite;
-}

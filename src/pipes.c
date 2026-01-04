@@ -36,8 +36,8 @@ pipes_t *pipes_init(void)
     pipes_t *const pipes = malloc(sizeof(pipes_t));
     pipes->color = PIPE_COLOR_GREEN;
     pipes->scroll_ticks = 0;
-    pipes->cap_sprite = read_dfs_sprite("gfx/pipe-cap.sprite");
-    pipes->tube_sprite = read_dfs_sprite("gfx/pipe-tube.sprite");
+    pipes->cap_sprite = sprite_load("rom:/gfx/pipe-cap.sprite");
+    pipes->tube_sprite = sprite_load("rom:/gfx/pipe-tube.sprite");
     pipes_reset(pipes);
     return pipes;
 }

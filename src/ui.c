@@ -82,18 +82,18 @@ typedef enum
 
 // This array must line up with ui_sprite_t
 static const char *const UI_SPRITE_FILES[UI_SPRITES_COUNT] = {
-    "gfx/logo.sprite",
-    "gfx/headings.sprite",
-    "gfx/how-to.sprite",
-    "gfx/scoreboard.sprite",
-    "gfx/medal-bronze.sprite",
-    "gfx/medal-silver.sprite",
-    "gfx/medal-gold.sprite",
-    "gfx/medal-platinum.sprite",
-    "gfx/font-large.sprite",
-    "gfx/font-medium.sprite",
-    "gfx/new.sprite",
-    "gfx/sparkle.sprite",
+    "rom:/gfx/logo.sprite",
+    "rom:/gfx/headings.sprite",
+    "rom:/gfx/how-to.sprite",
+    "rom:/gfx/scoreboard.sprite",
+    "rom:/gfx/medal-bronze.sprite",
+    "rom:/gfx/medal-silver.sprite",
+    "rom:/gfx/medal-gold.sprite",
+    "rom:/gfx/medal-platinum.sprite",
+    "rom:/gfx/font-large.sprite",
+    "rom:/gfx/font-medium.sprite",
+    "rom:/gfx/new.sprite",
+    "rom:/gfx/sparkle.sprite",
 };
 
 typedef struct ui_s
@@ -231,7 +231,7 @@ ui_t *ui_init(void)
     // Load the sprites
     for (size_t i = 0; i < UI_SPRITES_COUNT; i++)
     {
-        ui->sprites[i] = read_dfs_sprite(UI_SPRITE_FILES[i]);
+        ui->sprites[i] = sprite_load(UI_SPRITE_FILES[i]);
     }
     return ui;
 }

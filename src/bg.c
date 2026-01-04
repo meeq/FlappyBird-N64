@@ -70,13 +70,13 @@ typedef enum
 
 // This array must line up with bg_sprite_t
 static const char *const BG_SPRITE_FILES[BG_SPRITES_COUNT] = {
-    "gfx/bg-cloud-day.sprite",
-    "gfx/bg-cloud-night.sprite",
-    "gfx/bg-city-day.sprite",
-    "gfx/bg-city-night.sprite",
-    "gfx/bg-hill-day.sprite",
-    "gfx/bg-hill-night.sprite",
-    "gfx/ground.sprite",
+    "rom:/gfx/bg-cloud-day.sprite",
+    "rom:/gfx/bg-cloud-night.sprite",
+    "rom:/gfx/bg-city-day.sprite",
+    "rom:/gfx/bg-city-night.sprite",
+    "rom:/gfx/bg-hill-day.sprite",
+    "rom:/gfx/bg-hill-night.sprite",
+    "rom:/gfx/ground.sprite",
 };
 
 typedef struct bg_fill_color_s
@@ -124,7 +124,7 @@ void bg_init(void)
     bg.initialized = true;
     for (size_t i = 0; i < BG_SPRITES_COUNT; i++)
     {
-        bg.sprites[i] = read_dfs_sprite(BG_SPRITE_FILES[i]);
+        bg.sprites[i] = sprite_load(BG_SPRITE_FILES[i]);
     }
     bg.sky_fill = (bg_fill_color_t){
         .y = BG_SKY_FILL_Y,

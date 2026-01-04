@@ -50,6 +50,4 @@ void gfx_set_highres(bool enable);
 
 bool gfx_get_highres(void);
 
-sprite_t *read_dfs_sprite(const char *file);
-
 #endif

@@ -56,7 +56,7 @@
 
 bird_t *bird_init(bird_color_t color_type)
 {
-    sprite_t *const sprite = read_dfs_sprite("gfx/bird.sprite");
+    sprite_t *const sprite = sprite_load("rom:/gfx/bird.sprite");
     bird_t *const bird = malloc(sizeof(bird_t));
     bird->sprite = sprite;
     bird->slice_w = sprite->width / sprite->hslices;
