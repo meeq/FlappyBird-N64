@@ -112,21 +112,21 @@ typedef struct ui_s
     bool did_flash;
     bool flash_draw;
     color_t flash_color;
-    uint32_t hit_ticks;
+    uint64_t hit_ticks;
     /* Game Over */
-    uint32_t dead_ticks;
+    uint64_t dead_ticks;
     bool did_gameover;
     bool heading_draw;
     bool board_draw;
     bool score_draw;
     bool medal_draw;
     /* Scoreboard animations */
-    uint32_t board_ticks;
+    uint64_t board_ticks;
     int board_y;
-    uint32_t score_ticks;
+    uint64_t score_ticks;
     int last_score_acc;
     /* Medal sparkle animation */
-    uint32_t sparkle_ticks;
+    uint64_t sparkle_ticks;
     int sparkle_x;
     int sparkle_y;
 } ui_t;
@@ -268,7 +268,7 @@ static void ui_bird_tick(ui_t *ui, const bird_t *bird)
 
 static void ui_flash_tick(ui_t *ui)
 {
-    const uint32_t now_ticks = TICKS_READ();
+    const uint64_t now_ticks = get_ticks();
     /* Flash the screen for a split second after the bird dies */
     if (ui->state == BIRD_STATE_DYING ||
         ui->state == BIRD_STATE_DEAD)
@@ -277,7 +277,7 @@ static void ui_flash_tick(ui_t *ui)
         {
             const bool was_flash_draw = ui->flash_draw;
             ui->flash_draw = (
-                TICKS_DISTANCE(ui->hit_ticks, now_ticks)
+                (now_ticks - ui->hit_ticks)
                 <= UI_DEATH_FLASH_TICKS
             );
             if (was_flash_draw && !ui->flash_draw)
@@ -304,8 +304,8 @@ static void ui_gameover_tick(ui_t *ui)
         /* Medal sparkle animation - pick new random position each cycle */
         if (ui->medal_draw)
         {
-            const uint32_t now_ticks = TICKS_READ();
-            if (TICKS_DISTANCE(ui->sparkle_ticks, now_ticks) >= UI_SPARKLE_CYCLE_TICKS)
+            const uint64_t now_ticks = get_ticks();
+            if ((now_ticks - ui->sparkle_ticks) >= UI_SPARKLE_CYCLE_TICKS)
             {
                 ui_randomize_sparkle_position(ui);
                 ui->sparkle_ticks = now_ticks;
@@ -314,8 +314,8 @@ static void ui_gameover_tick(ui_t *ui)
         return;
     }
     /* Animate the Game Over UI */
-    const uint32_t now_ticks = TICKS_READ();
-    const int dead_diff_ticks = TICKS_DISTANCE(ui->dead_ticks, now_ticks);
+    const uint64_t now_ticks = get_ticks();
+    const uint64_t dead_diff_ticks = now_ticks - ui->dead_ticks;
     /* Only show the scores and medal after the scoreboard appears */
     ui->score_draw = false;
     ui->medal_draw = false;
@@ -337,7 +337,7 @@ static void ui_gameover_tick(ui_t *ui)
     if (ui->board_draw)
     {
         sprite_t *const scoreboard = ui->sprites[UI_SPRITE_SCOREBOARD];
-        const int board_diff_ticks = TICKS_DISTANCE(ui->board_ticks, now_ticks);
+        const uint64_t board_diff_ticks = now_ticks - ui->board_ticks;
         const int max_y = display_get_height();
         const int center_y = max_y / 2;
         const int min_y = center_y - (scoreboard->height / 2);
@@ -368,7 +368,7 @@ static void ui_gameover_tick(ui_t *ui)
     {
         if (ui->last_score_acc < ui->last_score)
         {
-            const int score_diff_ticks = TICKS_DISTANCE(ui->score_ticks, now_ticks);
+            const uint64_t score_diff_ticks = now_ticks - ui->score_ticks;
             if (score_diff_ticks >= UI_DEATH_SCORE_DELAY)
             {
                 ui->last_score_acc++;

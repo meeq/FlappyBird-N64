@@ -128,19 +128,19 @@ void bird_draw(const bird_t *bird)
 
 void bird_hit(bird_t *bird)
 {
-    bird->hit_ticks = TICKS_READ();
+    bird->hit_ticks = get_ticks();
     sfx_play(SFX_HIT);
     joypad_set_rumble_active(JOYPAD_PORT_1, bird->is_rumbling = true);
 }
 
 static void bird_tick_animation(bird_t *bird)
 {
-    const uint32_t now_ticks = TICKS_READ();
-    uint32_t anim_ticks = bird->anim_ticks;
+    const uint64_t now_ticks = get_ticks();
+    uint64_t anim_ticks = bird->anim_ticks;
     int anim_frame = bird->anim_frame;
     if (bird->state != BIRD_STATE_DYING && bird->state != BIRD_STATE_DEAD)
     {
-        if (TICKS_DISTANCE(anim_ticks, now_ticks) >= BIRD_ANIM_RATE)
+        if ((now_ticks - anim_ticks) >= BIRD_ANIM_RATE)
         {
             /* Update animation state */
             if (++anim_frame >= BIRD_ANIM_FRAMES)
@@ -173,8 +173,8 @@ static void bird_tick_sine_wave(bird_t *bird)
     /* Center the bird in the sky */
     bird->y = 0.0;
     /* Periodically update the "floating" effect */
-    const uint32_t now_ticks = TICKS_READ();
-    if (TICKS_DISTANCE(bird->sine_ticks, now_ticks) >= BIRD_SINE_RATE)
+    const uint64_t now_ticks = get_ticks();
+    if ((now_ticks - bird->sine_ticks) >= BIRD_SINE_RATE)
     {
         bird_tick_dx(bird);
         /* Increment the "floating" effect sine wave */
@@ -195,11 +195,11 @@ static void bird_tick_velocity(bird_t *bird, const joypad_buttons_t *const butto
     {
         bird->dy = -BIRD_FLAP_VELOCITY;
         bird->anim_frame = BIRD_ANIM_FRAMES - 1;
-        bird->flap_ticks = TICKS_READ();
+        bird->flap_ticks = get_ticks();
         sfx_play(SFX_WING);
     }
-    const uint32_t now_ticks = TICKS_READ();
-    if (TICKS_DISTANCE(bird->dy_ticks, now_ticks) >= BIRD_VELOCITY_RATE)
+    const uint64_t now_ticks = get_ticks();
+    if ((now_ticks - bird->dy_ticks) >= BIRD_VELOCITY_RATE)
     {
         bird_tick_dx(bird);
         float y = bird->y;
@@ -237,8 +237,8 @@ static void bird_tick_rotation(bird_t *bird)
         return;
     }
 
-    const uint32_t now_ticks = TICKS_READ();
-    const uint32_t elapsed_ms = TICKS_DISTANCE(bird->flap_ticks, now_ticks) / TICKS_PER_MS;
+    const uint64_t now_ticks = get_ticks();
+    const uint64_t elapsed_ms = (now_ticks - bird->flap_ticks) / TICKS_PER_MS;
 
     if (elapsed_ms < BIRD_ROTATION_UP_MS)
     {
@@ -249,7 +249,7 @@ static void bird_tick_rotation(bird_t *bird)
     else
     {
         /* Phase 2: Rotating down (twice as fast when dying) */
-        uint32_t fall_elapsed = elapsed_ms - BIRD_ROTATION_UP_MS;
+        uint64_t fall_elapsed = elapsed_ms - BIRD_ROTATION_UP_MS;
         int down_ms = BIRD_ROTATION_DOWN_MS;
         if (bird->state == BIRD_STATE_DYING)
         {
@@ -268,12 +268,12 @@ static bird_color_t bird_random_color_type(void)
 
 void bird_tick(bird_t *bird, const joypad_buttons_t *const buttons)
 {
-    const uint32_t now_ticks = TICKS_READ();
+    const uint64_t now_ticks = get_ticks();
     /* State transitions based on button input */
     switch (bird->state)
     {
     case BIRD_STATE_DEAD:
-        if (TICKS_DISTANCE(bird->dead_ticks, now_ticks) >= BIRD_RESET_DELAY)
+        if ((now_ticks - bird->dead_ticks) >= BIRD_RESET_DELAY)
         {
             bird->is_dead_reset = true;
         }
@@ -332,7 +332,7 @@ void bird_tick(bird_t *bird, const joypad_buttons_t *const buttons)
         break;
     }
     /* Stop rumbling after hitting a pipe/the ground */
-    if (bird->is_rumbling && TICKS_DISTANCE(bird->hit_ticks, now_ticks) >= BIRD_RUMBLE_MS)
+    if (bird->is_rumbling && (now_ticks - bird->hit_ticks) >= BIRD_RUMBLE_MS)
     {
         joypad_set_rumble_active(JOYPAD_PORT_1, bird->is_rumbling = false);
     }

@@ -32,8 +32,8 @@ typedef struct pipe_s
 typedef struct pipes_s
 {
     pipe_color_t color;
-    uint32_t reset_ticks;
-    uint32_t scroll_ticks;
+    uint64_t reset_ticks;
+    uint64_t scroll_ticks;
     sprite_t *cap_sprite;
     sprite_t *tube_sprite;
     pipe_t n[PIPES_MAX_COUNT];

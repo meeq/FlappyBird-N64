@@ -100,14 +100,14 @@ void pipes_reset(pipes_t *pipes)
 
 void pipes_tick(pipes_t *pipes)
 {
-    const uint32_t now_ticks = TICKS_READ();
+    const uint64_t now_ticks = get_ticks();
     /* Start scrolling after a reset */
     if (pipes->scroll_ticks == 0)
     {
         pipes->scroll_ticks = now_ticks;
     }
     /* Scroll the pipes and reset them as they go off-screen */
-    if (TICKS_DISTANCE(pipes->scroll_ticks, now_ticks) >= PIPES_SCROLL_RATE)
+    if ((now_ticks - pipes->scroll_ticks) >= PIPES_SCROLL_RATE)
     {
         pipe_t *pipe;
         for (size_t i = 0, j; i < PIPES_MAX_COUNT; i++)

@@ -101,7 +101,7 @@ static struct background_s
     sprite_t *sprites[BG_SPRITES_COUNT];
     // Setup state
     bg_time_mode_t time_mode;
-    uint32_t scroll_ticks;
+    uint64_t scroll_ticks;
     // Color fills
     bg_fill_color_t sky_fill;
     bg_fill_color_t cloud_fill;
@@ -225,8 +225,8 @@ void bg_tick(const joypad_buttons_t *buttons)
         bg_set_time_mode(!bg.time_mode);
     }
     /* Scroll the bg */
-    const uint32_t now_ticks = TICKS_READ();
-    if (TICKS_DISTANCE(bg.scroll_ticks, now_ticks) >= BG_SCROLL_RATE)
+    const uint64_t now_ticks = get_ticks();
+    if ((now_ticks - bg.scroll_ticks) >= BG_SCROLL_RATE)
     {
         bg.scroll_ticks = now_ticks;
         bg_tick_scroll(&bg.cloud_top);
