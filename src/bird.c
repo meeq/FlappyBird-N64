@@ -273,9 +273,13 @@ static void bird_tick_rotation(bird_t *bird)
     {
         /* Phase 3: Rotating down */
         uint64_t hold_time = (bird->state == BIRD_STATE_DYING) ? 0 : BIRD_ROTATION_HOLD_MS;
-        uint64_t fall_elapsed = elapsed_ms - BIRD_ROTATION_UP_MS - hold_time;
-        float t = (float)fall_elapsed / BIRD_ROTATION_DOWN_MS;
-        if (t > 1.0f) t = 1.0f;
+        uint64_t fall_start = BIRD_ROTATION_UP_MS + hold_time;
+        float t = 0.0f;
+        if (elapsed_ms > fall_start)
+        {
+            t = (float)(elapsed_ms - fall_start) / BIRD_ROTATION_DOWN_MS;
+            if (t > 1.0f) t = 1.0f;
+        }
         bird->rotation = BIRD_ROTATION_UP_DEG + t * (BIRD_ROTATION_DOWN_DEG - BIRD_ROTATION_UP_DEG);
     }
 }
