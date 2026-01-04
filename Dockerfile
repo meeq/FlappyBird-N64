@@ -42,6 +42,11 @@ RUN --mount=target=${DOWNLOAD_PATH},type=cache,sharing=locked \
     /tools/build-gdb.sh && \
     rm -rf ${N64_INST}/share/locale/*
 
+###############################################################################
+# libdragon
+###############################################################################
+FROM toolchain AS libdragon
+
 COPY ./libdragon /libdragon
 RUN cd /libdragon && ./build.sh
 
@@ -64,7 +69,7 @@ RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
 ARG N64_INST=/n64_toolchain
 ENV N64_INST=${N64_INST}
 
-COPY --from=toolchain ${N64_INST} ${N64_INST}
+COPY --from=libdragon ${N64_INST} ${N64_INST}
 
 WORKDIR /workspace
 

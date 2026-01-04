@@ -17,30 +17,46 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Get libdragon commit SHA
-        id: libdragon
+      - name: Compute cache keys
+        id: cache-keys
         run: |
-          sha=$(git rev-parse --short HEAD:libdragon)
-          echo "sha=$sha" >> $GITHUB_OUTPUT
-          echo "scope=libdragon-$sha" >> $GITHUB_OUTPUT
-          echo "tag=flappybird-n64:$sha" >> $GITHUB_OUTPUT
+          # Toolchain cache key based on build scripts content
+          toolchain_hash=$(sha256sum libdragon/tools/build-toolchain.sh libdragon/tools/build-gdb.sh | sha256sum | cut -c1-16)
+          echo "toolchain=$toolchain_hash" >> $GITHUB_OUTPUT
+
+          # Libdragon cache key based on submodule commit
+          libdragon_sha=$(git rev-parse --short HEAD:libdragon)
+          echo "libdragon=$libdragon_sha" >> $GITHUB_OUTPUT
+
+          # Docker image tag
+          echo "tag=flappybird-n64:$libdragon_sha" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image
+      - name: Build toolchain stage
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: toolchain
+          cache-from: type=gha,scope=toolchain-${{ steps.cache-keys.outputs.toolchain }}
+          cache-to: type=gha,mode=max,scope=toolchain-${{ steps.cache-keys.outputs.toolchain }}
+
+      - name: Build devcontainer image
         uses: docker/build-push-action@v6
         with:
           context: .
           target: devcontainer
           load: true
-          tags: ${{ steps.libdragon.outputs.tag }}
-          cache-from: type=gha,scope=${{ steps.libdragon.outputs.scope }}
-          cache-to: type=gha,mode=max,scope=${{ steps.libdragon.outputs.scope }}
+          tags: ${{ steps.cache-keys.outputs.tag }}
+          cache-from: |
+            type=gha,scope=toolchain-${{ steps.cache-keys.outputs.toolchain }}
+            type=gha,scope=libdragon-${{ steps.cache-keys.outputs.libdragon }}
+          cache-to: type=gha,mode=max,scope=libdragon-${{ steps.cache-keys.outputs.libdragon }}
 
       - name: Build ROM
         run: |
-          docker run --rm -v ${{ github.workspace }}:/workspace ${{ steps.libdragon.outputs.tag }} make
+          docker run --rm -v ${{ github.workspace }}:/workspace ${{ steps.cache-keys.outputs.tag }} make
 
       - name: Upload ROM artifact
         uses: actions/upload-artifact@v4
