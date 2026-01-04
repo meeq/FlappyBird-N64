@@ -31,6 +31,7 @@
 #define UI_DEATH_BOARD_DELAY    ((int)1500 * TICKS_PER_MS)
 #define UI_DEATH_BOARD_DY_TICKS ((float)200.0 * TICKS_PER_MS)
 #define UI_DEATH_SCORE_DELAY    ((int)48 * TICKS_PER_MS)
+#define UI_SPARKLE_CYCLE_TICKS  ((int)500 * TICKS_PER_MS)
 
 static color_t UI_DARK_COLOR  = {0};
 static color_t UI_LIGHT_COLOR = {0};
@@ -125,7 +126,14 @@ typedef struct ui_s
     uint32_t score_ticks;
     int last_score_acc;
     int high_score_acc;
+    /* Medal sparkle animation */
+    uint32_t sparkle_ticks;
+    int sparkle_x;
+    int sparkle_y;
 } ui_t;
+
+/* Forward declarations */
+static void ui_randomize_sparkle_position(ui_t *ui);
 
 /* EEPROM high score persistence */
 
@@ -294,7 +302,16 @@ static void ui_gameover_tick(ui_t *ui)
     }
     if (ui->did_gameover)
     {
-        // TODO Medal sparkles
+        /* Medal sparkle animation - pick new random position each cycle */
+        if (ui->medal_draw)
+        {
+            const uint32_t now_ticks = TICKS_READ();
+            if (TICKS_DISTANCE(ui->sparkle_ticks, now_ticks) >= UI_SPARKLE_CYCLE_TICKS)
+            {
+                ui_randomize_sparkle_position(ui);
+                ui->sparkle_ticks = now_ticks;
+            }
+        }
         return;
     }
     /* Animate the Game Over UI */
@@ -371,6 +388,9 @@ static void ui_gameover_tick(ui_t *ui)
         {
             ui->medal_draw = true;
             ui->did_gameover = true;
+            /* Initialize sparkle animation */
+            ui_randomize_sparkle_position(ui);
+            ui->sparkle_ticks = now_ticks;
             if (ui->new_high_score)
             {
                 ui_save_high_score(ui);
@@ -520,22 +540,41 @@ static void ui_scoreboard_draw(const ui_t *ui)
     rdpq_sprite_blit(scoreboard, x, ui->board_y, NULL);
 }
 
-static void ui_medal_draw(const ui_t *ui)
+static sprite_t *ui_get_medal_sprite(const ui_t *ui)
 {
-    ui_sprite_t medal_sprite;
     const int score = ui->last_score;
     if (score >= UI_MEDAL_SCORE_PLATINUM)
-        medal_sprite = UI_SPRITE_MEDAL_PLATINUM;
+        return ui->sprites[UI_SPRITE_MEDAL_PLATINUM];
     else if (score >= UI_MEDAL_SCORE_GOLD)
-        medal_sprite = UI_SPRITE_MEDAL_GOLD;
+        return ui->sprites[UI_SPRITE_MEDAL_GOLD];
     else if (score >= UI_MEDAL_SCORE_SILVER)
-        medal_sprite = UI_SPRITE_MEDAL_SILVER;
+        return ui->sprites[UI_SPRITE_MEDAL_SILVER];
     else if (score >= UI_MEDAL_SCORE_BRONZE)
-        medal_sprite = UI_SPRITE_MEDAL_BRONZE;
+        return ui->sprites[UI_SPRITE_MEDAL_BRONZE];
     else
-        return;
+        return NULL;
+}
 
-    sprite_t *const medal = ui->sprites[medal_sprite];
+static void ui_randomize_sparkle_position(ui_t *ui)
+{
+    sprite_t *const medal = ui_get_medal_sprite(ui);
+    sprite_t *const sparkle = ui->sprites[UI_SPRITE_SPARKLE];
+    if (medal == NULL) return;
+
+    const int sparkle_w = sparkle->width / sparkle->hslices;
+    const int sparkle_h = sparkle->height;
+    const int range_x = medal->width - sparkle_w;
+    const int range_y = medal->height - sparkle_h;
+
+    ui->sparkle_x = ((float)rand() / (float)RAND_MAX) * range_x;
+    ui->sparkle_y = ((float)rand() / (float)RAND_MAX) * range_y;
+}
+
+static void ui_medal_draw(const ui_t *ui)
+{
+    sprite_t *const medal = ui_get_medal_sprite(ui);
+    if (medal == NULL)
+        return;
 
     const int center_x = (gfx->width / 2);
     const int center_y = (gfx->height / 2);
@@ -544,6 +583,27 @@ static void ui_medal_draw(const ui_t *ui)
 
     rdpq_set_mode_copy(true);
     rdpq_sprite_blit(medal, x, y, NULL);
+
+    /* Draw sparkle animation */
+    sprite_t *const sparkle = ui->sprites[UI_SPRITE_SPARKLE];
+    const int64_t now_ticks = get_ticks();
+    const int elapsed = now_ticks - ui->sparkle_ticks;
+
+    /* 5 animation phases over 1 second (200ms each): small, medium, large, medium, small */
+    int phase = (elapsed * 5) / UI_SPARKLE_CYCLE_TICKS;
+    if (phase > 4) phase = 4;
+    const int frame_map[] = {0, 1, 2, 1, 0};
+    const int frame = frame_map[phase];
+
+    const int sparkle_w = sparkle->width / sparkle->hslices;
+    const int sparkle_x = x + ui->sparkle_x;
+    const int sparkle_y = y + ui->sparkle_y;
+
+    rdpq_sprite_blit(sparkle, sparkle_x, sparkle_y, &(rdpq_blitparms_t){
+        .s0 = frame * sparkle_w,
+        .width = sparkle_w,
+        .height = sparkle->height,
+    });
 }
 
 static void ui_highscores_score_draw(const ui_t *ui, int score, int y)

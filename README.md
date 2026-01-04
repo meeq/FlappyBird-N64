@@ -26,7 +26,6 @@ This project is considered "done", and is no longer being actively developed. It
 
 * Bird sprite does not rotate
 * Night sky is missing stars
-* Medals do not sparkle
 * Screen does not shake upon death
 
 ## Play the game
