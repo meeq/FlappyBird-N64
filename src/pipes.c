@@ -44,9 +44,9 @@ pipes_t *pipes_init(void)
 
 void pipes_free(pipes_t *pipes)
 {
-    free(pipes->cap_sprite);
+    sprite_free(pipes->cap_sprite);
     pipes->cap_sprite = NULL;
-    free(pipes->tube_sprite);
+    sprite_free(pipes->tube_sprite);
     pipes->tube_sprite = NULL;
     free(pipes);
 }

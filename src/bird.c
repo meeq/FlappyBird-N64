@@ -86,7 +86,7 @@ bird_t *bird_init(bird_color_t color_type)
 
 void bird_free(bird_t *bird)
 {
-    free(bird->sprite);
+    sprite_free(bird->sprite);
     bird->sprite = NULL;
     free(bird);
 }

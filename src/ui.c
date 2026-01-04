@@ -240,7 +240,7 @@ void ui_free(ui_t *ui)
 {
     for (size_t i = 0; i < UI_SPRITES_COUNT; i++)
     {
-        free(ui->sprites[i]);
+        sprite_free(ui->sprites[i]);
         ui->sprites[i] = NULL;
     }
     free(ui);
