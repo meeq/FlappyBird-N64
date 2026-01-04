@@ -115,7 +115,16 @@ void bird_draw(const bird_t *bird)
     const int t_offset = bird->color_type * bird->slice_h;
     /* Draw the bird sprite with rotation */
     rdpq_set_mode_standard();
-    rdpq_mode_alphacompare(1);
+    if (bird->rotation != 0.0f && bird->rotation != BIRD_ROTATION_DOWN_DEG)
+    {
+        /* Use alpha blending with bilinear filtering to smooth rotation */
+        rdpq_mode_blender(RDPQ_BLENDER_MULTIPLY);
+        rdpq_mode_filter(FILTER_BILINEAR);
+    }
+    else
+    {
+        rdpq_mode_alphacompare(1);
+    }
     rdpq_sprite_blit(bird->sprite, cx, bird_y, &(rdpq_blitparms_t){
         .s0 = s_offset,
         .t0 = t_offset,
