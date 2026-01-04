@@ -53,8 +53,12 @@ jobs:
           target: toolchain
           push: true
           tags: ${{ env.TOOLCHAIN_IMAGE }}:${{ steps.cache-keys.outputs.toolchain }}
-          cache-from: type=registry,ref=${{ env.TOOLCHAIN_IMAGE }}:${{ steps.cache-keys.outputs.toolchain }}
-          cache-to: type=inline
+          cache-from: |
+            type=gha,scope=toolchain-${{ steps.cache-keys.outputs.toolchain }}
+            type=registry,ref=${{ env.TOOLCHAIN_IMAGE }}:${{ steps.cache-keys.outputs.toolchain }}
+          cache-to: |
+            type=gha,mode=max,scope=toolchain-${{ steps.cache-keys.outputs.toolchain }}
+            type=inline
 
       - name: Build and push devcontainer image
         uses: docker/build-push-action@v6
@@ -65,9 +69,13 @@ jobs:
           load: true
           tags: ${{ env.DEVCONTAINER_IMAGE }}:${{ steps.cache-keys.outputs.libdragon }}
           cache-from: |
+            type=gha,scope=toolchain-${{ steps.cache-keys.outputs.toolchain }}
+            type=gha,scope=devcontainer-${{ steps.cache-keys.outputs.libdragon }}
             type=registry,ref=${{ env.TOOLCHAIN_IMAGE }}:${{ steps.cache-keys.outputs.toolchain }}
             type=registry,ref=${{ env.DEVCONTAINER_IMAGE }}:${{ steps.cache-keys.outputs.libdragon }}
-          cache-to: type=inline
+          cache-to: |
+            type=gha,mode=max,scope=devcontainer-${{ steps.cache-keys.outputs.libdragon }}
+            type=inline
 
       - name: Build ROM
         run: |
