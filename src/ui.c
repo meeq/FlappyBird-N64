@@ -125,7 +125,6 @@ typedef struct ui_s
     int board_y;
     uint32_t score_ticks;
     int last_score_acc;
-    int high_score_acc;
     /* Medal sparkle animation */
     uint32_t sparkle_ticks;
     int sparkle_x;
@@ -367,20 +366,12 @@ static void ui_gameover_tick(ui_t *ui)
     }
     if (ui->score_draw)
     {
-        if (ui->last_score_acc < ui->last_score ||
-            ui->high_score_acc < ui->high_score)
+        if (ui->last_score_acc < ui->last_score)
         {
             const int score_diff_ticks = TICKS_DISTANCE(ui->score_ticks, now_ticks);
             if (score_diff_ticks >= UI_DEATH_SCORE_DELAY)
             {
-                if (ui->last_score_acc < ui->last_score)
-                {
-                    ui->last_score_acc++;
-                }
-                else if (ui->high_score_acc < ui->high_score)
-                {
-                    ui->high_score_acc++;
-                }
+                ui->last_score_acc++;
                 ui->score_ticks = now_ticks;
             }
         }
@@ -643,9 +634,9 @@ static void ui_highscores_draw(const ui_t *ui)
     const int center_x = (gfx->width / 2);
     const int center_y = (gfx->height / 2);
     ui_highscores_score_draw(ui, ui->last_score_acc, center_y - 11);
-    ui_highscores_score_draw(ui, ui->high_score_acc, center_y + 10);
+    ui_highscores_score_draw(ui, ui->high_score, center_y + 10);
 
-    if (ui->new_high_score && ui->high_score_acc == ui->high_score)
+    if (ui->new_high_score && ui->last_score_acc == ui->last_score)
     {
         sprite_t *const new_sprite = ui->sprites[UI_SPRITE_NEW];
         const int new_x = center_x + 10;
