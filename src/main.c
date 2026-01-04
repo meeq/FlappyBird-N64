@@ -49,6 +49,12 @@ int main(void)
         joypad_poll();
         buttons = joypad_get_buttons_pressed(JOYPAD_PORT_1);
 
+        /* Toggle high-res mode with Z button */
+        if (buttons.z)
+        {
+            gfx_set_highres(!gfx_get_highres());
+        }
+
         /* Update bird state before the rest of the world */
         const bird_state_t prev_bird_state = bird->state;
         bird_tick(bird, &buttons);
@@ -91,9 +97,10 @@ int main(void)
         gfx_display_lock();
         {
             /* Draw the game state */
-            bg_draw();
+            bg_draw_sky();
             pipes_draw(pipes);
             bird_draw(bird);
+            bg_draw_ground();
             ui_draw(ui);
         }
         /* Finish drawing and show the framebuffer */

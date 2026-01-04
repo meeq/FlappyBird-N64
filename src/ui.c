@@ -123,7 +123,7 @@ typedef struct ui_s
     bool medal_draw;
     /* Scoreboard animations */
     uint64_t board_ticks;
-    int board_y;
+    float board_y_factor;  /* 0.0 = final position, 1.0 = off screen at bottom */
     uint64_t score_ticks;
     int last_score_acc;
     /* Medal sparkle animation */
@@ -219,7 +219,7 @@ ui_t *ui_init(void)
     memset(ui, 0, sizeof(ui_t));
 
     ui->flash_color = UI_FLASH_COLOR;
-    ui->board_y = gfx->height;
+    ui->board_y_factor = 1.0f;  /* Start off-screen */
     ui_set_time_mode(ui, bg_get_time_mode());
     ui_load_high_score(ui);
     // Load the sprites
@@ -346,32 +346,21 @@ static void ui_gameover_tick(ui_t *ui)
     }
     if (ui->board_draw)
     {
-        sprite_t *const scoreboard = ui->sprites[UI_SPRITE_SCOREBOARD];
         const uint64_t board_diff_ticks = now_ticks - ui->board_ticks;
-        const int max_y = display_get_height();
-        const int center_y = max_y / 2;
-        const int min_y = center_y - (scoreboard->height / 2);
         ui->score_draw = board_diff_ticks >= UI_DEATH_BOARD_DY_TICKS;
         if (!ui->score_draw)
         {
-            /* Pop the scoreboard up from the bottom */
-            const int y_diff = max_y - min_y;
-            const float y_factor = board_diff_ticks / UI_DEATH_BOARD_DY_TICKS;
-            if (y_factor >= 0.0 && y_factor < 1.0)
-            {
-                ui->board_y = max_y - (y_diff * y_factor);
-            }
-            else
-            {
-                ui->board_y = max_y - y_diff;
-            }
+            /* Pop the scoreboard up from the bottom (1.0 = off screen, 0.0 = final pos) */
+            float y_factor = 1.0f - (board_diff_ticks / UI_DEATH_BOARD_DY_TICKS);
+            if (y_factor < 0.0f) y_factor = 0.0f;
+            ui->board_y_factor = y_factor;
             /* Reset the score accumulator */
             ui->score_ticks = now_ticks;
             ui->last_score_acc = 0;
         }
         else
         {
-            ui->board_y = min_y;
+            ui->board_y_factor = 0.0f;  /* Final position */
         }
     }
     if (ui->score_draw)
@@ -421,27 +410,31 @@ static void ui_logo_draw(const ui_t *ui)
 
     const int center_x = (gfx->width / 2);
     const int center_y = (gfx->height / 2);
-    const int logo_x = center_x - (logo->width / 2);
-    const int logo_y = center_y - (logo->height * 3.5);
+    const int logo_x = center_x - GFX_SCALE(logo->width / 2);
+    const int logo_y = center_y - GFX_SCALE(logo->height * 3.5);
 
     /* Draw logo sprite */
-    rdpq_set_mode_copy(true);
-    rdpq_sprite_blit(logo, logo_x, logo_y, NULL);
+    rdpq_set_mode_standard();
+    rdpq_mode_alphacompare(1);
+    rdpq_sprite_blit(logo, logo_x, logo_y, &(rdpq_blitparms_t){
+        .scale_x = gfx->scale,
+        .scale_y = gfx->scale,
+    });
 
     const char *const credit1_str = "Game by .GEARS";
     const int credit1_w = strlen(credit1_str) * 6;
     const int credit1_x = center_x - (credit1_w / 2);
-    const int credit1_y = gfx->height - 80;
+    const int credit1_y = gfx->height - GFX_SCALE(80);
 
     const char *const credit2_str = "N64 Port by Meeq";
     const int credit2_w = strlen(credit2_str) * 6;
     const int credit2_x = center_x - (credit2_w / 2);
-    const int credit2_y = gfx->height - 62;
+    const int credit2_y = gfx->height - GFX_SCALE(62);
 
     const char *const version_str = ROM_VERSION;
     const int version_w = strlen(version_str) * 6;
-    const int version_x = gfx->width - 32 - version_w;
-    const int version_y = gfx->height - 32;
+    const int version_x = gfx->width - GFX_SCALE(32) - version_w;
+    const int version_y = gfx->height - GFX_SCALE(32);
 
     /* Draw a shadow under the text */
     rdpq_textparms_t shadow_parms = { .style_id = UI_STYLE_SHADOW };
@@ -468,17 +461,20 @@ static void ui_heading_draw(const ui_t *ui, int stride)
 
     const int center_x = (gfx->width / 2);
     const int center_y = (gfx->height / 2);
-    const int x = center_x - (headings->width / 2);
-    const int y = center_y - 70;
+    const int x = center_x - GFX_SCALE(headings->width / 2);
+    const int y = center_y - GFX_SCALE(70);
 
     /* Calculate slice dimensions for strided sprite */
     const int slice_h = headings->height / headings->vslices;
     const int t_offset = stride * slice_h;
 
-    rdpq_set_mode_copy(true);
+    rdpq_set_mode_standard();
+    rdpq_mode_alphacompare(1);
     rdpq_sprite_blit(headings, x, y, &(rdpq_blitparms_t){
         .t0 = t_offset,
         .height = slice_h,
+        .scale_x = gfx->scale,
+        .scale_y = gfx->scale,
     });
 }
 
@@ -488,11 +484,15 @@ static void ui_howto_draw(const ui_t *ui)
 
     const int center_x = (gfx->width / 2);
     const int center_y = (gfx->height / 2);
-    const int x = center_x - (howto->width / 2);
-    const int y = center_y - (howto->height / 1.45);
+    const int x = center_x - GFX_SCALE(howto->width / 2);
+    const int y = center_y - GFX_SCALE(howto->height / 1.45);
 
-    rdpq_set_mode_copy(true);
-    rdpq_sprite_blit(howto, x, y, NULL);
+    rdpq_set_mode_standard();
+    rdpq_mode_alphacompare(1);
+    rdpq_sprite_blit(howto, x, y, &(rdpq_blitparms_t){
+        .scale_x = gfx->scale,
+        .scale_y = gfx->scale,
+    });
 }
 
 static void ui_score_draw(const ui_t *ui)
@@ -511,13 +511,15 @@ static void ui_score_draw(const ui_t *ui)
 
     const int digit_w = font->width / font->hslices;
     const int digit_h = font->height / font->vslices;
-    const int score_w = digit_w * num_digits;
+    const int scaled_digit_w = GFX_SCALE(digit_w);
+    const int score_w = scaled_digit_w * num_digits;
     const int center_x = gfx->width / 2;
-    const int y = 20;
+    const int y = GFX_SCALE(20);
 
-    rdpq_set_mode_copy(true);
+    rdpq_set_mode_standard();
+    rdpq_mode_alphacompare(1);
 
-    int x = center_x + (score_w / 2) - digit_w;
+    int x = center_x + (score_w / 2) - scaled_digit_w;
     for (i = 0; i < num_digits; i++)
     {
         const int s_offset = digits[i] * digit_w;
@@ -525,8 +527,10 @@ static void ui_score_draw(const ui_t *ui)
             .s0 = s_offset,
             .width = digit_w,
             .height = digit_h,
+            .scale_x = gfx->scale,
+            .scale_y = gfx->scale,
         });
-        x -= digit_w;
+        x -= scaled_digit_w;
     }
 }
 
@@ -535,10 +539,21 @@ static void ui_scoreboard_draw(const ui_t *ui)
     sprite_t *const scoreboard = ui->sprites[UI_SPRITE_SCOREBOARD];
 
     const int center_x = (gfx->width / 2);
-    const int x = center_x - (scoreboard->width / 2);
+    const int x = center_x - GFX_SCALE(scoreboard->width / 2);
 
-    rdpq_set_mode_copy(true);
-    rdpq_sprite_blit(scoreboard, x, ui->board_y, NULL);
+    /* Compute Y position from normalized factor */
+    const int max_y = gfx->height;
+    const int center_y = max_y / 2;
+    const int min_y = center_y - GFX_SCALE(scoreboard->height / 2);
+    const int y_diff = max_y - min_y;
+    const int board_y = min_y + (int)(y_diff * ui->board_y_factor);
+
+    rdpq_set_mode_standard();
+    rdpq_mode_alphacompare(1);
+    rdpq_sprite_blit(scoreboard, x, board_y, &(rdpq_blitparms_t){
+        .scale_x = gfx->scale,
+        .scale_y = gfx->scale,
+    });
 }
 
 static sprite_t *ui_get_medal_sprite(const ui_t *ui)
@@ -579,11 +594,15 @@ static void ui_medal_draw(const ui_t *ui)
 
     const int center_x = (gfx->width / 2);
     const int center_y = (gfx->height / 2);
-    const int x = center_x - (medal->width / 2) - 32;
-    const int y = center_y - (medal->height / 2) + 4;
+    const int x = center_x - GFX_SCALE(medal->width / 2) - GFX_SCALE(32);
+    const int y = center_y - GFX_SCALE(medal->height / 2) + GFX_SCALE(4);
 
-    rdpq_set_mode_copy(true);
-    rdpq_sprite_blit(medal, x, y, NULL);
+    rdpq_set_mode_standard();
+    rdpq_mode_alphacompare(1);
+    rdpq_sprite_blit(medal, x, y, &(rdpq_blitparms_t){
+        .scale_x = gfx->scale,
+        .scale_y = gfx->scale,
+    });
 
     /* Draw sparkle animation */
     sprite_t *const sparkle = ui->sprites[UI_SPRITE_SPARKLE];
@@ -597,13 +616,15 @@ static void ui_medal_draw(const ui_t *ui)
     const int frame = frame_map[phase];
 
     const int sparkle_w = sparkle->width / sparkle->hslices;
-    const int sparkle_x = x + ui->sparkle_x;
-    const int sparkle_y = y + ui->sparkle_y;
+    const int sparkle_x = x + GFX_SCALE(ui->sparkle_x);
+    const int sparkle_y = y + GFX_SCALE(ui->sparkle_y);
 
     rdpq_sprite_blit(sparkle, sparkle_x, sparkle_y, &(rdpq_blitparms_t){
         .s0 = frame * sparkle_w,
         .width = sparkle_w,
         .height = sparkle->height,
+        .scale_x = gfx->scale,
+        .scale_y = gfx->scale,
     });
 }
 
@@ -622,11 +643,13 @@ static void ui_highscores_score_draw(const ui_t *ui, int score, int y)
 
     const int digit_w = font->width / font->hslices;
     const int digit_h = font->height / font->vslices;
+    const int scaled_digit_w = GFX_SCALE(digit_w);
     const int center_x = gfx->width / 2;
 
-    rdpq_set_mode_copy(true);
+    rdpq_set_mode_standard();
+    rdpq_mode_alphacompare(1);
 
-    int x = center_x + 38;
+    int x = center_x + GFX_SCALE(38);
     for (i = 0; i < num_digits; i++)
     {
         const int s_offset = digits[i] * digit_w;
@@ -634,8 +657,10 @@ static void ui_highscores_score_draw(const ui_t *ui, int score, int y)
             .s0 = s_offset,
             .width = digit_w,
             .height = digit_h,
+            .scale_x = gfx->scale,
+            .scale_y = gfx->scale,
         });
-        x -= digit_w;
+        x -= scaled_digit_w;
     }
 }
 
@@ -643,17 +668,21 @@ static void ui_highscores_draw(const ui_t *ui)
 {
     const int center_x = (gfx->width / 2);
     const int center_y = (gfx->height / 2);
-    ui_highscores_score_draw(ui, ui->last_score_acc, center_y - 11);
-    ui_highscores_score_draw(ui, ui->high_score, center_y + 10);
+    ui_highscores_score_draw(ui, ui->last_score_acc, center_y - GFX_SCALE(11));
+    ui_highscores_score_draw(ui, ui->high_score, center_y + GFX_SCALE(10));
 
     if (ui->new_high_score && ui->last_score_acc == ui->last_score)
     {
         sprite_t *const new_sprite = ui->sprites[UI_SPRITE_NEW];
-        const int new_x = center_x + 10;
-        const int new_y = center_y + 1;
+        const int new_x = center_x + GFX_SCALE(10);
+        const int new_y = center_y + GFX_SCALE(1);
 
-        rdpq_set_mode_copy(true);
-        rdpq_sprite_blit(new_sprite, new_x, new_y, NULL);
+        rdpq_set_mode_standard();
+        rdpq_mode_alphacompare(1);
+        rdpq_sprite_blit(new_sprite, new_x, new_y, &(rdpq_blitparms_t){
+            .scale_x = gfx->scale,
+            .scale_y = gfx->scale,
+        });
     }
 }
 

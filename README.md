@@ -33,7 +33,7 @@ This project is considered "done", and is no longer being actively developed. It
 
 This ROM file has been tested to work on real Nintendo 64 hardware using the [EverDrive-64 by krikzz](http://krikzz.com/), [64drive by retroactive](http://64drive.retroactive.be/), and [SummerCart64](https://github.com/Polprzewodnikowy/SummerCart64).
 
-This ROM file should also be compatible with low-level, accuracy-focused Nintendo 64 emulators such as [Ares](https://ares-emulator.github.io/), [CEN64](https://cen64.com/) and [MAME](http://mamedev.org/).
+This ROM file should also be compatible with low-level, accuracy-focused Nintendo 64 emulators such as [Ares](https://ares-emulator.github.io/), [gopher64](https://github.com/gopher64/gopher64) and [MAME](http://mamedev.org/).
 
 **Due to the usage of [LibDragon](https://dragonminded.com/n64dev/libdragon/), it is an explicit non-goal of this project to suppport emulators.** The goal was to make a game for Nintendo 64, so tautologically:
 

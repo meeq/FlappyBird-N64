@@ -124,6 +124,9 @@ void bird_draw(const bird_t *bird)
         .cx = bird->slice_w / 2,
         .cy = bird->slice_h / 2,
         .theta = bird->rotation,
+        .scale_x = gfx->scale,
+        .scale_y = gfx->scale,
+        .filtering = gfx->highres,
     });
 }
 

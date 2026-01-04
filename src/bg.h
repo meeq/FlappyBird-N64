@@ -14,7 +14,8 @@
 
 /* Background constants */
 
-#define BG_GROUND_TOP_Y         ((int)190)
+#define BG_GROUND_TOP_Y_BASE    ((int)190)
+#define BG_GROUND_TOP_Y         GFX_SCALE(BG_GROUND_TOP_Y_BASE)
 
 /* Background types */
 
@@ -38,6 +39,8 @@ void bg_randomize_time_mode(void);
 
 void bg_tick(const joypad_buttons_t *buttons);
 
-void bg_draw(void);
+void bg_draw_sky(void);
+
+void bg_draw_ground(void);
 
 #endif

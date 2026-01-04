@@ -16,17 +16,56 @@ gfx_t *gfx;
 
 void gfx_init(void)
 {
+    /* Setup state */
+    gfx = malloc(sizeof(gfx_t));
+    gfx->scale = 1.0f;
+    gfx->highres = false;
+    gfx->disp = NULL;
     /* Set up the display and RDP subsystems */
     display_init(RESOLUTION_320x240, DEPTH_16_BPP, 3, GAMMA_NONE, FILTERS_RESAMPLE);
     rdpq_init();
     /* Setup debug font for text rendering */
     rdpq_font_t *debug_font = rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_MONO);
     rdpq_text_register_font(FONT_DEBUG, debug_font);
-    /* Setup state */
-    gfx = malloc(sizeof(gfx_t));
+    /* Cache display dimensions */
     gfx->width = display_get_width();
     gfx->height = display_get_height();
-    gfx->disp = NULL;
+}
+
+void gfx_set_highres(bool enable)
+{
+    if (gfx->highres == enable) return;
+
+    /* Wait for any pending RDP operations to complete */
+    rspq_wait();
+
+    /* Close the current display */
+    display_close();
+
+    /* Initialize with new resolution */
+    if (enable)
+    {
+        /* High-res: 640x480 interlaced with better filtering */
+        display_init(RESOLUTION_640x480, DEPTH_16_BPP, 3, GAMMA_NONE,
+                     FILTERS_RESAMPLE_ANTIALIAS_DEDITHER);
+        gfx->scale = 2.0f;
+    }
+    else
+    {
+        /* Low-res: 320x240 progressive */
+        display_init(RESOLUTION_320x240, DEPTH_16_BPP, 3, GAMMA_NONE,
+                     FILTERS_RESAMPLE);
+        gfx->scale = 1.0f;
+    }
+
+    gfx->highres = enable;
+    gfx->width = display_get_width();
+    gfx->height = display_get_height();
+}
+
+bool gfx_get_highres(void)
+{
+    return gfx->highres;
 }
 
 void gfx_display_lock(void)

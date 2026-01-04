@@ -239,62 +239,69 @@ void bg_tick(const joypad_buttons_t *buttons)
 static void bg_draw_color(const bg_fill_color_t * const fill)
 {
     rdpq_set_mode_fill(fill->color);
-    const int tx = 0, ty = fill->y;
-    const int bx = display_get_width(), by = fill->y + fill->h;
+    const int tx = 0, ty = GFX_SCALE(fill->y);
+    const int bx = gfx->width, by = GFX_SCALE(fill->y + fill->h);
     rdpq_fill_rectangle(tx, ty, bx, by);
 }
 
-void bg_draw_sprite(const bg_fill_sprite_t * const fill)
+static void bg_draw_sprite(const bg_fill_sprite_t *const fill)
 {
     sprite_t *sprite = bg.sprites[fill->sprite];
     assert(sprite != NULL);
     assert(sprite->hslices == 1);
     assert(sprite->vslices == 1);
 
-    rdpq_set_mode_copy(true);
+    rdpq_set_mode_standard();
+    rdpq_mode_alphacompare(1);
 
-    const int scroll_x = fill->scroll_x;
-    const int max_w = display_get_width();
-    int tx, bx;
-    int ty = fill->y;
-    int by = fill->y + sprite->height - 1;
+    /* Texture coordinates (unscaled) */
+    const float scroll_x = fill->scroll_x;
+    const int tex_h = sprite->height;
 
-    /* Use RDP tiling to repeat the sprite horizontally */
+    /* Screen coordinates (scaled) */
+    const int scr_ty = GFX_SCALE(fill->y);
+    const int scr_by = scr_ty + GFX_SCALE(tex_h);
+    const int scr_max_w = gfx->width;
+
+    /* Upload sprite with horizontal tiling */
     rdpq_texparms_t tiled_texparams = {
-        .s = {
-            .repeats = REPEAT_INFINITE,
-            .mirror = MIRROR_NONE,
-        },
-        .t = {
-            .repeats = 1,
-            .mirror = MIRROR_NONE,
-        },
+        .s = { .repeats = REPEAT_INFINITE, .mirror = MIRROR_NONE },
+        .t = { .repeats = 1, .mirror = MIRROR_NONE },
     };
     rdpq_sprite_upload(TILE0, sprite, &tiled_texparams);
-    /* If cut off on the left side, draw clipped version separately */
-    tx = scroll_x;
-    if (tx < 0)
-    {
-        bx = tx + fill->scroll_w;
-        rdpq_texture_rectangle(TILE0, 0, ty, bx, by, -tx, 0);
-        tx += fill->scroll_w;
+
+    /* Calculate screen X start based on scroll, handling wrap */
+    int scr_tx = GFX_SCALE(scroll_x);
+    float tex_s0 = 0;
+    if (scr_tx < 0) {
+        /* Left edge clipped - adjust texture start coordinate */
+        tex_s0 = -scroll_x;
+        scr_tx = 0;
     }
-    /* Draw full-tiles for the rest */
-    bx = max_w;
-    rdpq_texture_rectangle(TILE0, tx, ty, bx, by, 0, 0);
+
+    /* Draw with hardware tiling - texture repeats automatically */
+    float tex_s1 = tex_s0 + (scr_max_w - scr_tx) / gfx->scale;
+    rdpq_texture_rectangle_scaled(TILE0,
+        scr_tx, scr_ty, scr_max_w, scr_by,
+        tex_s0, 0, tex_s1, tex_h);
 }
 
-void bg_draw(void)
+void bg_draw_sky(void)
 {
-    /* Color fills */
+    /* Color fills (sky, clouds, hills - but not ground) */
     bg_draw_color(&bg.sky_fill);
     bg_draw_color(&bg.cloud_fill);
     bg_draw_color(&bg.hill_fill);
-    bg_draw_color(&bg.ground_fill);
 
-    /* Texture fills */
+    /* Texture fills (clouds, city, hills - but not ground) */
     bg_draw_sprite(&bg.cloud_top);
     bg_draw_sprite(&bg.city);
     bg_draw_sprite(&bg.hill_top);
+}
+
+void bg_draw_ground(void)
+{
+    /* Ground is drawn separately so it can cover pipes/bird */
+    bg_draw_color(&bg.ground_fill);
     bg_draw_sprite(&bg.ground_top);
 }
