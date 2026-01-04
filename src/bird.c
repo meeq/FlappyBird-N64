@@ -364,3 +364,16 @@ void bird_tick(bird_t *bird, const joypad_buttons_t *const buttons)
     /* Update rotation based on time since last flap */
     bird_tick_rotation(bird);
 }
+
+void bird_set_color(bird_t *bird, bird_color_t color)
+{
+    if (color < BIRD_COLORS_COUNT)
+    {
+        bird->color_type = color;
+    }
+}
+
+bird_color_t bird_get_color(const bird_t *bird)
+{
+    return bird->color_type;
+}

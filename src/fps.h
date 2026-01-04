@@ -20,4 +20,8 @@ void fps_tick(const joypad_buttons_t *buttons);
 
 void fps_draw(void);
 
+void fps_set_visible(bool visible);
+
+bool fps_get_visible(void);
+
 #endif

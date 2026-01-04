@@ -75,4 +75,8 @@ void bird_hit(bird_t *bird);
 
 void bird_tick(bird_t *bird, const joypad_buttons_t *buttons);
 
+void bird_set_color(bird_t *bird, bird_color_t color);
+
+bird_color_t bird_get_color(const bird_t *bird);
+
 #endif

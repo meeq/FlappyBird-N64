@@ -14,8 +14,22 @@
 #include "bg.h"
 #include "bird.h"
 #include "collision.h"
+#include "fps.h"
 #include "pipes.h"
 #include "ui.h"
+
+static joypad_buttons_t game_get_buttons_pressed(joypad_port_t port)
+{
+    joypad_buttons_t buttons = joypad_get_buttons_pressed(port);
+    // Treat analog joystick axes as D-pad presses
+    const int stick_x = joypad_get_axis_pressed(port, JOYPAD_AXIS_STICK_X);
+    const int stick_y = joypad_get_axis_pressed(port, JOYPAD_AXIS_STICK_Y);
+    if (stick_x < 0) buttons.d_left = 1;
+    if (stick_x > 0) buttons.d_right = 1;
+    if (stick_y > 0) buttons.d_up = 1;
+    if (stick_y < 0) buttons.d_down = 1;
+    return buttons;
+}
 
 int main(void)
 {
@@ -37,6 +51,7 @@ int main(void)
 
     /* Initialize game state */
     bg_init();
+    fps_init();
     bird_t *const bird = bird_init(BIRD_COLOR_YELLOW);
     pipes_t *const pipes = pipes_init();
     ui_t *const ui = ui_init();
@@ -47,7 +62,7 @@ int main(void)
     {
         /* Update joypad state */
         joypad_poll();
-        buttons = joypad_get_buttons_pressed(JOYPAD_PORT_1);
+        buttons = game_get_buttons_pressed(JOYPAD_PORT_1);
 
         /* Toggle high-res mode with Z button */
         if (buttons.z)
@@ -70,6 +85,9 @@ int main(void)
         switch (bird->state)
         {
         case BIRD_STATE_TITLE:
+            ui_menu_tick(ui, bird, &buttons);
+            bg_tick(&buttons);
+            break;
         case BIRD_STATE_READY:
             bg_tick(&buttons);
             break;
@@ -84,6 +102,7 @@ int main(void)
 
         /* Update the UI based on the world state */
         ui_tick(ui, bird);
+        fps_tick(&buttons);
 
         /* Buffer sound effects */
         if (audio_can_write())
@@ -102,6 +121,7 @@ int main(void)
             bird_draw(bird);
             bg_draw_ground();
             ui_draw(ui);
+            fps_draw();
         }
         /* Finish drawing and show the framebuffer */
         rdpq_detach_show();

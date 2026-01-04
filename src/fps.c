@@ -42,7 +42,7 @@ static fps_counter_t fps = {0};
 void fps_init(void)
 {
     memset(&fps, 0, sizeof fps);
-    FPS_TEXT_COLOR = RGBA32(0x00, 0x00, 0x00, 0xFF);
+    FPS_TEXT_COLOR = RGBA32(0xFF, 0xFF, 0xFF, 0xFF);
     /* Setup font style for FPS text (both 1x and 2x fonts) */
     rdpq_font_t *font_1x = (rdpq_font_t *)rdpq_text_get_font(FONT_AT01);
     rdpq_font_t *font_2x = (rdpq_font_t *)rdpq_text_get_font(FONT_AT01_2X);
@@ -99,6 +99,16 @@ void fps_tick(const joypad_buttons_t *buttons)
         fps.stat_ticks = now_ticks - stat_period_diff;
     }
     fps.frame_ticks = now_ticks;
+}
+
+void fps_set_visible(bool visible)
+{
+    fps.should_draw = visible;
+}
+
+bool fps_get_visible(void)
+{
+    return fps.should_draw;
 }
 
 void fps_draw(void)

@@ -14,6 +14,7 @@
 #include "sfx.h"
 #include "bg.h"
 #include "bird.h"
+#include "fps.h"
 
 #include <eeprom.h>
 
@@ -40,6 +41,7 @@ static color_t UI_FLASH_COLOR = {0};
 /* Font style IDs for UI text */
 #define UI_STYLE_SHADOW 1
 #define UI_STYLE_TEXT   2
+#define UI_STYLE_DIM    3
 
 static inline void ui_init_colors(void)
 {
@@ -53,6 +55,15 @@ typedef enum
     UI_HEADING_GET_READY,
     UI_HEADING_GAME_OVER,
 } ui_heading_t;
+
+typedef enum
+{
+    MENU_ROW_COLOR,
+    MENU_ROW_SCENE,
+    MENU_ROW_HIRES,
+    MENU_ROW_FPS,
+    MENU_ROW_COUNT,
+} menu_row_t;
 
 typedef enum
 {
@@ -130,6 +141,9 @@ typedef struct ui_s
     uint64_t sparkle_ticks;
     int sparkle_x;
     int sparkle_y;
+    /* Title screen menu */
+    int menu_row;
+    bird_color_t bird_color;
 } ui_t;
 
 /* Forward declarations */
@@ -192,16 +206,8 @@ static void ui_save_high_score(const ui_t *ui)
 static void ui_set_time_mode(ui_t *ui, bg_time_mode_t time_mode)
 {
     ui->time_mode = time_mode;
-    if (time_mode == BG_TIME_DAY)
-    {
-        ui->text_color = UI_LIGHT_COLOR;
-        ui->shadow_color = UI_DARK_COLOR;
-    }
-    else if (time_mode == BG_TIME_NIGHT)
-    {
-        ui->text_color = UI_DARK_COLOR;
-        ui->shadow_color = UI_LIGHT_COLOR;
-    }
+    ui->text_color = UI_LIGHT_COLOR;
+    ui->shadow_color = UI_DARK_COLOR;
     /* Update font styles for current time mode (both 1x and 2x fonts) */
     rdpq_font_t *font_1x = (rdpq_font_t *)rdpq_text_get_font(FONT_AT01);
     rdpq_font_t *font_2x = (rdpq_font_t *)rdpq_text_get_font(FONT_AT01_2X);
@@ -209,11 +215,13 @@ static void ui_set_time_mode(ui_t *ui, bg_time_mode_t time_mode)
     {
         rdpq_font_style(font_1x, UI_STYLE_SHADOW, &(rdpq_fontstyle_t){ .color = ui->shadow_color });
         rdpq_font_style(font_1x, UI_STYLE_TEXT, &(rdpq_fontstyle_t){ .color = ui->text_color });
+        rdpq_font_style(font_1x, UI_STYLE_DIM, &(rdpq_fontstyle_t){ .color = UI_DARK_COLOR });
     }
     if (font_2x)
     {
         rdpq_font_style(font_2x, UI_STYLE_SHADOW, &(rdpq_fontstyle_t){ .color = ui->shadow_color });
         rdpq_font_style(font_2x, UI_STYLE_TEXT, &(rdpq_fontstyle_t){ .color = ui->text_color });
+        rdpq_font_style(font_2x, UI_STYLE_DIM, &(rdpq_fontstyle_t){ .color = UI_DARK_COLOR });
     }
 }
 
@@ -250,6 +258,7 @@ static void ui_bird_tick(ui_t *ui, const bird_t *bird)
 {
     /* Synchronize bird state to UI */
     ui->state = bird->state;
+    ui->bird_color = bird_get_color(bird);
     switch (ui->state)
     {
     case BIRD_STATE_DEAD:
@@ -706,6 +715,100 @@ static void ui_flash_draw(const ui_t *ui)
     rdpq_fill_rectangle(0, 0, gfx->width, gfx->height);
 }
 
+/* Title screen menu */
+
+static const char *const MENU_COLOR_NAMES[] = {"Yellow", "Blue", "Red"};
+static const char *const MENU_SCENE_NAMES[] = {"Day", "Night"};
+static const char *const MENU_BOOL_NAMES[] = {"No", "Yes"};
+
+void ui_menu_tick(ui_t *ui, bird_t *bird, const joypad_buttons_t *buttons)
+{
+    if (ui->state != BIRD_STATE_TITLE) return;
+
+    /* Navigate menu rows with D-pad up/down */
+    if (buttons->d_up)
+    {
+        ui->menu_row = (ui->menu_row - 1 + MENU_ROW_COUNT) % MENU_ROW_COUNT;
+    }
+    if (buttons->d_down)
+    {
+        ui->menu_row = (ui->menu_row + 1) % MENU_ROW_COUNT;
+    }
+
+    /* Adjust values with D-pad left/right */
+    if (buttons->d_left || buttons->d_right)
+    {
+        const int dir = buttons->d_right ? 1 : -1;
+        switch (ui->menu_row)
+        {
+        case MENU_ROW_COLOR:
+        {
+            int color = bird_get_color(bird);
+            color = (color + dir + BIRD_COLORS_COUNT) % BIRD_COLORS_COUNT;
+            bird_set_color(bird, color);
+            break;
+        }
+        case MENU_ROW_SCENE:
+        {
+            bg_time_mode_t mode = bg_get_time_mode();
+            mode = (mode + dir + BG_TIME_MODES_COUNT) % BG_TIME_MODES_COUNT;
+            bg_set_time_mode(mode);
+            break;
+        }
+        case MENU_ROW_HIRES:
+            gfx_set_highres(!gfx_get_highres());
+            break;
+        case MENU_ROW_FPS:
+            fps_set_visible(!fps_get_visible());
+            break;
+        }
+    }
+}
+
+static void ui_menu_draw(const ui_t *ui)
+{
+    const int font_id = gfx->highres ? FONT_AT01_2X : FONT_AT01;
+    const int char_w = gfx->highres ? 10 : 5;
+    const int line_h = gfx->highres ? 16 : 8;
+    const int shadow_offset = gfx->highres ? 2 : 1;
+
+    const int center_x = gfx->width / 2;
+    const int start_y = gfx->height / 2 - GFX_SCALE(10);
+
+    /* Get current values */
+    const char *color_str = MENU_COLOR_NAMES[ui->bird_color];
+    const char *scene_str = MENU_SCENE_NAMES[bg_get_time_mode()];
+    const char *hires_str = MENU_BOOL_NAMES[gfx_get_highres() ? 1 : 0];
+    const char *fps_str = MENU_BOOL_NAMES[fps_get_visible() ? 1 : 0];
+
+    /* Menu row strings */
+    char rows[MENU_ROW_COUNT][32];
+    snprintf(rows[MENU_ROW_COLOR], sizeof(rows[0]), "Color: %s", color_str);
+    snprintf(rows[MENU_ROW_SCENE], sizeof(rows[0]), "Scene: %s", scene_str);
+    snprintf(rows[MENU_ROW_HIRES], sizeof(rows[0]), "Hi-Res: %s", hires_str);
+    snprintf(rows[MENU_ROW_FPS], sizeof(rows[0]), "Show FPS: %s", fps_str);
+
+    rdpq_textparms_t shadow_parms = { .style_id = UI_STYLE_SHADOW };
+    rdpq_textparms_t text_parms = { .style_id = UI_STYLE_TEXT };
+    rdpq_textparms_t dim_parms = { .style_id = UI_STYLE_DIM };
+
+    for (int i = 0; i < MENU_ROW_COUNT; i++)
+    {
+        const bool focused = (i == ui->menu_row);
+        const char *prefix = focused ? "> " : "  ";
+        char line[40];
+        snprintf(line, sizeof(line), "%s%s", prefix, rows[i]);
+
+        const int text_w = strlen(line) * char_w;
+        const int x = center_x - (text_w / 2);
+        const int y = start_y + (i * line_h);
+
+        /* Draw shadow then text (dim if not focused) */
+        rdpq_text_print(&shadow_parms, font_id, x + shadow_offset, y + shadow_offset, line);
+        rdpq_text_print(focused ? &text_parms : &dim_parms, font_id, x, y, line);
+    }
+}
+
 void ui_draw(const ui_t *ui)
 {
     if (ui->flash_draw)
@@ -717,6 +820,7 @@ void ui_draw(const ui_t *ui)
     {
     case BIRD_STATE_TITLE:
         ui_logo_draw(ui);
+        ui_menu_draw(ui);
         break;
     case BIRD_STATE_READY:
         ui_score_draw(ui);
