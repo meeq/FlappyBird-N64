@@ -24,7 +24,6 @@ This project is considered "done", and is no longer being actively developed. It
 
 ### Intentional omissions
 
-* Bird sprite does not rotate
 * Night sky is missing stars
 * Screen does not shake upon death
 

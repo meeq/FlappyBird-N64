@@ -45,6 +45,12 @@
 #define BIRD_SINE_CYCLE     ((float) (M_PI * 2.0))
 #define BIRD_SINE_DAMPEN    ((float) 0.02)
 
+/* Rotation */
+#define BIRD_ROTATION_UP_DEG    ((float) (30.0 * M_PI / 180.0))
+#define BIRD_ROTATION_UP_MS     100
+#define BIRD_ROTATION_DOWN_DEG  ((float) (-90.0 * M_PI / 180.0))
+#define BIRD_ROTATION_DOWN_MS   1000
+
 /* Bird implementation */
 
 bird_t *bird_init(bird_color_t color_type)
@@ -72,6 +78,8 @@ bird_t *bird_init(bird_color_t color_type)
     bird->sine_ticks = 0;
     bird->sine_x = 0.0;
     bird->sine_y = 0.0;
+    bird->rotation = 0.0;
+    bird->flap_ticks = 0;
     return bird;
 }
 
@@ -101,21 +109,20 @@ void bird_draw(const bird_t *bird)
     if (bird_y > BIRD_MAX_Y) bird_y = BIRD_MAX_Y;
     if (bird_y < BIRD_MIN_Y) bird_y = BIRD_MIN_Y;
     bird_y = cy + bird_y * cy;
-    /* Calculate bird corner coordinates from center point */
-    const int bird_half_w = bird->slice_w / 2,
-              bird_half_h = bird->slice_h / 2;
-    const int tx = cx - bird_half_w,
-              ty = bird_y - bird_half_h;
     /* Calculate texture offset for current animation frame and color */
     const int s_offset = bird->anim_frame * bird->slice_w;
     const int t_offset = bird->color_type * bird->slice_h;
-    /* Draw the bird sprite */
-    rdpq_set_mode_copy(true);
-    rdpq_sprite_blit(bird->sprite, tx, ty, &(rdpq_blitparms_t){
+    /* Draw the bird sprite with rotation */
+    rdpq_set_mode_standard();
+    rdpq_mode_alphacompare(1);
+    rdpq_sprite_blit(bird->sprite, cx, bird_y, &(rdpq_blitparms_t){
         .s0 = s_offset,
         .t0 = t_offset,
         .width = bird->slice_w,
         .height = bird->slice_h,
+        .cx = bird->slice_w / 2,
+        .cy = bird->slice_h / 2,
+        .theta = bird->rotation,
     });
 }
 
@@ -131,20 +138,7 @@ static void bird_tick_animation(bird_t *bird)
     const uint32_t now_ticks = TICKS_READ();
     uint32_t anim_ticks = bird->anim_ticks;
     int anim_frame = bird->anim_frame;
-    if (bird->state == BIRD_STATE_DYING || bird->state == BIRD_STATE_DEAD)
-    {
-        /* Dead birds don't animate */
-        anim_ticks = now_ticks;
-        if (bird->dy < 0.0)
-        {
-            anim_frame = BIRD_ANIM_FRAMES - 1;
-        }
-        else
-        {
-            anim_frame = BIRD_DYING_FRAME;
-        }
-    }
-    else
+    if (bird->state != BIRD_STATE_DYING && bird->state != BIRD_STATE_DEAD)
     {
         if (TICKS_DISTANCE(anim_ticks, now_ticks) >= BIRD_ANIM_RATE)
         {
@@ -201,6 +195,7 @@ static void bird_tick_velocity(bird_t *bird, const joypad_buttons_t *const butto
     {
         bird->dy = -BIRD_FLAP_VELOCITY;
         bird->anim_frame = BIRD_ANIM_FRAMES - 1;
+        bird->flap_ticks = TICKS_READ();
         sfx_play(SFX_WING);
     }
     const uint32_t now_ticks = TICKS_READ();
@@ -231,6 +226,38 @@ static void bird_tick_velocity(bird_t *bird, const joypad_buttons_t *const butto
         bird->y = y;
         bird->dy = dy;
         bird->dy_ticks = now_ticks;
+    }
+}
+
+static void bird_tick_rotation(bird_t *bird)
+{
+    if (bird->state == BIRD_STATE_TITLE || bird->state == BIRD_STATE_READY)
+    {
+        bird->rotation = 0.0;
+        return;
+    }
+
+    const uint32_t now_ticks = TICKS_READ();
+    const uint32_t elapsed_ms = TICKS_DISTANCE(bird->flap_ticks, now_ticks) / TICKS_PER_MS;
+
+    if (elapsed_ms < BIRD_ROTATION_UP_MS)
+    {
+        /* Phase 1: Rotating up */
+        float t = (float)elapsed_ms / BIRD_ROTATION_UP_MS;
+        bird->rotation = t * BIRD_ROTATION_UP_DEG;
+    }
+    else
+    {
+        /* Phase 2: Rotating down (twice as fast when dying) */
+        uint32_t fall_elapsed = elapsed_ms - BIRD_ROTATION_UP_MS;
+        int down_ms = BIRD_ROTATION_DOWN_MS;
+        if (bird->state == BIRD_STATE_DYING)
+        {
+            down_ms /= 2;
+        }
+        float t = (float)fall_elapsed / down_ms;
+        if (t > 1.0f || bird->state == BIRD_STATE_DEAD) t = 1.0f;
+        bird->rotation = BIRD_ROTATION_UP_DEG + t * (BIRD_ROTATION_DOWN_DEG - BIRD_ROTATION_UP_DEG);
     }
 }
 
@@ -311,4 +338,6 @@ void bird_tick(bird_t *bird, const joypad_buttons_t *const buttons)
     }
     /* Progress the flapping/falling animation */
     bird_tick_animation(bird);
+    /* Update rotation based on time since last flap */
+    bird_tick_rotation(bird);
 }

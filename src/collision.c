@@ -32,6 +32,7 @@ void collision_tick(bird_t *bird, pipes_t *pipes)
                 bird_y < pipe_y - COLLISION_PIPE_HALF_GAP)
             {
                 bird->state = BIRD_STATE_DYING;
+                if (bird->dy < 0) bird->dy = 0;
                 bird_hit(bird);
             }
             else if (bird_x > pipe_x - COLLISION_SCORE_X_TOLERANCE &&

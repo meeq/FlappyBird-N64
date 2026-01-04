@@ -58,6 +58,9 @@ typedef struct bird_s
     uint32_t sine_ticks;
     float sine_x;
     float sine_y;
+    /* Rotation */
+    float rotation;
+    uint32_t flap_ticks;
 } bird_t;
 
 /* Bird functions */
