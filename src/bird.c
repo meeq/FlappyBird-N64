@@ -46,10 +46,11 @@
 #define BIRD_SINE_DAMPEN    ((float) 0.02)
 
 /* Rotation */
-#define BIRD_ROTATION_UP_DEG    ((float) (50.0 * M_PI / 180.0))
-#define BIRD_ROTATION_UP_MS     80
+#define BIRD_ROTATION_UP_DEG    ((float) (20.0 * M_PI / 180.0))
+#define BIRD_ROTATION_UP_MS     100
 #define BIRD_ROTATION_DOWN_DEG  ((float) (-90.0 * M_PI / 180.0))
-#define BIRD_ROTATION_DOWN_MS   800
+#define BIRD_ROTATION_DOWN_MS   600
+#define BIRD_ROTATION_HOLD_MS   300
 
 /* Bird implementation */
 
@@ -245,16 +246,22 @@ static void bird_tick_rotation(bird_t *bird)
     const uint64_t now_ticks = get_ticks();
     const uint64_t elapsed_ms = (now_ticks - bird->flap_ticks) / TICKS_PER_MS;
 
-    if (elapsed_ms < BIRD_ROTATION_UP_MS)
+    if (elapsed_ms < BIRD_ROTATION_UP_MS && bird->rotation < BIRD_ROTATION_UP_DEG)
     {
-        /* Phase 1: Rotating up */
+        /* Phase 1: Rotating up (skip if already at up position) */
         float t = (float)elapsed_ms / BIRD_ROTATION_UP_MS;
         bird->rotation = t * BIRD_ROTATION_UP_DEG;
     }
+    else if (elapsed_ms < BIRD_ROTATION_UP_MS + BIRD_ROTATION_HOLD_MS && bird->state != BIRD_STATE_DYING)
+    {
+        /* Phase 2: Hold at up position (skip when dying) */
+        bird->rotation = BIRD_ROTATION_UP_DEG;
+    }
     else
     {
-        /* Phase 2: Rotating down (twice as fast when dying) */
-        uint64_t fall_elapsed = elapsed_ms - BIRD_ROTATION_UP_MS;
+        /* Phase 3: Rotating down */
+        uint64_t hold_time = (bird->state == BIRD_STATE_DYING) ? 0 : BIRD_ROTATION_HOLD_MS;
+        uint64_t fall_elapsed = elapsed_ms - BIRD_ROTATION_UP_MS - hold_time;
         float t = (float)fall_elapsed / BIRD_ROTATION_DOWN_MS;
         if (t > 1.0f) t = 1.0f;
         bird->rotation = BIRD_ROTATION_UP_DEG + t * (BIRD_ROTATION_DOWN_DEG - BIRD_ROTATION_UP_DEG);
