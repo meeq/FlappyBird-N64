@@ -31,9 +31,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Fetch tags
-        run: git fetch --tags --force
-
       - name: Override libdragon ref
         if: inputs.libdragon_ref != ''
         run: |
