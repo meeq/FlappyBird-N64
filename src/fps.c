@@ -15,12 +15,6 @@
 
 #define FPS_MAX             ((unsigned int) (60))
 #define FPS_FRAME_TICKS     ((unsigned int) ((1000.0 / FPS_MAX) * TICKS_PER_MS))
-#define FPS_STAT_TICKS      ((unsigned int) (500 * TICKS_PER_MS))
-#define FPS_STATS_PER_SEC   ((float) (FPS_STAT_TICKS / TICKS_PER_MS) / 1000.0)
-#define FPS_NUM_HISTORY     ((size_t) 10)
-#define FPS_TEXT_LEN        ((size_t) 48)
-
-static color_t FPS_TEXT_COLOR = {0};
 
 typedef struct fps_counter_s
 {
@@ -28,11 +22,6 @@ typedef struct fps_counter_s
     ticks_t frame_ticks;
     int total_frames;
     int total_misses;
-    ticks_t stat_ticks;
-    int frames_per_stat;
-    int stat_count;
-    float stat_fps[FPS_NUM_HISTORY];
-    float average_fps;
 } fps_counter_t;
 
 /* FPS implementation */
@@ -42,17 +31,17 @@ static fps_counter_t fps = {0};
 void fps_init(void)
 {
     memset(&fps, 0, sizeof fps);
-    FPS_TEXT_COLOR = RGBA32(0xFF, 0xFF, 0xFF, 0xFF);
+    color_t color = RGBA32(0xFF, 0xFF, 0xFF, 0xFF);
     /* Setup font style for FPS text (both 1x and 2x fonts) */
     rdpq_font_t *font_1x = (rdpq_font_t *)rdpq_text_get_font(FONT_AT01);
     rdpq_font_t *font_2x = (rdpq_font_t *)rdpq_text_get_font(FONT_AT01_2X);
     if (font_1x)
     {
-        rdpq_font_style(font_1x, 0, &(rdpq_fontstyle_t){ .color = FPS_TEXT_COLOR });
+        rdpq_font_style(font_1x, 0, &(rdpq_fontstyle_t){ .color = color });
     }
     if (font_2x)
     {
-        rdpq_font_style(font_2x, 0, &(rdpq_fontstyle_t){ .color = FPS_TEXT_COLOR });
+        rdpq_font_style(font_2x, 0, &(rdpq_fontstyle_t){ .color = color });
     }
 }
 
@@ -64,39 +53,15 @@ void fps_tick(const joypad_buttons_t *buttons)
         fps.should_draw = !fps.should_draw;
     }
 
-    /* Increment frame counters */
     fps.total_frames++;
-    fps.frames_per_stat++;
 
-    /* Check timing */
+    /* Track missed frames */
     const ticks_t now_ticks = timer_ticks();
     const ticks_t frame_diff = now_ticks - fps.frame_ticks;
     if (fps.total_frames > 1 && frame_diff > FPS_FRAME_TICKS)
     {
         int frame_period_diff = frame_diff - FPS_FRAME_TICKS;
         fps.total_misses += frame_period_diff / FPS_FRAME_TICKS;
-    }
-    const ticks_t stat_diff = now_ticks - fps.stat_ticks;
-    if (stat_diff >= FPS_STAT_TICKS)
-    {
-        float stat_fps = fps.frames_per_stat / FPS_STATS_PER_SEC;
-        fps.stat_fps[fps.stat_count % FPS_NUM_HISTORY] = stat_fps;
-        if (fps.stat_count < FPS_NUM_HISTORY)
-        {
-            fps.stat_count++;
-        }
-
-        float total_fps = 0.0;
-        for (int i = 0; i < FPS_NUM_HISTORY; i++)
-        {
-            total_fps += fps.stat_fps[i];
-        }
-        fps.average_fps = total_fps / fps.stat_count;
-
-        /* Reset the stat counters */
-        fps.frames_per_stat = 0;
-        int stat_period_diff = stat_diff - FPS_STAT_TICKS;
-        fps.stat_ticks = now_ticks - stat_period_diff;
     }
     fps.frame_ticks = now_ticks;
 }
@@ -121,7 +86,7 @@ void fps_draw(void)
 
     rdpq_text_printf(NULL, font_id, 10, gfx->height - (line_height * 2 + 7),
         "FPS: %05.2f, Frame: %u, Miss: %u",
-        fps.average_fps, fps.total_frames, fps.total_misses);
+        display_get_fps(), fps.total_frames, fps.total_misses);
 
     rdpq_text_printf(NULL, font_id, 10, gfx->height - (line_height + 7),
         "Milli: %llu, Tick: %llu",
