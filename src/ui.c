@@ -202,12 +202,18 @@ static void ui_set_time_mode(ui_t *ui, bg_time_mode_t time_mode)
         ui->text_color = UI_DARK_COLOR;
         ui->shadow_color = UI_LIGHT_COLOR;
     }
-    /* Update font styles for current time mode */
-    rdpq_font_t *font = (rdpq_font_t *)rdpq_text_get_font(FONT_DEBUG);
-    if (font)
+    /* Update font styles for current time mode (both 1x and 2x fonts) */
+    rdpq_font_t *font_1x = (rdpq_font_t *)rdpq_text_get_font(FONT_AT01);
+    rdpq_font_t *font_2x = (rdpq_font_t *)rdpq_text_get_font(FONT_AT01_2X);
+    if (font_1x)
     {
-        rdpq_font_style(font, UI_STYLE_SHADOW, &(rdpq_fontstyle_t){ .color = ui->shadow_color });
-        rdpq_font_style(font, UI_STYLE_TEXT, &(rdpq_fontstyle_t){ .color = ui->text_color });
+        rdpq_font_style(font_1x, UI_STYLE_SHADOW, &(rdpq_fontstyle_t){ .color = ui->shadow_color });
+        rdpq_font_style(font_1x, UI_STYLE_TEXT, &(rdpq_fontstyle_t){ .color = ui->text_color });
+    }
+    if (font_2x)
+    {
+        rdpq_font_style(font_2x, UI_STYLE_SHADOW, &(rdpq_fontstyle_t){ .color = ui->shadow_color });
+        rdpq_font_style(font_2x, UI_STYLE_TEXT, &(rdpq_fontstyle_t){ .color = ui->text_color });
     }
 }
 
@@ -421,37 +427,42 @@ static void ui_logo_draw(const ui_t *ui)
         .scale_y = gfx->scale,
     });
 
+    /* Select font and character width based on resolution */
+    const int font_id = gfx->highres ? FONT_AT01_2X : FONT_AT01;
+    const int char_w = gfx->highres ? 10 : 5;
+    const int shadow_offset = gfx->highres ? 2 : 1;
+
     const char *const credit1_str = "Game by .GEARS";
-    const int credit1_w = strlen(credit1_str) * 6;
+    const int credit1_w = strlen(credit1_str) * char_w;
     const int credit1_x = center_x - (credit1_w / 2);
     const int credit1_y = gfx->height - GFX_SCALE(80);
 
     const char *const credit2_str = "N64 Port by Meeq";
-    const int credit2_w = strlen(credit2_str) * 6;
+    const int credit2_w = strlen(credit2_str) * char_w;
     const int credit2_x = center_x - (credit2_w / 2);
     const int credit2_y = gfx->height - GFX_SCALE(62);
 
     const char *const version_str = ROM_VERSION;
-    const int version_w = strlen(version_str) * 6;
+    const int version_w = strlen(version_str) * char_w;
     const int version_x = gfx->width - GFX_SCALE(32) - version_w;
     const int version_y = gfx->height - GFX_SCALE(32);
 
     /* Draw a shadow under the text */
     rdpq_textparms_t shadow_parms = { .style_id = UI_STYLE_SHADOW };
-    rdpq_text_print(&shadow_parms, FONT_DEBUG, credit1_x + 1, credit1_y + 1, credit1_str);
-    rdpq_text_print(&shadow_parms, FONT_DEBUG, credit2_x + 1, credit2_y + 1, credit2_str);
+    rdpq_text_print(&shadow_parms, font_id, credit1_x + shadow_offset, credit1_y + shadow_offset, credit1_str);
+    rdpq_text_print(&shadow_parms, font_id, credit2_x + shadow_offset, credit2_y + shadow_offset, credit2_str);
     if (version_w)
     {
-        rdpq_text_print(&shadow_parms, FONT_DEBUG, version_x + 1, version_y + 1, version_str);
+        rdpq_text_print(&shadow_parms, font_id, version_x + shadow_offset, version_y + shadow_offset, version_str);
     }
 
     /* Draw the same text on top of the shadow */
     rdpq_textparms_t text_parms = { .style_id = UI_STYLE_TEXT };
-    rdpq_text_print(&text_parms, FONT_DEBUG, credit1_x, credit1_y, credit1_str);
-    rdpq_text_print(&text_parms, FONT_DEBUG, credit2_x, credit2_y, credit2_str);
+    rdpq_text_print(&text_parms, font_id, credit1_x, credit1_y, credit1_str);
+    rdpq_text_print(&text_parms, font_id, credit2_x, credit2_y, credit2_str);
     if (version_w)
     {
-        rdpq_text_print(&text_parms, FONT_DEBUG, version_x, version_y, version_str);
+        rdpq_text_print(&text_parms, font_id, version_x, version_y, version_str);
     }
 }
 

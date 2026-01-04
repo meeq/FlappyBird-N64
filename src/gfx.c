@@ -11,9 +11,6 @@
 
 gfx_t *gfx;
 
-/* Font IDs for RDPQ text rendering */
-#define FONT_DEBUG 1
-
 void gfx_init(void)
 {
     /* Setup state */
@@ -24,9 +21,11 @@ void gfx_init(void)
     /* Set up the display and RDP subsystems */
     display_init(RESOLUTION_320x240, DEPTH_16_BPP, 3, GAMMA_NONE, FILTERS_RESAMPLE);
     rdpq_init();
-    /* Setup debug font for text rendering */
-    rdpq_font_t *debug_font = rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_MONO);
-    rdpq_text_register_font(FONT_DEBUG, debug_font);
+    /* Load custom fonts for text rendering (1x and 2x for high-res) */
+    rdpq_font_t *font_1x = rdpq_font_load("rom:/fonts/at01-1x.font64");
+    rdpq_font_t *font_2x = rdpq_font_load("rom:/fonts/at01-2x.font64");
+    rdpq_text_register_font(FONT_AT01, font_1x);
+    rdpq_text_register_font(FONT_AT01_2X, font_2x);
     /* Cache display dimensions */
     gfx->width = display_get_width();
     gfx->height = display_get_height();

@@ -43,11 +43,16 @@ void fps_init(void)
 {
     memset(&fps, 0, sizeof fps);
     FPS_TEXT_COLOR = RGBA32(0x00, 0x00, 0x00, 0xFF);
-    /* Setup font style for FPS text */
-    rdpq_font_t *font = (rdpq_font_t *)rdpq_text_get_font(FONT_DEBUG);
-    if (font)
+    /* Setup font style for FPS text (both 1x and 2x fonts) */
+    rdpq_font_t *font_1x = (rdpq_font_t *)rdpq_text_get_font(FONT_AT01);
+    rdpq_font_t *font_2x = (rdpq_font_t *)rdpq_text_get_font(FONT_AT01_2X);
+    if (font_1x)
     {
-        rdpq_font_style(font, 0, &(rdpq_fontstyle_t){ .color = FPS_TEXT_COLOR });
+        rdpq_font_style(font_1x, 0, &(rdpq_fontstyle_t){ .color = FPS_TEXT_COLOR });
+    }
+    if (font_2x)
+    {
+        rdpq_font_style(font_2x, 0, &(rdpq_fontstyle_t){ .color = FPS_TEXT_COLOR });
     }
 }
 
@@ -101,12 +106,14 @@ void fps_draw(void)
     if (!fps.should_draw) return;
 
     const ticks_t ticks = timer_ticks();
+    const int font_id = gfx->highres ? FONT_AT01_2X : FONT_AT01;
+    const int line_height = gfx->highres ? 26 : 13;
 
-    rdpq_text_printf(NULL, FONT_DEBUG, 10, gfx->height - 33,
+    rdpq_text_printf(NULL, font_id, 10, gfx->height - (line_height * 2 + 7),
         "FPS: %05.2f, Frame: %u, Miss: %u",
         fps.average_fps, fps.total_frames, fps.total_misses);
 
-    rdpq_text_printf(NULL, FONT_DEBUG, 10, gfx->height - 20,
+    rdpq_text_printf(NULL, font_id, 10, gfx->height - (line_height + 7),
         "Milli: %llu, Tick: %llu",
         ticks / TICKS_PER_MS, ticks);
 }

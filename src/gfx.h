@@ -13,7 +13,8 @@
 #include "system.h"
 
 /* Font IDs for RDPQ text rendering */
-#define FONT_DEBUG 1
+#define FONT_AT01    1
+#define FONT_AT01_2X 2
 
 /* Graphics definitions */
 

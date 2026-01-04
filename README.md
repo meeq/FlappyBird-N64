@@ -102,6 +102,8 @@ This project's source code is [BSD licensed](./LICENSE.txt?raw=true) (c) 2017-20
 The graphic and sound assets are subject to the original work's copyright: [Flappy Bird (c) 2013 .Gears](https://www.dotgears.com/apps/app_flappy.html)<br />
 These assets are used for non-commercial purposes with love, care, and respect, but without permission.
 
+The [at01 font by GrafxKid](https://grafxkid.itch.io/at01) is [Public Domain (CC0 1.0)](https://creativecommons.org/public-domain/cc0/).
+
 LibDragon is [Unlicensed public domain software](https://github.com/DragonMinded/libdragon/blob/trunk/LICENSE.md?raw=true).
 
 "Nintendo 64" is a registered trademark of Nintendo used for informational purposes without permission.

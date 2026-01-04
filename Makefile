@@ -51,13 +51,14 @@ PNG_FILES := $(wildcard $(PNG_DIR)/*.png)
 SPRITE_FILES := $(patsubst $(PNG_DIR)/%.png,$(SPRITE_DIR)/%.sprite,$(PNG_FILES))
 SPRITE_MANIFEST_TXT := $(PNG_DIR)/manifest.txt
 
+# Font files
+FONT_DIR := $(RESOURCES_DIR)/fonts
+FONT64_DIR := $(N64_MKDFS_ROOT)/fonts
+FONT64_FILES := $(FONT64_DIR)/at01-1x.font64 $(FONT64_DIR)/at01-2x.font64
+
 # Build artifacts
 DFS_FILE := $(BUILD_DIR)/$(N64_ROM_NAME).dfs
 LINKED_OBJS := $(BUILD_DIR)/$(N64_ROM_NAME).elf
-
-# LibDragon tools
-N64_AUDIOCONV ?= $(N64_BINDIR)/audioconv64
-N64_MKSPRITE ?= $(N64_BINDIR)/mksprite
 
 #
 # Compilation pipeline
@@ -88,8 +89,23 @@ $(WAV64_DIR)/%.wav64: $(WAV_DIR)/%.wav
 	@echo "    [SFX] $<"
 	$(N64_AUDIOCONV) -o "$(WAV64_DIR)" "$<" $(REDIRECT_STDOUT)
 
+# Fonts (1x for low-res, 2x for high-res)
+FONT64_SIZE_1x := 16
+FONT64_SIZE_2x := 32
+FONT64_OUTLINE_1x := 1
+FONT64_OUTLINE_2x := 2
+
+# Disable parallel builds for font generation to prevent race conditions
+.NOTPARALLEL: $(FONT64_FILES)
+
+$(FONT64_DIR)/at01-%.font64: $(FONT_DIR)/at01.ttf
+	@mkdir -p "$(dir $@)"
+	@echo "    [FONT] $< ($*)"
+	$(N64_MKFONT) --size $(FONT64_SIZE_$*) --outline $(FONT64_OUTLINE_$*) --range 20-7F -o "$(FONT64_DIR)" "$<" $(REDIRECT_STDOUT)
+	@mv "$(FONT64_DIR)/at01.font64" "$@"
+
 # Filesystem
-$(DFS_FILE): $(SPRITE_FILES) $(WAV64_FILES)
+$(DFS_FILE): $(SPRITE_FILES) $(WAV64_FILES) $(FONT64_FILES)
 
 #
 # Housekeeping
@@ -97,7 +113,6 @@ $(DFS_FILE): $(SPRITE_FILES) $(WAV64_FILES)
 
 clean:
 	rm -Rf "$(BUILD_DIR)" *.z64
-	git restore '*.z64'
 .PHONY: clean
 
 # Include compiler-generated dependency files
